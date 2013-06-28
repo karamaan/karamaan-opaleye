@@ -21,4 +21,4 @@ library
                    Karamaan.Opaleye.SQL,
                    Karamaan.Opaleye.Table,
                    Karamaan.Opaleye.Wire
-  ghc-options:     -Wall -Werror
+  ghc-options:     -Wall

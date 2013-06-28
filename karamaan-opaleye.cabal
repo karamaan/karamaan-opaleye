@@ -1,0 +1,21 @@
+name:     karamaan-opaleye
+version:  0.1
+synopsis: A relational query language for Haskell
+author:   Purely Agile
+build-type: Simple
+cabal-version: >= 1.2
+
+library
+  build-depends:   base, time, haskelldb, karamaan-whaleutil
+  exposed-modules: Karamaan.Opaleye.Aggregate,
+                   Karamaan.Opaleye.Aggregators,
+                   Karamaan.Opaleye.Explore,
+                   Karamaan.Opaleye.Operators,
+                   Karamaan.Opaleye.Operators2,
+                   Karamaan.Opaleye.Pack,
+                   Karamaan.Opaleye.Predicates,
+                   Karamaan.Opaleye.QueryArr,
+                   Karamaan.Opaleye.SQL,
+                   Karamaan.Opaleye.Table,
+                   Karamaan.Opaleye.Wire
+  ghc-options:     -Wall -Werror

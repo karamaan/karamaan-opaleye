@@ -1,0 +1,7 @@
+Try to remove Pack completely if possible.  There are lens-, arrowy,
+applicativey sort of concepts that should allow this.
+
+Make turning the queries into metaqueries typesafe.
+
+Metaquery should probably now have another name to make it clear it's
+a query in the postgresql sense, and not in the Opaleye sense.

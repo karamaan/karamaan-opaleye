@@ -9,7 +9,7 @@ License:      OtherLicense
 License-File: LICENSE
 
 library
-  build-depends:   base, time, haskelldb, karamaan-whaleutil
+  build-depends:   base >= 4 && < 5, time, haskelldb, karamaan-whaleutil
   exposed-modules: Karamaan.Opaleye.Aggregate,
                    Karamaan.Opaleye.Aggregators,
                    Karamaan.Opaleye.Explore,

@@ -1,5 +1,5 @@
 name:     karamaan-opaleye
-version:  0.1
+version:  0.2
 synopsis: A relational query language for Haskell
 author:   Purely Agile
 build-type: Simple

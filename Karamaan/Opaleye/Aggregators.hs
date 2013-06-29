@@ -1,7 +1,6 @@
 module Karamaan.Opaleye.Aggregators where
 
 import Karamaan.Opaleye.Aggregate (Aggregator(Aggregator), (*:))
-import Karamaan.Opaleye.Tuples (ap8, pure8, toList8)
 import Karamaan.Opaleye.Pack (unflatten1, flatten1,
                               unflatten2, flatten2,
                               unflatten3, flatten3,

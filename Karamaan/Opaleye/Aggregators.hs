@@ -75,9 +75,11 @@ agg8T = bojjer agg7T
 
 agg3 :: (Aggregator a1, Aggregator a2, Aggregator a3)
         -> Aggregator (a1, a2, a3)
-agg3 aggs = aggApp flatten3 unflatten3 bs
-  where (a, as) = unflatten3 aggs
-        bs = a *: agg2 as
+agg3 = aggApp flatten3 unflatten3 . agg3T . unflatten3
+
+agg4 :: (Aggregator a1, Aggregator a2, Aggregator a3, Aggregator a4)
+        -> Aggregator (a1, a2, a3, a4)
+agg4 = aggApp flatten4 unflatten4 . agg4T . unflatten4
 
 -- There's a lot of boilerplate here!
 -- Not sure what to do to get rid of that

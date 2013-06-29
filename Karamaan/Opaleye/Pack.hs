@@ -20,6 +20,12 @@ instance (Pack a, Pack b) => Pack (a, b) where
             in ((a, b), rest')
   unpack (a, b) = unpack a ++ unpack b
 
+flatten1 a = a
+unflatten1 a = a
+
+flatten2 (a, b) = (a, b)
+unflatten2 (a, b) = (a, b)
+
 flatten3 (a, (b, c)) = (a, b, c)
 unflatten3 (a, b, c) = (a, (b, c))
 

@@ -97,6 +97,9 @@ union = binrel Union
 -- I tried Query (a, a) a and couldn't get it to work.  Also
 -- I guess this would lead to a loss of sharing and much bigger queries.
 -- Maybe the optimiser will prune all the uncessary stuff though.
+--
+-- Needs to be converted away from the Pack typeclass.
+-- Needes a datatype with unpack and packMap
 binrel :: Pack b => RelOp -> QueryArr () b -> QueryArr () b -> QueryArr () b
 binrel op q1 q2 = QueryArr f where
   f ((), primQ, t0) = (w_out, PrimQuery.times primQ primQ', next t2)

@@ -9,18 +9,9 @@ import Karamaan.Opaleye.Pack (unflatten1, flatten1,
                               unflatten6, flatten6,
                               unflatten7, flatten7,
                               unflatten8, flatten8)
-
+import Karamaan.Opaleye.Tuples (T1, T2, T3, T4, T5, T6, T7, T8)
 -- These really belong in Karamaan.Opaleye.Aggregate but the
 -- implementations are somewhat verbose so I wanted to sequester them
-
-type T1 a = a
-type T2 a b = (a, T1 b)
-type T3 a b c = (a, T2 b c)
-type T4 a b c d = (a, T3 b c d)
-type T5 a b c d e = (a, T4 b c d e)
-type T6 a b c d e f = (a, T5 b c d e f)
-type T7 a b c d e f g = (a, T6 b c d e f g)
-type T8 a b c d e f g h = (a, T7 b c d e f g h)
 
 aggApp :: (a -> b) -> (b -> a) -> Aggregator a -> Aggregator b
 aggApp f f' (Aggregator s w p) = Aggregator s (w . f') p'

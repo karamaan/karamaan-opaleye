@@ -9,10 +9,11 @@ import Karamaan.Opaleye.Pack (unflatten1, flatten1,
                               unflatten7, flatten7,
                               unflatten8, flatten8)
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
-import Karamaan.Opaleye.Aggregate (Writer)
 -- FIXME: don't want to import everything, but we're importing a lot
 -- and I can't be bothered to type it all
-import Karamaan.Opaleye.Aggregators hiding (chain, convert)
+import Karamaan.Opaleye.Tuples
+
+type Writer a = a -> [String]
 
 data Colspec a = Colspec a (Writer a)
 

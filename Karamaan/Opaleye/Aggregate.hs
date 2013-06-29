@@ -10,8 +10,8 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, Empty),
 import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.Pack (unpack, packMap)
 import Control.Arrow ((&&&), (***))
+import Karamaan.Opaleye.Colspec (Writer)
 
-type Writer a = a -> [String]
 type PackMap a = (String -> String) -> a -> a
 
 -- I used to have "Aggregator a b" for a's that would get turned

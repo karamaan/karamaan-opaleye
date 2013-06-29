@@ -31,9 +31,9 @@ chain :: (t -> Aggregator a') -> (Aggregator a, t) -> Aggregator (a, a')
 chain agg (a, as) = a *: agg as
 
 -- Need two unflattens (u, u') because of insufficient polymorphism, I guess
-cobber :: (a' -> b') -> (b' -> a') -> (b -> a) -> (a -> Aggregator a')
+convert :: (a' -> b') -> (b' -> a') -> (b -> a) -> (a -> Aggregator a')
           -> b -> Aggregator b'
-cobber f u u' agg = aggApp f u . agg . u'
+convert f u u' agg = aggApp f u . agg . u'
 
 agg1T :: Aggregator a1 -> Aggregator (T1 a1)
 agg1T = id
@@ -71,36 +71,36 @@ agg8T:: T8 (Aggregator a1) (Aggregator a2) (Aggregator a3) (Aggregator a4)
 agg8T = chain agg7T
 
 agg1 :: Aggregator a1 -> Aggregator a1
-agg1 = cobber flatten1 unflatten1 unflatten1 agg1T
+agg1 = convert flatten1 unflatten1 unflatten1 agg1T
 
 agg2 :: (Aggregator a1, Aggregator a2)
         -> Aggregator (a1, a2)
-agg2 = cobber flatten2 unflatten2 unflatten2 agg2T
+agg2 = convert flatten2 unflatten2 unflatten2 agg2T
 
 agg3 :: (Aggregator a1, Aggregator a2, Aggregator a3)
         -> Aggregator (a1, a2, a3)
-agg3 = cobber flatten3 unflatten3 unflatten3 agg3T
+agg3 = convert flatten3 unflatten3 unflatten3 agg3T
 
 agg4 :: (Aggregator a1, Aggregator a2, Aggregator a3, Aggregator a4)
         -> Aggregator (a1, a2, a3, a4)
-agg4 = cobber flatten4 unflatten4 unflatten4 agg4T
+agg4 = convert flatten4 unflatten4 unflatten4 agg4T
 
 agg5 :: (Aggregator a1, Aggregator a2, Aggregator a3, Aggregator a4,
          Aggregator a5)
         -> Aggregator (a1, a2, a3, a4, a5)
-agg5 = cobber flatten5 unflatten5 unflatten5 agg5T
+agg5 = convert flatten5 unflatten5 unflatten5 agg5T
 
 agg6 :: (Aggregator a1, Aggregator a2, Aggregator a3, Aggregator a4,
          Aggregator a5, Aggregator a6)
         -> Aggregator (a1, a2, a3, a4, a5, a6)
-agg6 = cobber flatten6 unflatten6 unflatten6 agg6T
+agg6 = convert flatten6 unflatten6 unflatten6 agg6T
 
 agg7 :: (Aggregator a1, Aggregator a2, Aggregator a3, Aggregator a4,
          Aggregator a5, Aggregator a6, Aggregator a7)
         -> Aggregator (a1, a2, a3, a4, a5, a6, a7)
-agg7 = cobber flatten7 unflatten7 unflatten7 agg7T
+agg7 = convert flatten7 unflatten7 unflatten7 agg7T
 
 agg8 :: (Aggregator a1, Aggregator a2, Aggregator a3, Aggregator a4,
          Aggregator a5, Aggregator a6, Aggregator a7, Aggregator a8)
         -> Aggregator (a1, a2, a3, a4, a5, a6, a7, a8)
-agg8 = cobber flatten8 unflatten8 unflatten8 agg8T
+agg8 = convert flatten8 unflatten8 unflatten8 agg8T

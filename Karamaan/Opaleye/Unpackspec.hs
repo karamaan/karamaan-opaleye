@@ -4,11 +4,14 @@ import Karamaan.Opaleye.Colspec (Writer)
 import Control.Arrow ((***))
 import Data.Function (on)
 import Karamaan.Opaleye.Tuples
+import Karamaan.Opaleye.Pack
 
 newtype Unpackspec a = Unpackspec (Writer a)
 
-unUnpackspec :: Unpackspec a -> Writer a
-unUnpackspec (Unpackspec f) = f
+unpackspecApp :: (b -> a) -> Unpackspec a -> Unpackspec b
+unpackspecApp f (Unpackspec u) = Unpackspec (u . f)
+
+convert u u' c = unpackspecApp u . c . u'
 
 (^:) :: Unpackspec a -> Unpackspec b -> Unpackspec (a, b)
 (Unpackspec f1) ^: (Unpackspec f2) = Unpackspec (\(x1, x2) -> f1 x1 ++ f2 x2)
@@ -48,3 +51,37 @@ unpackT8 :: T8 (Unpackspec a1) (Unpackspec a2) (Unpackspec a3) (Unpackspec a4)
                (Unpackspec a5) (Unpackspec a6) (Unpackspec a7) (Unpackspec a8)
             -> Unpackspec (T8 a1 a2 a3 a4 a5 a6 a7 a8)
 unpackT8 = chain unpackT7
+
+unpackT :: Unpackspec a -> Unpackspec a
+unpackT = unpackT1
+
+unpack2 :: (Unpackspec a1, Unpackspec a2) -> Unpackspec (a1, a2)
+unpack2 = convert unflatten2 unflatten2 unpackT2
+
+unpack3 :: (Unpackspec a1, Unpackspec a2, Unpackspec a3)
+           -> Unpackspec (a1, a2, a3)
+unpack3 = convert unflatten3 unflatten3 unpackT3
+
+unpack4 :: (Unpackspec a1, Unpackspec a2, Unpackspec a3, Unpackspec a4)
+           -> Unpackspec (a1, a2, a3, a4)
+unpack4 = convert unflatten4 unflatten4 unpackT4
+
+unpack5 :: (Unpackspec a1, Unpackspec a2, Unpackspec a3, Unpackspec a4,
+            Unpackspec a5)
+           -> Unpackspec (a1, a2, a3, a4, a5)
+unpack5 = convert unflatten5 unflatten5 unpackT5
+
+unpack6 :: (Unpackspec a1, Unpackspec a2, Unpackspec a3, Unpackspec a4,
+            Unpackspec a5, Unpackspec a6)
+           -> Unpackspec (a1, a2, a3, a4, a5, a6)
+unpack6 = convert unflatten6 unflatten6 unpackT6
+
+unpack7 :: (Unpackspec a1, Unpackspec a2, Unpackspec a3, Unpackspec a4,
+            Unpackspec a5, Unpackspec a6, Unpackspec a7)
+           -> Unpackspec (a1, a2, a3, a4, a5, a6, a7)
+unpack7 = convert unflatten7 unflatten7 unpackT7
+
+unpack8 :: (Unpackspec a1, Unpackspec a2, Unpackspec a3, Unpackspec a4,
+            Unpackspec a5, Unpackspec a6, Unpackspec a7, Unpackspec a8)
+           -> Unpackspec (a1, a2, a3, a4, a5, a6, a7, a8)
+unpack8 = convert unflatten8 unflatten8 unpackT8

@@ -2,7 +2,8 @@
 
 module Karamaan.Opaleye.Explore where
 
-import Karamaan.Opaleye.Table (makeTable, cols1, col)
+import Karamaan.Opaleye.Table (makeTable)
+import Karamaan.Opaleye.Colspec (cols1, col)
 import Karamaan.Opaleye.QueryArr (equals, Query)
 import Karamaan.Opaleye.SQL (showSqlForPostgreSQLSimple, showSqlUnopt)
 import Karamaan.Opaleye.Predicates (equalsC)

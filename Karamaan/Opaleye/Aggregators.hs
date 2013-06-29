@@ -31,8 +31,8 @@ chain :: (t -> Aggregator a') -> (Aggregator a, t) -> Aggregator (a, a')
 chain agg (a, as) = a *: agg as
 
 -- Need two unflattens (u, u') because of insufficient polymorphism, I guess
-cobber :: (a' -> b) -> (b -> a') -> (a -> b') -> (b' -> Aggregator a') -> a
-          -> Aggregator b
+cobber :: (a' -> b) -> (b -> a') -> (a -> b') -> (b' -> Aggregator a')
+          -> a -> Aggregator b
 cobber f u u' agg = aggApp f u . agg . u'
 
 agg1T :: Aggregator a1 -> Aggregator (T1 a1)

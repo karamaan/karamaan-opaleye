@@ -1,21 +1,21 @@
-module Karamaan.Opaleye.QueryArr where
+module Karamaan.Opaleye.Unpackspec where
 
 import Karamaan.Opaleye.Colspec (Writer)
-import Control.Arrow ((***))
-import Data.Function (on)
 import Karamaan.Opaleye.Tuples
-import Karamaan.Opaleye.Pack
+import Karamaan.Opaleye.Pack hiding (unpack)
 
 newtype Unpackspec a = Unpackspec (Writer a)
 
 unpackspecApp :: (b -> a) -> Unpackspec a -> Unpackspec b
 unpackspecApp f (Unpackspec u) = Unpackspec (u . f)
 
+convert :: (b -> a1) -> (a -> b1) -> (b1 -> Unpackspec a1) -> a -> Unpackspec b
 convert u u' c = unpackspecApp u . c . u'
 
 (^:) :: Unpackspec a -> Unpackspec b -> Unpackspec (a, b)
 (Unpackspec f1) ^: (Unpackspec f2) = Unpackspec (\(x1, x2) -> f1 x1 ++ f2 x2)
 
+chain :: (t -> Unpackspec a2) -> (Unpackspec a1, t) -> Unpackspec (a1, a2)
 chain unpack (a, as) = unpackT2 (a, unpack as)
 
 unpackT1 :: T1 (Unpackspec a) -> Unpackspec (T1 a)

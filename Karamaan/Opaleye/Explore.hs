@@ -2,7 +2,7 @@
 
 module Karamaan.Opaleye.Explore where
 
-import Karamaan.Opaleye.Table (makeTable)
+import Karamaan.Opaleye.Table (makeTable, cols1, col)
 import Karamaan.Opaleye.QueryArr (equals, Query)
 import Karamaan.Opaleye.SQL (showSqlForPostgreSQLSimple, showSqlUnopt)
 import Karamaan.Opaleye.Predicates (equalsC)
@@ -11,7 +11,7 @@ import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.Operators2 (union, constant, plus, divide)
 
 exampleTable :: Query (Wire Int)
-exampleTable = makeTable ["id"] "exampleTable"
+exampleTable = makeTable (cols1 (col "id")) "exampleTable"
 
 -- Happily the optimised versions of these are equal.  This means that
 -- equals could be implemented in terms of constant and equals.

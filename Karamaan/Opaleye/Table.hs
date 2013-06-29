@@ -5,8 +5,7 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, BaseTable),
                                      PrimExpr(AttrExpr),
                                      Attribute, Assoc, times)
 import Control.Arrow ((***))
-import Karamaan.Opaleye.Pack (Pack, pack,
-                              unflatten1, flatten1,
+import Karamaan.Opaleye.Pack (unflatten1, flatten1,
                               unflatten2, flatten2,
                               unflatten3, flatten3,
                               unflatten4, flatten4,
@@ -14,7 +13,7 @@ import Karamaan.Opaleye.Pack (Pack, pack,
                               unflatten6, flatten6,
                               unflatten7, flatten7,
                               unflatten8, flatten8)
-import Karamaan.Opaleye.Wire (Wire, unWire)
+import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 import Karamaan.Opaleye.Aggregate (Writer)
 -- FIXME: don't want to import everything, but we're importing a lot
 -- and I can't be bothered to type it all
@@ -22,8 +21,8 @@ import Karamaan.Opaleye.Aggregators hiding (chain, convert)
 
 data Colspec a = Colspec a (Writer a)
 
-col :: Wire a -> Colspec (Wire a)
-col w = Colspec w (return . unWire)
+col :: String -> Colspec (Wire a)
+col s = Colspec (Wire s) (return . unWire)
 
 colspecApp :: (b -> a) -> (a -> b) -> Colspec a -> Colspec b
 colspecApp f g (Colspec a w) = Colspec (g a) (w . f)
@@ -101,20 +100,19 @@ cols8 :: (Colspec a, Colspec b, Colspec a3, Colspec a4, Colspec a5, Colspec a6,
          -> Colspec (a, b, a3, a4, a5, a6, a7, a8)
 cols8 = convert unflatten8 unflatten8 flatten8 colsT8
 
-makeTable :: Pack a => [String] -> String -> Query a
-makeTable x = makeTable' (zip x x)
+makeTable :: Colspec a -> String -> Query a
+makeTable colspec@(Colspec a w) = makeTable' colspec (zip x x)
+  where x = w a
 
-makeTable' :: Pack a
-              => [(String, String)] -> String -> Query a
-makeTable' cols table_name = QueryArr f
+makeTable' :: Colspec a -> [(String, String)] -> String -> Query a
+makeTable' colspec cols table_name = QueryArr f
   where f ((), primQuery, t0) = (retwires, times primQuery primQuery', next t0)
-          where (retwires, primQuery') = makeTable'' cols table_name (tagWith t0)
+          where (retwires, primQuery') = makeTable'' colspec cols table_name (tagWith t0)
 
 -- TODO: this needs tidying
-makeTable'' :: Pack a
-               => [(String, String)] -> String -> (String -> String)
+makeTable'' :: Colspec a -> [(String, String)] -> String -> (String -> String)
                -> (a, PrimQuery)
-makeTable'' cols table_name tag' =
+makeTable'' (Colspec a _) cols table_name tag' =
   let basetablecols :: [String]
       basetablecols = map snd cols
       makeAssoc :: (String, String) -> (Attribute, PrimExpr)
@@ -123,5 +121,4 @@ makeTable'' cols table_name tag' =
       projcols = map makeAssoc cols
       q :: PrimQuery
       q = Project projcols (BaseTable table_name basetablecols)
-      retwires = (pack . map fst) projcols
-  in (retwires, q)
+  in (a, q)

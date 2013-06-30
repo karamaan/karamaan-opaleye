@@ -1,6 +1,6 @@
 module Karamaan.Opaleye.Unpackspec where
 
-import Karamaan.Opaleye.Colspec (Writer)
+import Karamaan.Opaleye.Colspec (Writer, (+++))
 import Karamaan.Opaleye.Tuples
 import Karamaan.Opaleye.Pack hiding (unpack)
 
@@ -13,7 +13,7 @@ convert :: (b -> a1) -> (a -> b1) -> (b1 -> Unpackspec a1) -> a -> Unpackspec b
 convert u u' c = unpackspecApp u . c . u'
 
 (^:) :: Unpackspec a -> Unpackspec b -> Unpackspec (a, b)
-(Unpackspec f1) ^: (Unpackspec f2) = Unpackspec (\(x1, x2) -> f1 x1 ++ f2 x2)
+(Unpackspec f1) ^: (Unpackspec f2) = Unpackspec (f1 +++ f2)
 
 chain :: (t -> Unpackspec a2) -> (Unpackspec a1, t) -> Unpackspec (a1, a2)
 chain unpack (a, as) = unpackT2 (a, unpack as)

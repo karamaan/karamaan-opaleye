@@ -16,6 +16,9 @@ import Karamaan.Opaleye.Tuples
 type Writer a = a -> [String]
 type PackMap a = (String -> String) -> a -> a
 
+(+++) :: Writer a -> Writer b -> Writer (a, b)
+w +++ w' = \(x,x') -> w x ++ w' x'
+
 -- TODO: when I added the PackMap argument to Colspec I only had to update
 -- col, colspecApp and colsT2.  I didn't have to add an argument to colspecApp,
 -- interesting.  What are the implications for this way of doing "generics" on
@@ -35,7 +38,7 @@ colsT1 = id
 colsT2 :: T2 (Colspec a1) (Colspec a2) -> Colspec (T2 a1 a2)
 colsT2 (Colspec a1 w1 p1, Colspec a2 w2 p2)
   = Colspec (a1, a2) w' p'
-  where w' (x1, x2) = w1 x1 ++ w2 x2
+  where w' = w1 +++ w2
         p' f (x1, x2) = (p1 f x1, p2 f x2)
 
 chain :: (t -> Colspec b) -> (Colspec a, t) -> Colspec (a, b)

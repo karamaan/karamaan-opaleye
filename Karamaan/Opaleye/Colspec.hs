@@ -14,23 +14,29 @@ import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 import Karamaan.Opaleye.Tuples
 
 type Writer a = a -> [String]
+type PackMap a = (String -> String) -> a -> a
 
-data Colspec a = Colspec a (Writer a)
+-- TODO: when I added the PackMap argument to Colspec I only had to update
+-- col, colspecApp and colsT2.  I didn't have to add an argument to colspecApp,
+-- interesting.  What are the implications for this way of doing "generics" on
+-- tuples?
+data Colspec a = Colspec a (Writer a) (PackMap a)
 
 col :: String -> Colspec (Wire a)
-col s = Colspec (Wire s) (return . unWire)
+col s = Colspec (Wire s) (return . unWire) (\f -> Wire . f . unWire)
 
 colspecApp :: (b -> a) -> (a -> b) -> Colspec a -> Colspec b
-colspecApp f g (Colspec a w) = Colspec (g a) (w . f)
+colspecApp f g (Colspec a w p) = Colspec (g a) (w . f) (\ss -> g . p ss . f)
 
 colsT1 :: T1 (Colspec a1) -> Colspec (T1 a1)
 colsT1 = id
 
 -- TODO: dup with *:
 colsT2 :: T2 (Colspec a1) (Colspec a2) -> Colspec (T2 a1 a2)
-colsT2 (Colspec a1 w1, Colspec a2 w2)
-  = Colspec (a1, a2) w'
+colsT2 (Colspec a1 w1 p1, Colspec a2 w2 p2)
+  = Colspec (a1, a2) w' p'
   where w' (x1, x2) = w1 x1 ++ w2 x2
+        p' f (x1, x2) = (p1 f x1, p2 f x2)
 
 chain :: (t -> Colspec b) -> (Colspec a, t) -> Colspec (a, b)
 chain rest (a, as) = colsT2 (a, rest as)

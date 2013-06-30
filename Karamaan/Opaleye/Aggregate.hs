@@ -10,7 +10,7 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, Empty),
 import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.Pack (unpack, packMap)
 import Control.Arrow ((&&&), (***))
-import Karamaan.Opaleye.Colspec (Writer, PackMap)
+import Karamaan.Opaleye.Colspec (Writer, writer, PackMap, (+++), runWriter)
 
 -- I used to have "Aggregator a b" for a's that would get turned
 -- into b's when aggregated, but I never used it.
@@ -24,14 +24,14 @@ instance Show (Aggregator a) where
 (*:) :: Aggregator a -> Aggregator a' -> Aggregator (a, a')
 (Aggregator s w p) *: (Aggregator s' w' p') = Aggregator s'' w'' p''
   where s'' = s ++ s'
-        w'' (x, y) = w x ++ w' y
+        w'' = w +++ w'
         p'' f = p f *** p' f
 
 aggregatorMaker :: AggrOp -> Aggregator (Wire a)
 aggregatorMaker = aggregatorMaker' . Just
 
 aggregatorMaker' :: Maybe AggrOp -> Aggregator (Wire a)
-aggregatorMaker' op = Aggregator [op] unpack packMap
+aggregatorMaker' op = Aggregator [op] (writer unpack) packMap
 
 sum :: Aggregator (Wire a)
 sum = aggregatorMaker AggrSum
@@ -56,9 +56,9 @@ aggregate'' mf out j primQ' =
     let tag' :: String -> String
         tag' = tagWith j
         aggrs :: [Maybe AggrOp]
-        (Aggregator aggrs writer mapper) = mf
+        (Aggregator aggrs writer' mapper) = mf
         old_names :: [String]
-        old_names = writer out
+        old_names = runWriter writer' out
         new_names :: [String]
         new_names = map tag' old_names
         zipped :: [(String, Maybe AggrOp, String)]

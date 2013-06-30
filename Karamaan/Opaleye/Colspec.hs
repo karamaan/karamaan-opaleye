@@ -12,12 +12,22 @@ import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 -- FIXME: don't want to import everything, but we're importing a lot
 -- and I can't be bothered to type it all
 import Karamaan.Opaleye.Tuples
+import Control.Arrow ((***))
 
-type Writer a = a -> [String]
+newtype Writer a = XWriter (a -> [String])
 type PackMap a = (String -> String) -> a -> a
 
+modifyWriter :: Writer b -> (a -> b) -> Writer a
+modifyWriter (XWriter w) f = XWriter (w . f)
+
+runWriter :: Writer t -> t -> [String]
+runWriter (XWriter w) x = w x
+
+writer :: (t -> [String]) -> Writer t
+writer = XWriter
+
 (+++) :: Writer a -> Writer b -> Writer (a, b)
-w +++ w' = \(x,x') -> w x ++ w' x'
+w +++ w' = writer (uncurry (++) . (runWriter w *** runWriter w'))
 
 -- TODO: when I added the PackMap argument to Colspec I only had to update
 -- col, colspecApp and colsT2.  I didn't have to add an argument to colspecApp,
@@ -26,10 +36,10 @@ w +++ w' = \(x,x') -> w x ++ w' x'
 data Colspec a = Colspec a (Writer a) (PackMap a)
 
 col :: String -> Colspec (Wire a)
-col s = Colspec (Wire s) (return . unWire) (\f -> Wire . f . unWire)
+col s = Colspec (Wire s) (XWriter (return . unWire)) (\f -> Wire . f . unWire)
 
 colspecApp :: (b -> a) -> (a -> b) -> Colspec a -> Colspec b
-colspecApp f g (Colspec a w p) = Colspec (g a) (w . f) (\ss -> g . p ss . f)
+colspecApp f g (Colspec a w p) = Colspec (g a) (modifyWriter w f) (\ss -> g . p ss . f)
 
 colsT1 :: T1 (Colspec a1) -> Colspec (T1 a1)
 colsT1 = id

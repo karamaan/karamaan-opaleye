@@ -1,13 +1,13 @@
 module Karamaan.Opaleye.Unpackspec where
 
-import Karamaan.Opaleye.Colspec (Writer, (+++))
+import Karamaan.Opaleye.Colspec (Writer, (+++), modifyWriter)
 import Karamaan.Opaleye.Tuples
 import Karamaan.Opaleye.Pack hiding (unpack)
 
 newtype Unpackspec a = Unpackspec (Writer a)
 
 unpackspecApp :: (b -> a) -> Unpackspec a -> Unpackspec b
-unpackspecApp f (Unpackspec u) = Unpackspec (u . f)
+unpackspecApp f (Unpackspec u) = Unpackspec (modifyWriter u f)
 
 convert :: (b -> a1) -> (a -> b1) -> (b1 -> Unpackspec a1) -> a -> Unpackspec b
 convert u u' c = unpackspecApp u . c . u'

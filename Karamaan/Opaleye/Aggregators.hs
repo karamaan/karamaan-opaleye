@@ -9,12 +9,13 @@ import Karamaan.Opaleye.Pack (unflatten1, flatten1,
                               unflatten6, flatten6,
                               unflatten7, flatten7,
                               unflatten8, flatten8)
+import Karamaan.Opaleye.Colspec (modifyWriter)
 import Karamaan.Opaleye.Tuples (T1, T2, T3, T4, T5, T6, T7, T8)
 -- These really belong in Karamaan.Opaleye.Aggregate but the
 -- implementations are somewhat verbose so I wanted to sequester them
 
 aggApp :: (a -> b) -> (b -> a) -> Aggregator a -> Aggregator b
-aggApp f f' (Aggregator s w p) = Aggregator s (w . f') p'
+aggApp f f' (Aggregator s w p) = Aggregator s (modifyWriter w  f') p'
   where p' g = f . p g . f'
 
 chain :: (t -> Aggregator a') -> (Aggregator a, t) -> Aggregator (a, a')

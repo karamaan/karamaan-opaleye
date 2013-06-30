@@ -9,6 +9,7 @@ import Control.Arrow (Arrow, arr, first, (&&&))
 import Control.Category (Category, id, (.), (<<<))
 import Control.Applicative (Applicative, pure, (<*>))
 import Karamaan.Opaleye.Pack (Pack, unpack)
+import Karamaan.Opaleye.Colspec (runWriter, writer)
 import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
 import Data.Function (on)
 
@@ -38,7 +39,7 @@ runQueryArr :: QueryArr a b -> (a, PrimQuery, Tag) -> (b, PrimQuery, Tag)
 runQueryArr (QueryArr f) = f
 
 packToUnpackspec :: Pack a => Unpackspec a
-packToUnpackspec = Unpackspec unpack
+packToUnpackspec = Unpackspec (writer unpack)
 
 runQueryArrPrim :: Pack b => Query b -> PrimQuery
 runQueryArrPrim = runQueryArrPrim' packToUnpackspec
@@ -47,7 +48,7 @@ runQueryArrPrim' :: Unpackspec b -> Query b -> PrimQuery
 runQueryArrPrim' (Unpackspec g) f
   =  Project (map (id &&& AttrExpr) cols) primQuery
   where (a, primQuery, _) = runQueryArr f ((), Empty, start)
-        cols = g a
+        cols = runWriter g a
 
 first3 :: (a1 -> b) -> (a1, a2, a3) -> (b, a2, a3)
 first3 f (a1, a2, a3) = (f a1, a2, a3)

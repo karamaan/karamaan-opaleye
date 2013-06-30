@@ -4,13 +4,13 @@ import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith)
 import Database.HaskellDB.PrimQuery (PrimQuery(Project, BaseTable),
                                      PrimExpr(AttrExpr),
                                      Attribute, Assoc, times)
-import Karamaan.Opaleye.Colspec (Colspec(Colspec))
+import Karamaan.Opaleye.Colspec (Colspec(Colspec), runWriter)
 import Control.Arrow ((***))
 
 
 makeTable :: Colspec a -> String -> Query a
 makeTable colspec@(Colspec a w _) = makeTable' colspec (zip x x)
-  where x = w a
+  where x = runWriter w a
 
 makeTable' :: Colspec a -> [(String, String)] -> String -> Query a
 makeTable' colspec cols table_name = QueryArr f

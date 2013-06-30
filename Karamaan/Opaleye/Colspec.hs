@@ -26,8 +26,12 @@ runWriter (Writer w) x = w x
 writer :: (t -> [String]) -> Writer t
 writer = Writer
 
+-- FIXME: These are ridiculous names
 (+++) :: Writer a -> Writer b -> Writer (a, b)
 w +++ w' = writer (uncurry (++) . (runWriter w *** runWriter w'))
+
+(++++) :: PackMap a -> PackMap b -> PackMap (a, b)
+f ++++ g = \ss -> f ss *** g ss
 
 -- TODO: when I added the PackMap argument to Colspec I only had to update
 -- col, colspecApp and colsT2.  I didn't have to add an argument to colspecApp,

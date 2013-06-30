@@ -9,8 +9,9 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, Empty),
                                      Attribute, times)
 import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.Pack (unpack, packMap)
-import Control.Arrow ((&&&), (***))
-import Karamaan.Opaleye.Colspec (Writer, writer, PackMap, (+++), runWriter)
+import Control.Arrow ((&&&))
+import Karamaan.Opaleye.Colspec (Writer, writer, PackMap, (+++), runWriter,
+                                 (++++))
 
 -- I used to have "Aggregator a b" for a's that would get turned
 -- into b's when aggregated, but I never used it.
@@ -25,7 +26,7 @@ instance Show (Aggregator a) where
 (Aggregator s w p) *: (Aggregator s' w' p') = Aggregator s'' w'' p''
   where s'' = s ++ s'
         w'' = w +++ w'
-        p'' f = p f *** p' f
+        p'' = p ++++ p'
 
 aggregatorMaker :: AggrOp -> Aggregator (Wire a)
 aggregatorMaker = aggregatorMaker' . Just

@@ -53,7 +53,7 @@ colsT2 :: T2 (Colspec a1) (Colspec a2) -> Colspec (T2 a1 a2)
 colsT2 (Colspec a1 w1 p1, Colspec a2 w2 p2)
   = Colspec (a1, a2) w' p'
   where w' = w1 +++ w2
-        p' f (x1, x2) = (p1 f x1, p2 f x2)
+        p' = p1 ++++ p2
 
 chain :: (t -> Colspec b) -> (Colspec a, t) -> Colspec (a, b)
 chain rest (a, as) = colsT2 (a, rest as)

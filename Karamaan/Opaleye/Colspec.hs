@@ -14,17 +14,17 @@ import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 import Karamaan.Opaleye.Tuples
 import Control.Arrow ((***))
 
-newtype Writer a = XWriter (a -> [String])
+newtype Writer a = Writer (a -> [String])
 type PackMap a = (String -> String) -> a -> a
 
 modifyWriter :: Writer b -> (a -> b) -> Writer a
-modifyWriter (XWriter w) f = XWriter (w . f)
+modifyWriter w f = writer (runWriter w . f)
 
 runWriter :: Writer t -> t -> [String]
-runWriter (XWriter w) x = w x
+runWriter (Writer w) x = w x
 
 writer :: (t -> [String]) -> Writer t
-writer = XWriter
+writer = Writer
 
 (+++) :: Writer a -> Writer b -> Writer (a, b)
 w +++ w' = writer (uncurry (++) . (runWriter w *** runWriter w'))
@@ -36,7 +36,7 @@ w +++ w' = writer (uncurry (++) . (runWriter w *** runWriter w'))
 data Colspec a = Colspec a (Writer a) (PackMap a)
 
 col :: String -> Colspec (Wire a)
-col s = Colspec (Wire s) (XWriter (return . unWire)) (\f -> Wire . f . unWire)
+col s = Colspec (Wire s) (writer (return . unWire)) (\f -> Wire . f . unWire)
 
 colspecApp :: (b -> a) -> (a -> b) -> Colspec a -> Colspec b
 colspecApp f g (Colspec a w p) = Colspec (g a) (modifyWriter w f) (\ss -> g . p ss . f)

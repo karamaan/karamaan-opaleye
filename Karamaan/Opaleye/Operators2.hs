@@ -6,7 +6,7 @@ import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith, Tag,
 import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Database.HaskellDB.PrimQuery (PrimQuery(Project, Binary,
                                                Empty),
-                                     RelOp(Union), extend,
+                                     RelOp(Union, Intersect), extend,
                                      PrimExpr(AttrExpr, ConstExpr),
                                      BinOp(OpPlus, OpDiv, OpMul, OpOther,
                                            OpMinus),
@@ -90,6 +90,9 @@ constantString = unsafeConstant . ("'" ++) . (++"' :: text")
 
 unsafeConstant :: String -> Query (Wire a)
 unsafeConstant = constantLit . OtherLit
+
+intersect :: Pack b => QueryArr () b -> QueryArr () b -> QueryArr () b
+intersect = binrel Intersect
 
 union :: Pack b => QueryArr () b -> QueryArr () b -> QueryArr () b
 union = binrel Union

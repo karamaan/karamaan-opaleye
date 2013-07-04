@@ -56,12 +56,7 @@ test2 = TestCase (assertEqual "eq" (Project [("int11_eq_int212", AttrExpr "int11
                                                AttrExpr "bool1"),
                                               ("double1",
                                                AttrExpr "double1")]
-                                     (Project [("int11",AttrExpr "int1"),
-                                               ("int21",AttrExpr "int2"),
-                                               ("bool1",AttrExpr "bool"),
-                                               ("double1",AttrExpr "double")]
-                                      (BaseTable "test_table" ["int1","int2",
-                                                               "bool","double"]))))
+                                     tablePrimQ))
                                    (runQueryArrPrim testEq))
 
 tests = TestList [ TestLabel "test1" test1

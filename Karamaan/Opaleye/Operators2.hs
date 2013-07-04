@@ -16,6 +16,7 @@ import qualified Database.HaskellDB.PrimQuery as PrimQuery
 import Karamaan.Opaleye.Operators (binOp')
 import qualified Karamaan.Opaleye.Operators as Operators
 import Karamaan.Opaleye.Pack (Pack, packMap, unpack)
+import Control.Arrow ((***))
 
 unOp :: ShowConstant c => BinOp -> String -> String -> c
         -> QueryArr (Wire a) (Wire a)
@@ -126,3 +127,17 @@ binrel op q1 q2 = QueryArr f where
           r2 = Project old2_assoc primQ2
 
           primQ' = Binary op r1 r2
+
+case_ :: QueryArr ([(Wire Bool, Wire a)], Wire a) (Wire a)
+case_ = QueryArr f where
+  f ((cases, otherwise_), primQ, t0) = (w_out, primQ', t1)
+    where t1 = next t0
+          attrname_out = tagWith t0 "case_result"
+          w_out = Wire attrname_out
+          cases' = map (wireToPrimExpr *** wireToPrimExpr) cases
+          otherwise' = wireToPrimExpr otherwise_
+          caseExpr = PrimQuery.CaseExpr cases' otherwise'
+          primQ' = extend [(attrname_out, caseExpr)] primQ
+
+wireToPrimExpr :: Wire a -> PrimExpr
+wireToPrimExpr = AttrExpr . unWire

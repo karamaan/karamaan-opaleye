@@ -46,10 +46,6 @@ testOp op = proc () -> do
   (i, i', _, _) <- table -< ()
   op -< (i, i')
 
-testEq = testOp eq
-
-testGt = testOp gt
-
 testeq = TestCase (assertEqual "eq" (Project [("int11_eq_int212",
                                               AttrExpr "int11_eq_int212")]
                                     (Project ([("int11_eq_int212",
@@ -57,7 +53,7 @@ testeq = TestCase (assertEqual "eq" (Project [("int11_eq_int212",
                                                             (AttrExpr "int21"))]
                                               ++ tableAssocs)
                                      tablePrimQ))
-                                   (runQueryArrPrim testEq))
+                                   (runQueryArrPrim (testOp eq)))
 
 testgt = TestCase (assertEqual "gt" (Project [("int11_gt_int212",
                                               AttrExpr "int11_gt_int212")]
@@ -66,7 +62,7 @@ testgt = TestCase (assertEqual "gt" (Project [("int11_gt_int212",
                                                             (AttrExpr "int21"))]
                                               ++ tableAssocs)
                                      tablePrimQ))
-                                   (runQueryArrPrim testGt))
+                                   (runQueryArrPrim (testOp gt)))
 
 tests = TestList [ TestLabel "test1" test1
                  , TestLabel "testeq" testeq

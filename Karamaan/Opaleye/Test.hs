@@ -6,15 +6,16 @@ import Karamaan.Opaleye.Colspec (cols4, col)
 import Karamaan.Opaleye.Table (makeTable)
 import Karamaan.Opaleye.QueryArr (runQueryArrPrim, Query)
 import Karamaan.Opaleye.Wire (Wire)
-import Karamaan.Opaleye.Operators2 (eq, gt, minus)
+import Karamaan.Opaleye.Operators2 (eq, gt, minus, constant, constantString)
 
 import Database.HaskellDB.PrimQuery (PrimQuery(Project, BaseTable,
                                                Restrict, Group, Binary,
                                                Special, Empty),
+                                     Literal(IntegerLit, DoubleLit, OtherLit),
                                      BinOp(OpEq, OpGt, OpMinus),
                                      RelOp(Times, Union, Intersect,
                                            Divide, Difference),
-                                     PrimExpr(AttrExpr, BinExpr))
+                                     PrimExpr(AttrExpr, BinExpr, ConstExpr))
 
 import Test.HUnit (Test(TestCase, TestList, TestLabel), assertEqual, runTestTT)
 
@@ -72,10 +73,32 @@ testminus = TestCase (assertEqual "minus" (Project [("int11_minus_int212",
                                      tablePrimQ))
                                    (runQueryArrPrim (testOp minus)))
 
+constantint = Project [("constant1",AttrExpr "constant1")]
+              (Project [("constant1",ConstExpr (IntegerLit 1))] Empty)
+
+constantdouble = Project [("constant1",AttrExpr "constant1")]
+              (Project [("constant1",ConstExpr (DoubleLit 1))] Empty)
+
+constantstring = Project [("constant1",AttrExpr "constant1")]
+                 (Project [("constant1",ConstExpr (OtherLit "'hello' :: text"))]
+                  Empty)
+
+testconstantint = TestCase (assertEqual "constint" constantint
+                            (runQueryArrPrim (constant (1 :: Int))))
+
+testconstantdouble = TestCase (assertEqual "constdouble" constantdouble
+                               (runQueryArrPrim (constant (1 :: Double))))
+
+testconstantstring = TestCase (assertEqual "conststring" constantstring
+                               (runQueryArrPrim (constantString "hello")))
+
 tests = TestList [ TestLabel "test1" test1
                  , TestLabel "testeq" testeq
                  , TestLabel "testgt" testgt
                  , TestLabel "testminus" testminus
+                 , TestLabel "testconstantint" testconstantint
+                 , TestLabel "testconstantdouble" testconstantdouble
+                 , TestLabel "testconstantstring" testconstantstring
                  ]
 
 main = runTestTT tests

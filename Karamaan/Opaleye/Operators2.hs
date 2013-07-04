@@ -62,6 +62,12 @@ minus = opArr OpMinus "minus"
 gt :: QueryArr (Wire a, Wire a) (Wire Bool)
 gt = opArr PrimQuery.OpGt "gt"
 
+eq :: QueryArr (Wire a, Wire a) (Wire Bool)
+eq = opArr PrimQuery.OpEq "eq"
+
+cat :: QueryArr (Wire String, Wire String) (Wire String)
+cat = opArr (PrimQuery.OpOther "||") "cat"
+
 opArr :: BinOp -> String -> QueryArr (Wire a, Wire a) (Wire b)
 opArr op opname = QueryArr f
   where f ((u, u'), primQ, t1) = (newWire, extend newAssoc primQ, next t1)

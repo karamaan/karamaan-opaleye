@@ -6,12 +6,12 @@ import Karamaan.Opaleye.Colspec (cols4, col)
 import Karamaan.Opaleye.Table (makeTable)
 import Karamaan.Opaleye.QueryArr (runQueryArrPrim, Query)
 import Karamaan.Opaleye.Wire (Wire)
-import Karamaan.Opaleye.Operators2 (eq)
+import Karamaan.Opaleye.Operators2 (eq, gt)
 
 import Database.HaskellDB.PrimQuery (PrimQuery(Project, BaseTable,
                                                Restrict, Group, Binary,
                                                Special, Empty),
-                                     BinOp(OpEq),
+                                     BinOp(OpEq, OpGt),
                                      RelOp(Times, Union, Intersect,
                                            Divide, Difference),
                                      PrimExpr(AttrExpr, BinExpr))
@@ -42,11 +42,15 @@ tableAssocs = [ ("int11", AttrExpr "int11")
 test1 = TestCase (assertEqual "table" (Project tableAssocs tablePrimQ)
                                       (runQueryArrPrim table))
 
-testEq = proc () -> do
+testOp op = proc () -> do
   (i, i', _, _) <- table -< ()
-  eq -< (i, i')
+  op -< (i, i')
 
-test2 = TestCase (assertEqual "eq" (Project [("int11_eq_int212",
+testEq = testOp eq
+
+testGt = testOp gt
+
+testeq = TestCase (assertEqual "eq" (Project [("int11_eq_int212",
                                               AttrExpr "int11_eq_int212")]
                                     (Project ([("int11_eq_int212",
                                                BinExpr OpEq (AttrExpr "int11")
@@ -55,7 +59,18 @@ test2 = TestCase (assertEqual "eq" (Project [("int11_eq_int212",
                                      tablePrimQ))
                                    (runQueryArrPrim testEq))
 
+testgt = TestCase (assertEqual "gt" (Project [("int11_gt_int212",
+                                              AttrExpr "int11_gt_int212")]
+                                    (Project ([("int11_gt_int212",
+                                               BinExpr OpGt (AttrExpr "int11")
+                                                            (AttrExpr "int21"))]
+                                              ++ tableAssocs)
+                                     tablePrimQ))
+                                   (runQueryArrPrim testGt))
+
 tests = TestList [ TestLabel "test1" test1
-                 , TestLabel "test2" test2 ]
+                 , TestLabel "testeq" testeq
+                 , TestLabel "testgt" testgt
+                 ]
 
 main = runTestTT tests

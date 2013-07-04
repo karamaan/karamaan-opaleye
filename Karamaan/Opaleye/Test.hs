@@ -6,12 +6,12 @@ import Karamaan.Opaleye.Colspec (cols4, col)
 import Karamaan.Opaleye.Table (makeTable)
 import Karamaan.Opaleye.QueryArr (runQueryArrPrim, Query)
 import Karamaan.Opaleye.Wire (Wire)
-import Karamaan.Opaleye.Operators2 (eq, gt)
+import Karamaan.Opaleye.Operators2 (eq, gt, minus)
 
 import Database.HaskellDB.PrimQuery (PrimQuery(Project, BaseTable,
                                                Restrict, Group, Binary,
                                                Special, Empty),
-                                     BinOp(OpEq, OpGt),
+                                     BinOp(OpEq, OpGt, OpMinus),
                                      RelOp(Times, Union, Intersect,
                                            Divide, Difference),
                                      PrimExpr(AttrExpr, BinExpr))
@@ -41,7 +41,6 @@ tableAssocs = [ ("int11", AttrExpr "int11")
 
 test1 = TestCase (assertEqual "table" (Project tableAssocs tablePrimQ)
                                       (runQueryArrPrim table))
-
 testOp op = proc () -> do
   (i, i', _, _) <- table -< ()
   op -< (i, i')
@@ -64,9 +63,19 @@ testgt = TestCase (assertEqual "gt" (Project [("int11_gt_int212",
                                      tablePrimQ))
                                    (runQueryArrPrim (testOp gt)))
 
+testminus = TestCase (assertEqual "minus" (Project [("int11_minus_int212",
+                                              AttrExpr "int11_minus_int212")]
+                                    (Project ([("int11_minus_int212",
+                                               BinExpr OpMinus (AttrExpr "int11")
+                                                            (AttrExpr "int21"))]
+                                              ++ tableAssocs)
+                                     tablePrimQ))
+                                   (runQueryArrPrim (testOp minus)))
+
 tests = TestList [ TestLabel "test1" test1
                  , TestLabel "testeq" testeq
                  , TestLabel "testgt" testgt
+                 , TestLabel "testminus" testminus
                  ]
 
 main = runTestTT tests

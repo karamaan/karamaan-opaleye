@@ -59,7 +59,10 @@ divide = opArr OpDiv "div"
 minus :: QueryArr (Wire a, Wire a) (Wire a)
 minus = opArr OpMinus "minus"
 
-opArr :: BinOp -> String -> QueryArr (Wire a, Wire a) (Wire a)
+gt :: QueryArr (Wire a, Wire a) (Wire Bool)
+gt = opArr PrimQuery.OpGt "gt"
+
+opArr :: BinOp -> String -> QueryArr (Wire a, Wire a) (Wire b)
 opArr op opname = QueryArr f
   where f ((u, u'), primQ, t1) = (newWire, extend newAssoc primQ, next t1)
           where (newAssoc, newWire) = wireBinOp op opname u u' t1

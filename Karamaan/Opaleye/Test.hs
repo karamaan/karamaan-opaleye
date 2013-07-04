@@ -46,9 +46,11 @@ testEq = proc () -> do
   (i, i', _, _) <- table -< ()
   eq -< (i, i')
 
-test2 = TestCase (assertEqual "eq" (Project [("int11_eq_int212", AttrExpr "int11_eq_int212")]
+test2 = TestCase (assertEqual "eq" (Project [("int11_eq_int212",
+                                              AttrExpr "int11_eq_int212")]
                                     (Project ([("int11_eq_int212",
-                                               BinExpr OpEq (AttrExpr "int11") (AttrExpr "int21"))]
+                                               BinExpr OpEq (AttrExpr "int11")
+                                                            (AttrExpr "int21"))]
                                               ++ tableAssocs)
                                      tablePrimQ))
                                    (runQueryArrPrim testEq))

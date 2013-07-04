@@ -34,11 +34,12 @@ tablePrimQ = (Project [ ("int11", AttrExpr "int1")
                                       , "bool"
                                       , "double" ]))
 
-test1 = TestCase (assertEqual "table" (Project [ ("int11", AttrExpr "int11")
-                                               , ("int21", AttrExpr "int21")
-                                               , ("bool1", AttrExpr "bool1")
-                                               , ("double1", AttrExpr "double1")]
-                                       tablePrimQ)
+tableAssocs = [ ("int11", AttrExpr "int11")
+              , ("int21", AttrExpr "int21")
+              , ("bool1", AttrExpr "bool1")
+              , ("double1", AttrExpr "double1")]
+
+test1 = TestCase (assertEqual "table" (Project tableAssocs tablePrimQ)
                                       (runQueryArrPrim table))
 
 testEq = proc () -> do
@@ -46,16 +47,9 @@ testEq = proc () -> do
   eq -< (i, i')
 
 test2 = TestCase (assertEqual "eq" (Project [("int11_eq_int212", AttrExpr "int11_eq_int212")]
-                                    (Project [("int11_eq_int212",
-                                               BinExpr OpEq (AttrExpr "int11") (AttrExpr "int21")),
-                                              ("int11",
-                                               AttrExpr "int11"),
-                                              ("int21",
-                                               AttrExpr "int21"),
-                                              ("bool1",
-                                               AttrExpr "bool1"),
-                                              ("double1",
-                                               AttrExpr "double1")]
+                                    (Project ([("int11_eq_int212",
+                                               BinExpr OpEq (AttrExpr "int11") (AttrExpr "int21"))]
+                                              ++ tableAssocs)
                                      tablePrimQ))
                                    (runQueryArrPrim testEq))
 

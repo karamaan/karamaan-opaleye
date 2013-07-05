@@ -8,3 +8,6 @@ unWire (Wire a) = a
 -- TODO: get rid of this one
 unwire :: Wire a -> String
 unwire = unWire
+
+unsafeCoerce :: Wire a -> Wire b
+unsafeCoerce = Wire . unWire

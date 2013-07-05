@@ -92,13 +92,13 @@ testconstantdouble = TestCase (assertEqual "constdouble" constantdouble
 testconstantstring = TestCase (assertEqual "conststring" constantstring
                                (runQueryArrPrim (constantString "hello")))
 
-tests = TestList [ TestLabel "test1" test1
-                 , TestLabel "testeq" testeq
-                 , TestLabel "testgt" testgt
-                 , TestLabel "testminus" testminus
-                 , TestLabel "testconstantint" testconstantint
-                 , TestLabel "testconstantdouble" testconstantdouble
-                 , TestLabel "testconstantstring" testconstantstring
+tests = TestList [ test1
+                 , testeq
+                 , testgt
+                 , testminus
+                 , testconstantint
+                 , testconstantdouble
+                 , testconstantstring
                  ]
 
 main = runTestTT tests

@@ -65,6 +65,9 @@ gt = opArr PrimQuery.OpGt "gt"
 eq :: QueryArr (Wire a, Wire a) (Wire Bool)
 eq = opArr PrimQuery.OpEq "eq"
 
+notEq :: QueryArr (Wire a, Wire a) (Wire Bool)
+notEq = opArr PrimQuery.OpNotEq "not_eq"
+
 cat :: QueryArr (Wire String, Wire String) (Wire String)
 cat = opArr (PrimQuery.OpOther "||") "cat"
 

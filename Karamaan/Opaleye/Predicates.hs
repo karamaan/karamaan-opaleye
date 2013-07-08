@@ -58,3 +58,9 @@ singleEnquoten = ("'" ++) . (++"'")
 
 noOp :: Arrow arr => arr a ()
 noOp = arr (const ())
+
+wireTrue :: Wire a -> PrimExpr
+wireTrue = AttrExpr . unWire
+
+restrict :: QueryArr (Wire Bool) ()
+restrict = restrictWith wireTrue

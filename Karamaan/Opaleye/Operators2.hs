@@ -101,6 +101,9 @@ constant = constantLit . showConstant
 constantString :: String -> Query (Wire String)
 constantString = unsafeConstant . ("'" ++) . (++"' :: text")
 
+constantDay :: Day -> Query (Wire Day)
+constantDay = unsafeConstant . ("'" ++) . (++"' :: date") . dayToSQL
+
 unsafeConstant :: String -> Query (Wire a)
 unsafeConstant = constantLit . OtherLit
 

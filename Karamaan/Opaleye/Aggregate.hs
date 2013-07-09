@@ -3,7 +3,7 @@ module Karamaan.Opaleye.Aggregate where
 import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), runQueryArr,
                                   Tag, next, tagWith)
 import Database.HaskellDB.PrimQuery (PrimQuery(Project, Empty),
-                                     AggrOp(AggrSum, AggrAvg),
+                                     AggrOp(AggrSum, AggrAvg, AggrMax),
                                      PrimExpr(AttrExpr,
                                               AggrExpr),
                                      Attribute, times)
@@ -39,6 +39,9 @@ sum = aggregatorMaker AggrSum
 
 avg :: Aggregator (Wire a)
 avg = aggregatorMaker AggrAvg
+
+max :: Aggregator (Wire a)
+max = aggregatorMaker AggrMax
 
 groupBy :: Aggregator (Wire a)
 groupBy = aggregatorMaker' Nothing

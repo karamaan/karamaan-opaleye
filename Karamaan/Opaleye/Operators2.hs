@@ -156,3 +156,6 @@ case_ = QueryArr f where
 
 wireToPrimExpr :: Wire a -> PrimExpr
 wireToPrimExpr = AttrExpr . unWire
+
+opC :: QueryArr (a, b) c -> Query b -> QueryArr a c
+opC op q = op <<< second q <<< arr (\a -> (a, ()))

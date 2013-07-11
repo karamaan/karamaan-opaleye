@@ -65,6 +65,9 @@ minus = opArr OpMinus "minus"
 gt :: QueryArr (Wire a, Wire a) (Wire Bool)
 gt = opArr PrimQuery.OpGt "gt"
 
+gte :: QueryArr (Wire a, Wire a) (Wire Bool)
+gte = opArr PrimQuery.OpGtEq "gteq"
+
 eq :: QueryArr (Wire a, Wire a) (Wire Bool)
 eq = opArr PrimQuery.OpEq "eq"
 

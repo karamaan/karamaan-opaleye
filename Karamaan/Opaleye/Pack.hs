@@ -54,6 +54,11 @@ flatten10 (a, (b, (c, (a4, (a5, (a6, (a7, (a8, (a9, a10)))))))))
 unflatten10 (a, b, c, a4, a5, a6, a7, a8, a9, a10)
   = (a, (b, (c, (a4, (a5, (a6, (a7, (a8, (a9, a10)))))))))
 
+flatten11 (a, (b, (c, (a4, (a5, (a6, (a7, (a8, (a9, (a10, a11))))))))))
+  = (a, b, c, a4, a5, a6, a7, a8, a9, a10, a11)
+unflatten11 (a, b, c, a4, a5, a6, a7, a8, a9, a10, a11)
+  = (a, (b, (c, (a4, (a5, (a6, (a7, (a8, (a9, (a10, a11))))))))))
+
 instance (Pack a, Pack b, Pack c) => Pack (a, b, c) where
   packMap f = flatten3 . (packMap f *** packMap f) . unflatten3
   unpack = unpack . unflatten3
@@ -86,3 +91,9 @@ instance (Pack a, Pack b, Pack c, Pack d, Pack e, Pack f, Pack a7, Pack a8,
          => Pack (a, b, c, d, e, f, a7, a8, a9, a10) where
   packMap f = flatten10 . (packMap f *** packMap f) . unflatten10
   unpack = unpack . unflatten10
+
+instance (Pack a, Pack b, Pack c, Pack d, Pack e, Pack f, Pack a7, Pack a8,
+          Pack a9, Pack a10, Pack a11)
+         => Pack (a, b, c, d, e, f, a7, a8, a9, a10, a11) where
+  packMap f = flatten11 . (packMap f *** packMap f) . unflatten11
+  unpack = unpack . unflatten11

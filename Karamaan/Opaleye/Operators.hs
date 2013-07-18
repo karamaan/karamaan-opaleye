@@ -18,7 +18,12 @@ binOp' :: BinOp -> String -> PrimExpr -> String -> PrimExpr -> String
           -> (String -> String)
           -> (Assoc, Wire a)
 binOp' op opname t t_string t' t'_string tag' =
-  let newWireName = (tag' . concat) [t_string, "_", opname, "_", t'_string]
+  -- TODO vv I put this take 5 in here because the query strings were getting
+  -- too long and postgres was complaining that it was truncating them.
+  -- This is really just a temporary fix, because I'd like to keep the
+  -- possibility of long names but postprocess the PrimQuery to shorten
+  -- them before sending them to postgres.
+  let newWireName = (tag' . concat) [take 5 t_string, "_", opname, "_", take 5 t'_string]
       newAssoc = [(newWireName, BinExpr op t t')]
   in (newAssoc, Wire newWireName)
 

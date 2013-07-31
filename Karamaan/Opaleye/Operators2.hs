@@ -49,6 +49,9 @@ timesC :: NumBinOp a
 timesC x = unOp OpMul "times" (show x) x
 
 -- HaskellDB's OpMod comes out as "x MOD y" which Postgres doesn't like
+-- TODO: the solution to this is to make sure we use the correct SQL
+-- generator.  See
+-- http://hackage.haskell.org/packages/archive/haskelldb/2.2.2/doc/html/src/Database-HaskellDB-Sql-PostgreSQL.html#generator
 modC :: NumBinOp a
 modC x = unOp (OpOther "%") "mod" (show x) x
 

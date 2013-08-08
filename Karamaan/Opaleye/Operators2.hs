@@ -42,6 +42,8 @@ eq = opArr PrimQuery.OpEq "eq"
 notEq :: QueryArr (Wire a, Wire a) (Wire Bool)
 notEq = opArr PrimQuery.OpNotEq "not_eq"
 
+-- TODO: does HaskellDB support this?  Is it another Postgres incompatibility
+-- thing and we should use the Postgres SQL generator explicitly?
 cat :: QueryArr (Wire String, Wire String) (Wire String)
 cat = opArr (PrimQuery.OpOther "||") "cat"
 

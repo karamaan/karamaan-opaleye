@@ -1,6 +1,9 @@
+{-# LANGUAGE Arrows #-}
+
 module Karamaan.Opaleye.Operators2 where
 
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
+import qualified Karamaan.Opaleye.Wire as Wire
 import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith, Tag,
                                   runQueryArr)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
@@ -46,6 +49,12 @@ notEq = opArr PrimQuery.OpNotEq "not_eq"
 -- thing and we should use the Postgres SQL generator explicitly?
 cat :: QueryArr (Wire String, Wire String) (Wire String)
 cat = opArr (PrimQuery.OpOther "||") "cat"
+
+cat3 :: QueryArr (Wire String, Wire String, Wire String) (Wire String)
+cat3 = proc (s1, s2, s3) -> do
+  -- TODO: there must be a nicer way of doing this
+  s1s2 <- cat -< (s1, s2)
+  cat -< (s1s2, s3)
 
 isNull :: QueryArr (Wire (Maybe a)) (Wire Bool)
 isNull = unOpArr OpIsNull "is_null"
@@ -144,6 +153,23 @@ case_ = QueryArr f where
           otherwise' = wireToPrimExpr otherwise_
           caseExpr = PrimQuery.CaseExpr cases' otherwise'
           primQ' = extend [(attrname_out, caseExpr)] primQ
+
+ifThenElse :: QueryArr (Wire Bool, Wire a, Wire a) (Wire a)
+ifThenElse = proc (cond, ifTrue, ifFalse) -> do
+  case_ -< ([(cond, ifTrue)], ifFalse)
+
+-- TODO: These are some useful null-related Opaleye arrows that don't
+-- belong here.  They belong with Opaleye.
+fromMaybe :: QueryArr (Wire a, Wire (Maybe a)) (Wire a)
+fromMaybe = proc (d, m) -> do
+  isNull' <- isNull -< m
+  -- TODO: can now do this with ifThenElse
+  case_ -< ([ (isNull', d) ], Wire.unsafeCoerce m)
+
+fromMaybe' :: Query (Wire a) -> QueryArr (Wire (Maybe a)) (Wire a)
+fromMaybe' d = proc m -> do
+  d' <- d -< ()
+  fromMaybe -< (d', m)
 
 wireToPrimExpr :: Wire a -> PrimExpr
 wireToPrimExpr = AttrExpr . unWire

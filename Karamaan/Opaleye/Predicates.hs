@@ -11,9 +11,13 @@ import Database.HaskellDB.PrimQuery (PrimExpr(AttrExpr, UnExpr, ConstExpr,
 import Data.Time.Calendar (Day)
 import qualified Karamaan.WhaleUtil.Date as UD
 import Control.Arrow (arr, Arrow)
+import qualified Karamaan.WhaleUtil.Arrow as UA
 
 equalsOneOf :: ShowConstant a => [a] -> QueryArr (Wire a) ()
 equalsOneOf = restrictWith . flip wireIsOneOf . map showConstant
+
+doesntEqualAnyOf :: ShowConstant a => [a] -> QueryArr (Wire a) ()
+doesntEqualAnyOf = UA.all_ . map notEqualC
 
 notEqualC :: ShowConstant a => a -> QueryArr (Wire a) ()
 notEqualC = restrictWith . flip wireIsNot . showConstant

@@ -9,7 +9,8 @@ import Karamaan.Opaleye.SQL (showSqlForPostgreSQLSimple, showSqlUnopt)
 import Karamaan.Opaleye.Predicates (equalsC)
 import Control.Arrow (returnA)
 import Karamaan.Opaleye.Wire (Wire)
-import Karamaan.Opaleye.Operators2 (union, constant, plus, divide)
+import Karamaan.Opaleye.Operators2 (union, constant)
+import Karamaan.Opaleye.Operators.Numeric (plus, divide)
 
 exampleTable :: Query (Wire Int)
 exampleTable = makeTable (cols1 (col "id")) "exampleTable"

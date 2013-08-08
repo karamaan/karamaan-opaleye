@@ -8,8 +8,7 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, Binary,
                                                Empty),
                                      RelOp(Union, Intersect), extend,
                                      PrimExpr(AttrExpr, ConstExpr),
-                                     BinOp(OpPlus, OpDiv, OpMul, OpOther,
-                                           OpMinus),
+                                     BinOp,
                                      UnOp(OpIsNull),
                                      Assoc,
                                      Literal(OtherLit))
@@ -36,40 +35,6 @@ unOp op opname constname constval = QueryArr f
                 (assoc, w') = binOp' op opname t t_string t' t'_string
                                      (tagWith t0)
                 primQ' = extend assoc primQ
-
--- FIXME: the type signatures are odd here.  We pass in an Int for the sake of
--- avoiding an ambiguous type variable, but then we return Wire a when perhaps
--- it should be Num a => ... Wire a.  I guess the timesArrC should take a Double,
--- and return Num a whereas the mod should take only an Int and return Ints.
---
--- Think about this some more ...
-type NumBinOp a = Int -> QueryArr (Wire a) (Wire a)
-
-timesC :: NumBinOp a
-timesC x = unOp OpMul "times" (show x) x
-
--- HaskellDB's OpMod comes out as "x MOD y" which Postgres doesn't like
--- TODO: the solution to this is to make sure we use the correct SQL
--- generator.  See
--- http://hackage.haskell.org/packages/archive/haskelldb/2.2.2/doc/html/src/Database-HaskellDB-Sql-PostgreSQL.html#generator
-modC :: NumBinOp a
-modC x = unOp (OpOther "%") "mod" (show x) x
-
--- It's also unclear what types these operations should have
-plus :: QueryArr (Wire a, Wire a) (Wire a)
-plus = opArr OpPlus "plus"
-
-divide :: QueryArr (Wire a, Wire a) (Wire a)
-divide = opArr OpDiv "div"
-
-minus :: QueryArr (Wire a, Wire a) (Wire a)
-minus = opArr OpMinus "minus"
-
-gt :: QueryArr (Wire a, Wire a) (Wire Bool)
-gt = opArr PrimQuery.OpGt "gt"
-
-gte :: QueryArr (Wire a, Wire a) (Wire Bool)
-gte = opArr PrimQuery.OpGtEq "gteq"
 
 eq :: QueryArr (Wire a, Wire a) (Wire Bool)
 eq = opArr PrimQuery.OpEq "eq"

@@ -16,6 +16,7 @@ library
                    Karamaan.Opaleye.Explore,
                    Karamaan.Opaleye.Operators,
                    Karamaan.Opaleye.Operators2,
+                   Karamaan.Opaleye.Operators.Numeric,
                    Karamaan.Opaleye.Pack,
                    Karamaan.Opaleye.Predicates,
                    Karamaan.Opaleye.QueryArr,

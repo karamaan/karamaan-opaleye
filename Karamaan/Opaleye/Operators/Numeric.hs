@@ -33,6 +33,9 @@ plus = opArr OpPlus "plus"
 divide :: QueryArr (Wire a, Wire a) (Wire a)
 divide = opArr OpDiv "div"
 
+times :: QueryArr (Wire a, Wire a) (Wire a)
+times = opArr OpMul "times"
+
 minus :: QueryArr (Wire a, Wire a) (Wire a)
 minus = opArr OpMinus "minus"
 

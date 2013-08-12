@@ -57,6 +57,8 @@ wireIs = wireOp OpEq
 wireIsNot :: Wire a -> Literal -> PrimExpr
 wireIsNot = wireOp OpNotEq
 
+-- TODO: this should really be put somewhere else, or perhaps
+-- singleEnquoten . UD.dayToSQL should be
 singleEnquoten :: String -> String
 singleEnquoten = ("'" ++) . (++"'")
 

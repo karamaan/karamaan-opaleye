@@ -8,9 +8,10 @@ import Karamaan.Opaleye.Pack (unflatten1, flatten1,
                               unflatten5, flatten5,
                               unflatten6, flatten6,
                               unflatten7, flatten7,
-                              unflatten8, flatten8)
+                              unflatten8, flatten8,
+                              unflatten9, flatten9)
 import Karamaan.Opaleye.Colspec (modifyWriter)
-import Karamaan.Opaleye.Tuples (T1, T2, T3, T4, T5, T6, T7, T8)
+import Karamaan.Opaleye.Tuples (T1, T2, T3, T4, T5, T6, T7, T8, T9)
 -- These really belong in Karamaan.Opaleye.Aggregate but the
 -- implementations are somewhat verbose so I wanted to sequester them
 
@@ -61,6 +62,12 @@ agg8T:: T8 (Aggregator a1) (Aggregator a2) (Aggregator a3) (Aggregator a4)
         -> Aggregator (T8 a1 a2 a3 a4 a5 a6 a7 a8)
 agg8T = chain agg7T
 
+agg9T:: T9 (Aggregator a1) (Aggregator a2) (Aggregator a3) (Aggregator a4)
+           (Aggregator a5) (Aggregator a6) (Aggregator a7) (Aggregator a8)
+           (Aggregator a9)
+        -> Aggregator (T9 a1 a2 a3 a4 a5 a6 a7 a8 a9)
+agg9T = chain agg8T
+
 agg1 :: Aggregator a1 -> Aggregator a1
 agg1 = convert flatten1 unflatten1 unflatten1 agg1T
 
@@ -95,3 +102,9 @@ agg8 :: (Aggregator a1, Aggregator a2, Aggregator a3, Aggregator a4,
          Aggregator a5, Aggregator a6, Aggregator a7, Aggregator a8)
         -> Aggregator (a1, a2, a3, a4, a5, a6, a7, a8)
 agg8 = convert flatten8 unflatten8 unflatten8 agg8T
+
+agg9 :: (Aggregator a1, Aggregator a2, Aggregator a3, Aggregator a4,
+         Aggregator a5, Aggregator a6, Aggregator a7, Aggregator a8,
+         Aggregator a9)
+        -> Aggregator (a1, a2, a3, a4, a5, a6, a7, a8, a9)
+agg9 = convert flatten9 unflatten9 unflatten9 agg9T

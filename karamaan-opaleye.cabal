@@ -12,6 +12,7 @@ library
   build-depends:   base >= 4 && < 5, time, haskelldb, karamaan-whaleutil
   exposed-modules: Karamaan.Opaleye.Aggregate,
                    Karamaan.Opaleye.Aggregators,
+                   Karamaan.Opaleye.Bend,
                    Karamaan.Opaleye.Colspec,
                    Karamaan.Opaleye.Explore,
                    Karamaan.Opaleye.Operators,

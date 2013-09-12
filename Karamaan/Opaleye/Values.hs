@@ -12,7 +12,6 @@ import Karamaan.Opaleye.Colspec (Colspec, colsT2)
 import qualified Karamaan.WhaleUtil.Date as UD
 import Data.Time.Calendar
 import Karamaan.Opaleye.Predicates (singleEnquoten)
-import Control.Monad ((<=<))
 import Control.Applicative (liftA2)
 
 type S a = ReaderT String (State Int) a
@@ -32,8 +31,8 @@ data ValuesMaker a b = ValuesMaker (S (a -> [String], Colspec b))
 catResults :: (a -> [r]) -> (c -> [r]) -> (a, c) -> [r]
 catResults = uncurry (++) .:. (***)
 
-addOne :: S ()
-addOne = (put <=< return . (+1)) =<< get
+nextCol :: S Int
+nextCol = do { a <- get; put (a + 1); return a }
 
 string :: ValuesMaker String (Wire String)
 string = valuesMakerMaker singleEnquoten
@@ -47,8 +46,7 @@ day = valuesMakerMaker dayToSQL
 valuesMakerMaker :: (a -> String) -> ValuesMaker a (Wire b)
 valuesMakerMaker f = ValuesMaker w
   where w = do s <- ask
-               a <- get
-               addOne
+               a <- nextCol
                return ((:[]) . f, col (s ++ show a))
 
 -- TODO: this doesn't belong here
@@ -60,9 +58,9 @@ dayToSQL = (++ " :: date") . singleEnquoten . UD.dayToSQL
 --unit = ValuesMaker (return (const [])) (return colsT0)
 
 run :: ValuesMaker a b -> String -> [a] -> ([[String]], Colspec b, Int)
-run (ValuesMaker x) colPrefix a = (stringRows, colspec, nextCol)
+run (ValuesMaker x) colPrefix a = (stringRows, colspec, nextCol')
   where startColNum = 1
-        ((mapper, colspec), nextCol) = runS x colPrefix startColNum
+        ((mapper, colspec), nextCol') = runS x colPrefix startColNum
         stringRows = map mapper a
 
 runS :: S a -> String -> Int -> (a, Int)
@@ -70,12 +68,12 @@ runS m c s = runState (runReaderT m c) s
 
 valuesToQuery :: ValuesMaker a b -> String -> [a] -> Query b
 valuesToQuery v colPrefix rows = makeTable colspec select
-  where (stringRows, colspec, nextCol) = run v colPrefix rows
+  where (stringRows, colspec, nextCol') = run v colPrefix rows
         valueOfStringRow :: [String] -> String
         valueOfStringRow = embracket . intercalate ","
         valuesOfStringRows :: [[String]] -> String
         valuesOfStringRows = embracket . ("values "++) . intercalate "," . map valueOfStringRow
-        columnSelectors = map ((\x -> "column" ++ x ++ " as foocol" ++ x) . show) [1..nextCol-1]
+        columnSelectors = map ((\x -> "column" ++ x ++ " as foocol" ++ x) . show) [1..nextCol'-1]
         select = (embracket . intercalate " ") [ "select"
                                                , intercalate "," columnSelectors
                                                , "from"

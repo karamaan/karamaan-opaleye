@@ -18,6 +18,8 @@ type S a = ReaderT String (State Int) a
 
 data ValuesMaker a b = ValuesMaker (S (a -> [String], Colspec b))
 
+-- If and when we make Colspec a profunctor I guess we could make
+-- ValuesMaker a profunctor
 --bimap :: (a' -> a) -> (b -> b' ) -> ValuesMaker a b -> ValuesMaker a' b'
 --bimap f g (ValuesMaker p q) = ValuesMaker (fmap (. f) p) (fmap g q)
 

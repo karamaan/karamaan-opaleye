@@ -7,6 +7,7 @@ import Data.List (intercalate)
 import Karamaan.Opaleye.Wire (Wire)
 import Control.Arrow ((***))
 import Control.Monad.State (State, get, put, evalState, execState)
+import Control.Monad.Reader (ReaderT, runReaderT, ask)
 import Control.Applicative (liftA2)
 import Karamaan.Opaleye.Colspec (Colspec, colsT2)
 import qualified Karamaan.WhaleUtil.Date as UD
@@ -14,7 +15,7 @@ import Data.Time.Calendar
 import Karamaan.Opaleye.Predicates (singleEnquoten)
 
 -- TODO: this is too big.  The String should just be a reader
-type S a = State (Int, String) a
+type S a = ReaderT String (State Int) a
 
 data ValuesMaker a b = ValuesMaker (S (a -> [String])) (S (Colspec b))
 
@@ -33,19 +34,19 @@ catResults :: (a -> [r]) -> (c -> [r]) -> (a, c) -> [r]
 catResults = uncurry (++) .:. (***)
 
 addOne :: S ()
-addOne = do { (a, s) <- get; put (a + 1, s) }
+addOne = do { a <- get; put (a + 1) }
 
 string :: ValuesMaker String (Wire String)
 string = ValuesMaker (addOne >> return (return . singleEnquoten)) w
-  where w = do { (a, s) <- get; addOne; return (col (s ++ show a)) }
+  where w = do { s <- ask; a <- get; addOne; return (col (s ++ show a)) }
 
 int :: ValuesMaker Int (Wire Int)
 int = ValuesMaker (addOne >> return (return . show)) w
-  where w = do { (a, s) <- get; addOne; return (col (s ++ show a)) }
+  where w = do { s <- ask; a <- get; addOne; return (col (s ++ show a)) }
 
 day :: ValuesMaker Day (Wire Day)
 day = ValuesMaker (addOne >> return (return . dayToSQL)) w
-  where w = do { (a, s) <- get; addOne; return (col (s ++ show a)) }
+  where w = do { s <- ask; a <- get; addOne; return (col (s ++ show a)) }
         dayToSQL :: Day -> String
         dayToSQL = (++ " :: date") . singleEnquoten . UD.dayToSQL
         -- ^^ FIXME: duplication with constantDay
@@ -56,13 +57,20 @@ day = ValuesMaker (addOne >> return (return . dayToSQL)) w
 
 run :: ValuesMaker a b -> String -> [a] -> ([[String]], Colspec b, Int)
 run (ValuesMaker f m) colPrefix a = (stringRows, colspec, nextCol)
-  where s = (1, colPrefix)
-        stringRows = map (evalState f s) a
-        colspec = evalState m s
-        nextCol = fst (execState m s)
+  where startColNum = 1
+        stringRows = map (evalS f colPrefix startColNum) a
+        colspec = evalS m colPrefix startColNum
+        nextCol = execS m colPrefix startColNum
         -- ^^ OK this is weird.  I guess we should only have
         -- one way of getting the number of columns shouldn't
         -- we?
+
+evalS :: S a -> String -> Int -> a
+evalS m c s = evalState (runReaderT m c) s
+
+execS :: S a -> String -> Int -> Int
+execS m c s = execState (runReaderT m c) s
+
 
 valuesToQuery :: ValuesMaker a b -> String -> [a] -> Query b
 valuesToQuery v colPrefix rows = makeTable colspec select

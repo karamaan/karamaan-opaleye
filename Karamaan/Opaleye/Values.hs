@@ -36,6 +36,9 @@ catResults = uncurry (++) .:. (***)
 nextCol :: S Int
 nextCol = do { a <- get; put (a + 1); return a }
 
+nextColName :: S String
+nextColName = do { s <- ask; a <- nextCol; return (s ++ show a) }
+
 string :: ValuesMaker String (Wire String)
 string = valuesMakerMaker singleEnquoten
 
@@ -47,7 +50,7 @@ day = valuesMakerMaker dayToSQL
 
 valuesMakerMaker :: (a -> String) -> ValuesMaker a (Wire b)
 valuesMakerMaker f = ValuesMaker w
-  where w = do { s <- ask; a <- nextCol; return ((:[]) . f, col (s ++ show a)) }
+  where w = do { n <- nextColName; return ((:[]) . f, col n) }
 
 -- TODO: this doesn't belong here
 dayToSQL :: Day -> String

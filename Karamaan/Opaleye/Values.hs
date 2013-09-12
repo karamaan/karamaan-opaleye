@@ -16,7 +16,7 @@ import Control.Applicative (liftA2)
 
 type S a = ReaderT String (State Int) a
 
-data ValuesMaker a b = ValuesMaker (S (a -> [String], Colspec b))
+data ValuesMaker a b = ValuesMaker (a -> [String], S (Colspec b))
 
 -- If and when we make Colspec a profunctor I guess we could make
 -- ValuesMaker a profunctor
@@ -24,8 +24,9 @@ data ValuesMaker a b = ValuesMaker (S (a -> [String], Colspec b))
 --bimap f g (ValuesMaker p q) = ValuesMaker (fmap (. f) p) (fmap g q)
 
 (****) :: ValuesMaker a b -> ValuesMaker a' b' -> ValuesMaker (a, a') (b, b')
-(****) (ValuesMaker x) (ValuesMaker x') = ValuesMaker (combine x x')
-  where combine = liftA2 (\(f, m) (f', m') -> (catResults f f', colsT2 (m, m')))
+(****) (ValuesMaker (f, m)) (ValuesMaker (f', m')) = ValuesMaker (f'', m'')
+  where f'' = catResults f f'
+        m'' = liftA2 (curry colsT2) m m'
 
 (.:.) :: (r -> z) -> (a -> b -> c -> r) -> (a -> b -> c -> z)
 (f .:. g) x y z = f (g x y z)
@@ -49,8 +50,8 @@ day :: ValuesMaker Day (Wire Day)
 day = valuesMakerMaker dayToSQL
 
 valuesMakerMaker :: (a -> String) -> ValuesMaker a (Wire b)
-valuesMakerMaker f = ValuesMaker w
-  where w = do { n <- nextColName; return ((:[]) . f, col n) }
+valuesMakerMaker f = ValuesMaker ((:[]) . f, w)
+  where w = do { n <- nextColName; return (col n) }
 
 -- TODO: this doesn't belong here
 dayToSQL :: Day -> String
@@ -61,9 +62,10 @@ dayToSQL = (++ " :: date") . singleEnquoten . UD.dayToSQL
 --unit = ValuesMaker (return (const [])) (return colsT0)
 
 run :: ValuesMaker a b -> String -> [a] -> ([[String]], Colspec b, Int)
-run (ValuesMaker x) colPrefix a = (stringRows, colspec, nextCol')
+run (ValuesMaker (f, m)) colPrefix a = (stringRows, colspec, nextCol')
   where startColNum = 1
-        ((mapper, colspec), nextCol') = runS x colPrefix startColNum
+        mapper = f
+        (colspec, nextCol') = runS m colPrefix startColNum
         stringRows = map mapper a
 
 runS :: S a -> String -> Int -> (a, Int)

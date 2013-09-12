@@ -34,10 +34,6 @@ w +++ w' = writer (uncurry (++) . (runWriter w *** runWriter w'))
 (++++) :: PackMap a -> PackMap b -> PackMap (a, b)
 f ++++ g = \ss -> f ss *** g ss
 
--- TODO: when I added the PackMap argument to Colspec I only had to update
--- col, colspecApp and colsT2.  I didn't have to add an argument to colspecApp,
--- interesting.  What are the implications for this way of doing "generics" on
--- tuples?
 data Colspec a = Colspec a (Writer a) (PackMap a)
 
 col :: String -> Colspec (Wire a)

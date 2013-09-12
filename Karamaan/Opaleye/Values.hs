@@ -46,13 +46,16 @@ valueMaker :: (a -> String) -> S (a -> [String])
 valueMaker f = addOne >> return ((:[]) . f)
 
 string :: ValuesMaker String (Wire String)
-string = ValuesMaker (valueMaker singleEnquoten) nextColspec
+string = valuesMakerMaker singleEnquoten
 
 int :: ValuesMaker Int (Wire Int)
-int = ValuesMaker (valueMaker show) nextColspec
+int = valuesMakerMaker show
 
 day :: ValuesMaker Day (Wire Day)
-day = ValuesMaker (valueMaker dayToSQL) nextColspec
+day = valuesMakerMaker dayToSQL
+
+valuesMakerMaker :: (a -> String) -> ValuesMaker a (Wire b)
+valuesMakerMaker = flip ValuesMaker nextColspec . valueMaker
 
 dayToSQL :: Day -> String
 dayToSQL = (++ " :: date") . singleEnquoten . UD.dayToSQL

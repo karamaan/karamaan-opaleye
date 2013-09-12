@@ -21,7 +21,7 @@ import qualified Karamaan.Opaleye.Operators as Operators
 import Karamaan.Opaleye.Pack (Pack, packMap, unpack)
 import Control.Arrow ((***), arr, (<<<), second)
 import Data.Time.Calendar (Day)
-import Karamaan.WhaleUtil.Date (dayToSQL)
+import qualified Karamaan.Opaleye.Values as Values
 
 unOp :: ShowConstant c => BinOp -> String -> String -> c
         -> QueryArr (Wire a) (Wire a)
@@ -102,7 +102,7 @@ constantString :: String -> Query (Wire String)
 constantString = unsafeConstant . ("'" ++) . (++"' :: text")
 
 constantDay :: Day -> Query (Wire Day)
-constantDay = unsafeConstant . ("'" ++) . (++"' :: date") . dayToSQL
+constantDay = unsafeConstant . Values.dayToSQL
 
 unsafeConstant :: String -> Query (Wire a)
 unsafeConstant = constantLit . OtherLit

@@ -57,9 +57,9 @@ day = valuesMakerMaker dayToSQL
 valuesMakerMaker :: (a -> String) -> ValuesMaker a (Wire b)
 valuesMakerMaker = flip ValuesMaker nextColspec . valueMaker
 
+-- TODO: this doesn't belong here
 dayToSQL :: Day -> String
 dayToSQL = (++ " :: date") . singleEnquoten . UD.dayToSQL
--- ^^ FIXME: duplication with constantDay
 
 -- colsT0 doesn't exist, but if it did I think this would work
 --unit :: ValuesMaker () ()

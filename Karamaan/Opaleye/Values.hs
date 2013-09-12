@@ -42,14 +42,17 @@ nextColName = do { s <- ask; a <- get; addOne; return (s ++ show a) }
 nextColspec :: S (Colspec (Wire a))
 nextColspec = (return . col) =<< nextColName
 
+valueMaker :: (a -> String) -> S (a -> [String])
+valueMaker f = addOne >> return ((:[]) . f)
+
 string :: ValuesMaker String (Wire String)
-string = ValuesMaker (addOne >> return (return . singleEnquoten)) nextColspec
+string = ValuesMaker (valueMaker singleEnquoten) nextColspec
 
 int :: ValuesMaker Int (Wire Int)
-int = ValuesMaker (addOne >> return (return . show)) nextColspec
+int = ValuesMaker (valueMaker show) nextColspec
 
 day :: ValuesMaker Day (Wire Day)
-day = ValuesMaker (addOne >> return (return . dayToSQL)) nextColspec
+day = ValuesMaker (valueMaker dayToSQL) nextColspec
 
 dayToSQL :: Day -> String
 dayToSQL = (++ " :: date") . singleEnquoten . UD.dayToSQL

@@ -44,8 +44,11 @@ int = ValuesMaker (addOne >> return (return . show)) w
   where w = do { (a, s) <- get; addOne; return (col (s ++ show a)) }
 
 day :: ValuesMaker Day (Wire Day)
-day = ValuesMaker (addOne >> return (return . singleEnquoten . UD.dayToSQL)) w
+day = ValuesMaker (addOne >> return (return . dayToSQL)) w
   where w = do { (a, s) <- get; addOne; return (col (s ++ show a)) }
+        dayToSQL :: Day -> String
+        dayToSQL = (++ " :: date") . singleEnquoten . UD.dayToSQL
+        -- ^^ FIXME: duplication with constantDay
 
 -- colsT0 doesn't exist, but if it did I think this would work
 --unit :: ValuesMaker () ()

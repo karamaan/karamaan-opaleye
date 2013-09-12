@@ -14,7 +14,6 @@ import qualified Karamaan.WhaleUtil.Date as UD
 import Data.Time.Calendar
 import Karamaan.Opaleye.Predicates (singleEnquoten)
 
--- TODO: this is too big.  The String should just be a reader
 type S a = ReaderT String (State Int) a
 
 data ValuesMaker a b = ValuesMaker (S (a -> [String])) (S (Colspec b))

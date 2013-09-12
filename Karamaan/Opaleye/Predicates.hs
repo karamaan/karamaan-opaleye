@@ -59,6 +59,8 @@ wireIsNot = wireOp OpNotEq
 
 -- TODO: this should really be put somewhere else, or perhaps
 -- singleEnquoten . UD.dayToSQL should be
+-- FIXME: any usage of this risks an SQL injection bug.
+-- Need to come up with a principled way of dealing with these.
 singleEnquoten :: String -> String
 singleEnquoten = ("'" ++) . (++"'")
 

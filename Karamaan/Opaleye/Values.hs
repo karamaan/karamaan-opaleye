@@ -6,7 +6,7 @@ import Karamaan.Opaleye.Table (makeTable)
 import Data.List (intercalate)
 import Karamaan.Opaleye.Wire (Wire)
 import Control.Arrow ((***))
-import Control.Monad.State (State, get, put, evalState, execState, runState)
+import Control.Monad.State (State, get, put, runState)
 import Control.Monad.Reader (ReaderT, runReaderT, ask)
 import Karamaan.Opaleye.Colspec (Colspec, colsT2)
 import qualified Karamaan.WhaleUtil.Date as UD
@@ -34,15 +34,6 @@ catResults = uncurry (++) .:. (***)
 
 addOne :: S ()
 addOne = (put <=< return . (+1)) =<< get
-
-nextColName :: S String
-nextColName = do { s <- ask; a <- get; addOne; return (s ++ show a) }
-
-nextColspec :: S (Colspec (Wire a))
-nextColspec = (return . col) =<< nextColName
-
-valueMaker :: (a -> String) -> S (a -> [String])
-valueMaker f = addOne >> return ((:[]) . f)
 
 string :: ValuesMaker String (Wire String)
 string = valuesMakerMaker singleEnquoten
@@ -73,12 +64,6 @@ run (ValuesMaker x) colPrefix a = (stringRows, colspec, nextCol)
   where startColNum = 1
         ((mapper, colspec), nextCol) = runS x colPrefix startColNum
         stringRows = map mapper a
-
-evalS :: S a -> String -> Int -> a
-evalS m c s = evalState (runReaderT m c) s
-
-execS :: S a -> String -> Int -> Int
-execS m c s = execState (runReaderT m c) s
 
 runS :: S a -> String -> Int -> (a, Int)
 runS m c s = runState (runReaderT m c) s

@@ -9,7 +9,9 @@ import Control.Arrow ((***))
 import Control.Monad.State (State, get, put, evalState, execState)
 import Control.Applicative (liftA2)
 import Karamaan.Opaleye.Colspec (Colspec, colsT2)
-
+import qualified Karamaan.WhaleUtil.Date as UD
+import Data.Time.Calendar
+import Karamaan.Opaleye.Predicates (singleEnquoten)
 
 -- TODO: this is too big.  The String should just be a reader
 type S a = State (Int, String) a
@@ -33,12 +35,16 @@ catResults = uncurry (++) .:. (***)
 addOne :: S ()
 addOne = do { (a, s) <- get; put (a + 1, s) }
 
-str :: ValuesMaker String (Wire String)
-str = ValuesMaker (addOne >> return return) w
+string :: ValuesMaker String (Wire String)
+string = ValuesMaker (addOne >> return (return . singleEnquoten)) w
   where w = do { (a, s) <- get; addOne; return (col (s ++ show a)) }
 
 int :: ValuesMaker Int (Wire Int)
 int = ValuesMaker (addOne >> return (return . show)) w
+  where w = do { (a, s) <- get; addOne; return (col (s ++ show a)) }
+
+day :: ValuesMaker Day (Wire Day)
+day = ValuesMaker (addOne >> return (return . singleEnquoten . UD.dayToSQL)) w
   where w = do { (a, s) <- get; addOne; return (col (s ++ show a)) }
 
 -- colsT0 doesn't exist, but if it did I think this would work

@@ -45,9 +45,7 @@ day = valuesMakerMaker dayToSQL
 
 valuesMakerMaker :: (a -> String) -> ValuesMaker a (Wire b)
 valuesMakerMaker f = ValuesMaker w
-  where w = do s <- ask
-               a <- nextCol
-               return ((:[]) . f, col (s ++ show a))
+  where w = do { s <- ask; a <- nextCol; return ((:[]) . f, col (s ++ show a)) }
 
 -- TODO: this doesn't belong here
 dayToSQL :: Day -> String

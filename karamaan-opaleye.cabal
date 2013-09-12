@@ -9,7 +9,10 @@ License:      OtherLicense
 License-File: LICENSE
 
 library
-  build-depends:   base >= 4 && < 5, time, haskelldb, karamaan-whaleutil
+  build-depends:   base >= 4 && < 5, time, haskelldb, karamaan-whaleutil,
+                   -- vv mtl just for the State monad in Values.
+                   -- Remove this dependency when we write our own monad.
+                   mtl
   exposed-modules: Karamaan.Opaleye.Aggregate,
                    Karamaan.Opaleye.Aggregators,
                    Karamaan.Opaleye.Bend,
@@ -25,5 +28,6 @@ library
                    Karamaan.Opaleye.Table,
                    Karamaan.Opaleye.Tuples,
                    Karamaan.Opaleye.Wire,
-                   Karamaan.Opaleye.Unpackspec
+                   Karamaan.Opaleye.Unpackspec,
+                   Karamaan.Opaleye.Values
   ghc-options:     -Wall

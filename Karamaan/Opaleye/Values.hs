@@ -66,16 +66,22 @@ runS m c s = runState (runReaderT m c) s
 
 valuesToQuery' :: ([[String]], Colspec b, Int) -> Query b
 valuesToQuery' (stringRows, colspec, nextCol') = makeTable colspec select
-  where valueOfStringRow :: [String] -> String
-        valueOfStringRow = embracket . intercalate ","
-        valuesOfStringRows :: [[String]] -> String
-        valuesOfStringRows = embracket . ("values "++) . intercalate "," . map valueOfStringRow
-        columnSelectors = map ((\x -> "column" ++ x ++ " as foocol" ++ x) . show) [1..nextCol'-1]
+  where columnSelectors = map (colNames . show) [1..nextCol'-1]
+        colNames x = "column" ++ x ++ " as foocol" ++ x
         select = (embracket . intercalate " ") [ "select"
                                                , intercalate "," columnSelectors
                                                , "from"
                                                , valuesOfStringRows stringRows
                                                , "as foo" ]
+
+valueOfStringRow :: [String] -> String
+valueOfStringRow = embracket . intercalate ","
+
+valuesOfStringRows :: [[String]] -> String
+valuesOfStringRows = embracket
+                     . ("values "++)
+                     . intercalate ","
+                     . map valueOfStringRow
 
 valuesToQuery :: ValuesMaker a b -> String -> [a] -> Query b
 valuesToQuery v colPrefix rows = valuesToQuery' (run v colPrefix rows)

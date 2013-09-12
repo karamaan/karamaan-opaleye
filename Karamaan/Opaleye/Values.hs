@@ -13,6 +13,7 @@ import Karamaan.Opaleye.Colspec (Colspec, colsT2)
 import qualified Karamaan.WhaleUtil.Date as UD
 import Data.Time.Calendar
 import Karamaan.Opaleye.Predicates (singleEnquoten)
+import Control.Monad ((<=<))
 
 type S a = ReaderT String (State Int) a
 
@@ -33,20 +34,23 @@ catResults :: (a -> [r]) -> (c -> [r]) -> (a, c) -> [r]
 catResults = uncurry (++) .:. (***)
 
 addOne :: S ()
-addOne = do { a <- get; put (a + 1) }
+addOne = (put <=< return . (+1)) =<< get
+
+nextColName :: S String
+nextColName = do { s <- ask; a <- get; addOne; return (s ++ show a) }
+
+nextColspec :: S (Colspec (Wire a))
+nextColspec = (return . col) =<< nextColName
 
 string :: ValuesMaker String (Wire String)
-string = ValuesMaker (addOne >> return (return . singleEnquoten)) w
-  where w = do { s <- ask; a <- get; addOne; return (col (s ++ show a)) }
+string = ValuesMaker (addOne >> return (return . singleEnquoten)) nextColspec
 
 int :: ValuesMaker Int (Wire Int)
-int = ValuesMaker (addOne >> return (return . show)) w
-  where w = do { s <- ask; a <- get; addOne; return (col (s ++ show a)) }
+int = ValuesMaker (addOne >> return (return . show)) nextColspec
 
 day :: ValuesMaker Day (Wire Day)
-day = ValuesMaker (addOne >> return (return . dayToSQL)) w
-  where w = do { s <- ask; a <- get; addOne; return (col (s ++ show a)) }
-        dayToSQL :: Day -> String
+day = ValuesMaker (addOne >> return (return . dayToSQL)) nextColspec
+  where dayToSQL :: Day -> String
         dayToSQL = (++ " :: date") . singleEnquoten . UD.dayToSQL
         -- ^^ FIXME: duplication with constantDay
 

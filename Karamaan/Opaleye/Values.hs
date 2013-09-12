@@ -66,10 +66,9 @@ run (ValuesMaker x) colPrefix a = (stringRows, colspec, nextCol')
 runS :: S a -> String -> Int -> (a, Int)
 runS m c s = runState (runReaderT m c) s
 
-valuesToQuery :: ValuesMaker a b -> String -> [a] -> Query b
-valuesToQuery v colPrefix rows = makeTable colspec select
-  where (stringRows, colspec, nextCol') = run v colPrefix rows
-        valueOfStringRow :: [String] -> String
+valuesToQuery' :: ([[String]], Colspec b, Int) -> Query b
+valuesToQuery' (stringRows, colspec, nextCol') = makeTable colspec select
+  where valueOfStringRow :: [String] -> String
         valueOfStringRow = embracket . intercalate ","
         valuesOfStringRows :: [[String]] -> String
         valuesOfStringRows = embracket . ("values "++) . intercalate "," . map valueOfStringRow
@@ -79,6 +78,9 @@ valuesToQuery v colPrefix rows = makeTable colspec select
                                                , "from"
                                                , valuesOfStringRows stringRows
                                                , "as foo" ]
+
+valuesToQuery :: ValuesMaker a b -> String -> [a] -> Query b
+valuesToQuery v colPrefix rows = valuesToQuery' (run v colPrefix rows)
 
 embracket :: String -> String
 embracket = ("("++) . (++")")

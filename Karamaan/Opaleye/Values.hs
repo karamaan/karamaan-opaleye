@@ -6,26 +6,25 @@ import Karamaan.Opaleye.Table (makeTable)
 import Data.List (intercalate)
 import Karamaan.Opaleye.Wire (Wire)
 import Control.Arrow ((***))
-import Control.Monad.State (State, get, put, evalState, execState)
+import Control.Monad.State (State, get, put, evalState, execState, runState)
 import Control.Monad.Reader (ReaderT, runReaderT, ask)
-import Control.Applicative (liftA2)
 import Karamaan.Opaleye.Colspec (Colspec, colsT2)
 import qualified Karamaan.WhaleUtil.Date as UD
 import Data.Time.Calendar
 import Karamaan.Opaleye.Predicates (singleEnquoten)
 import Control.Monad ((<=<))
+import Control.Applicative (liftA2)
 
 type S a = ReaderT String (State Int) a
 
-data ValuesMaker a b = ValuesMaker (S (a -> [String])) (S (Colspec b))
+data ValuesMaker a b = ValuesMaker (S (a -> [String], Colspec b))
 
 --bimap :: (a' -> a) -> (b -> b' ) -> ValuesMaker a b -> ValuesMaker a' b'
 --bimap f g (ValuesMaker p q) = ValuesMaker (fmap (. f) p) (fmap g q)
 
 (****) :: ValuesMaker a b -> ValuesMaker a' b' -> ValuesMaker (a, a') (b, b')
-(****) (ValuesMaker f m) (ValuesMaker f' m') = ValuesMaker f'' m''
-  where f'' = liftA2 catResults f f'
-        m'' = fmap colsT2 (liftA2 (,) m m')
+(****) (ValuesMaker x) (ValuesMaker x') = ValuesMaker (combine x x')
+  where combine = liftA2 (\(f, m) (f', m') -> (catResults f f', colsT2 (m, m')))
 
 (.:.) :: (r -> z) -> (a -> b -> c -> r) -> (a -> b -> c -> z)
 (f .:. g) x y z = f (g x y z)
@@ -55,7 +54,11 @@ day :: ValuesMaker Day (Wire Day)
 day = valuesMakerMaker dayToSQL
 
 valuesMakerMaker :: (a -> String) -> ValuesMaker a (Wire b)
-valuesMakerMaker = flip ValuesMaker nextColspec . valueMaker
+valuesMakerMaker f = ValuesMaker w
+  where w = do s <- ask
+               a <- get
+               addOne
+               return ((:[]) . f, col (s ++ show a))
 
 -- TODO: this doesn't belong here
 dayToSQL :: Day -> String
@@ -66,14 +69,10 @@ dayToSQL = (++ " :: date") . singleEnquoten . UD.dayToSQL
 --unit = ValuesMaker (return (const [])) (return colsT0)
 
 run :: ValuesMaker a b -> String -> [a] -> ([[String]], Colspec b, Int)
-run (ValuesMaker f m) colPrefix a = (stringRows, colspec, nextCol)
+run (ValuesMaker x) colPrefix a = (stringRows, colspec, nextCol)
   where startColNum = 1
-        stringRows = map (evalS f colPrefix startColNum) a
-        colspec = evalS m colPrefix startColNum
-        nextCol = execS m colPrefix startColNum
-        -- ^^ OK this is weird.  I guess we should only have
-        -- one way of getting the number of columns shouldn't
-        -- we?
+        ((mapper, colspec), nextCol) = runS x colPrefix startColNum
+        stringRows = map mapper a
 
 evalS :: S a -> String -> Int -> a
 evalS m c s = evalState (runReaderT m c) s
@@ -81,6 +80,8 @@ evalS m c s = evalState (runReaderT m c) s
 execS :: S a -> String -> Int -> Int
 execS m c s = execState (runReaderT m c) s
 
+runS :: S a -> String -> Int -> (a, Int)
+runS m c s = runState (runReaderT m c) s
 
 valuesToQuery :: ValuesMaker a b -> String -> [a] -> Query b
 valuesToQuery v colPrefix rows = makeTable colspec select

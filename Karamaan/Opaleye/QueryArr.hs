@@ -70,6 +70,10 @@ instance Applicative (QueryArr a) where
   pure = arr . const
   f <*> g = arr (uncurry ($)) <<< (f &&& g)
 
+-- Is it possible to implement ArrowChoice for QueryArr?
+-- The reason I think it might be is that the shape seems
+-- statically determined.
+
 -- The return value of predicate should be a PrimExpr representing
 -- a boolean expression, but it seems that there is no way to acheieve
 -- such type-safety in Haskell DB

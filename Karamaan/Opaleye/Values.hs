@@ -49,6 +49,9 @@ int = valuesMakerMaker show
 day :: ValuesMaker Day (Wire Day)
 day = valuesMakerMaker dayToSQL
 
+bool :: ValuesMaker Bool (Wire Bool)
+bool = valuesMakerMaker show
+
 valuesMakerMaker :: (a -> String) -> ValuesMaker a (Wire b)
 valuesMakerMaker f = ValuesMaker ((:[]) . f, w)
   where w = do { n <- nextColName; return (col n) }

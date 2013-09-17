@@ -93,8 +93,14 @@ valuesOfStringRows = embracket
                      . intercalate ","
                      . map valueOfStringRow
 
-valuesToQuery :: ValuesMaker a b -> String -> [a] -> Query b
-valuesToQuery v colPrefix rows = valuesToQuery' (run v colPrefix rows)
+valuesToQuery'' :: ValuesMaker a b -> String -> [a] -> Query b
+valuesToQuery'' v colPrefix rows = valuesToQuery' (run v colPrefix rows)
+
+valuesToQuery :: ValuesMaker a b -> [a] -> Query b
+-- vv just provide a dummy column name
+-- Not really sure what the right thing to do with this is
+-- but any dummy name will always work
+valuesToQuery = flip valuesToQuery'' "foocol"
 
 embracket :: String -> String
 embracket = ("("++) . (++")")

@@ -9,7 +9,7 @@ import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith, Tag,
 import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Database.HaskellDB.PrimQuery (PrimQuery(Project, Binary,
                                                Empty),
-                                     RelOp(Union, Intersect), extend,
+                                     RelOp(Union, Intersect, Difference), extend,
                                      PrimExpr(AttrExpr, ConstExpr),
                                      BinOp,
                                      UnOp(OpIsNull),
@@ -112,6 +112,9 @@ intersect = binrel Intersect
 
 union :: Pack b => QueryArr () b -> QueryArr () b -> QueryArr () b
 union = binrel Union
+
+difference :: Pack b => QueryArr () b -> QueryArr () b -> QueryArr () b
+difference = binrel Difference
 
 -- I tried Query (a, a) a and couldn't get it to work.  Also
 -- I guess this would lead to a loss of sharing and much bigger queries.

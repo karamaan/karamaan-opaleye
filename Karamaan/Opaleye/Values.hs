@@ -64,8 +64,9 @@ dayToSQL = (++ " :: date") . singleEnquoten . UD.dayToSQL
 --unit :: ValuesMaker () ()
 --unit = ValuesMaker (return (const [])) (return colsT0)
 
-run :: ValuesMaker a b -> String -> [a] -> ([[String]], Colspec b, Int)
-run (ValuesMaker (f, m)) colPrefix a = (stringRows, colspec, nextCol')
+runValuesMaker :: ValuesMaker a b -> String -> [a]
+                  -> ([[String]], Colspec b, Int)
+runValuesMaker (ValuesMaker (f, m)) colPrefix a = (stringRows, colspec,nextCol')
   where startColNum = 1
         mapper = f
         (colspec, nextCol') = runS m colPrefix startColNum
@@ -94,7 +95,7 @@ valuesOfStringRows = embracket
                      . map valueOfStringRow
 
 valuesToQuery'' :: ValuesMaker a b -> String -> [a] -> Query b
-valuesToQuery'' = valuesToQuery' .:. run
+valuesToQuery'' = valuesToQuery' .:. runValuesMaker
 
 valuesToQuery :: ValuesMaker a b -> [a] -> Query b
 -- vv just provide a dummy column name

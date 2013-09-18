@@ -94,7 +94,7 @@ valuesOfStringRows = embracket
                      . map valueOfStringRow
 
 valuesToQuery'' :: ValuesMaker a b -> String -> [a] -> Query b
-valuesToQuery'' v colPrefix rows = valuesToQuery' (run v colPrefix rows)
+valuesToQuery'' = valuesToQuery' .:. run
 
 valuesToQuery :: ValuesMaker a b -> [a] -> Query b
 -- vv just provide a dummy column name

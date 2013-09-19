@@ -6,6 +6,8 @@ import Karamaan.Opaleye.Wire (Wire(Wire))
 import Database.HaskellDB.PrimQuery (PrimQuery(Group, Empty),PrimExpr(AttrExpr),
                                      times)
 
+-- TODO: Aha!  I realised you can implement distinct x = x `union` x!
+
 -- I think this is a correct implementation, but HaskellDB still seems to have
 -- trouble dealing with GROUP BY. See Report.Trade.Descendants.activeEdgesBroken
 distinct1 :: Query (Wire a) -> Query (Wire a)

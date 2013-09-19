@@ -5,9 +5,17 @@ import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), runQueryArr, next,
 import Karamaan.Opaleye.Wire (Wire(Wire))
 import Database.HaskellDB.PrimQuery (PrimQuery(Group, Empty),PrimExpr(AttrExpr),
                                      times)
+import Karamaan.Opaleye.Operators2 (union)
+import Karamaan.Opaleye.Pack (Pack)
 
--- TODO: Aha!  I realised you can implement distinct x = x `union` x!
 
+-- I realised you can implement distinct x = x `union` x!
+-- This may fail massively with large queries unless the optimiser realises
+-- that I'm taking the union of the same query twice.
+distinct :: Pack a => Query a -> Query a
+distinct x = x `union` x
+
+-- This is how I used to implement it.  It didn't work very well.
 -- I think this is a correct implementation, but HaskellDB still seems to have
 -- trouble dealing with GROUP BY. See Report.Trade.Descendants.activeEdgesBroken
 distinct1 :: Query (Wire a) -> Query (Wire a)

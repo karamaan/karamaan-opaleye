@@ -21,8 +21,14 @@ distinct x = x `union` x
 distinct1 :: Query (Wire a) -> Query (Wire a)
 distinct1 q = QueryArr $ \((), primQuery, t0) ->
   let (Wire oldCol, primQ, t1) = runQueryArr q ((), Empty, t0)
-      -- vv This adds an *additional* tag to a column name that
-      -- presumably already has one.  Is this right and/or desirable?
-      newCol = tagWith t1 oldCol
+-- vv We used to do
+--    newCol = tagWith t1 oldCol
+--    t2 = next t1
+-- but now we just do
+      newCol = oldCol
+      t2 = t1
+-- and HaskellDB seems happier with that.  Note that 'tagWith t1
+-- oldCol' adds an *additional* tag to a column name that presumably
+-- already has one.  I wasn't sure if that was a good idea anyway.
       queryMapper = times primQuery . Group [(newCol, AttrExpr oldCol)]
-  in (Wire newCol, queryMapper primQ, next t1)
+  in (Wire newCol, queryMapper primQ, t2)

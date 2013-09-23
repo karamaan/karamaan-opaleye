@@ -8,7 +8,8 @@ import Karamaan.Opaleye.Pack (unflatten1, flatten1,
                               unflatten6, flatten6,
                               unflatten7, flatten7,
                               unflatten8, flatten8,
-                              unflatten9, flatten9)
+                              unflatten9, flatten9,
+                              unflatten10, flatten10)
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 -- FIXME: don't want to import everything, but we're importing a lot
 -- and I can't be bothered to type it all
@@ -91,6 +92,11 @@ colsT9 :: T9 (Colspec a1) (Colspec a2) (Colspec a3) (Colspec a4) (Colspec a5)
           -> Colspec (T9 a1 a2 a3 a4 a5 a6 a7 a8 a9)
 colsT9 = chain colsT8
 
+colsT10 :: T10 (Colspec a1) (Colspec a2) (Colspec a3) (Colspec a4) (Colspec a5)
+          (Colspec a6) (Colspec a7) (Colspec a8) (Colspec a9) (Colspec a10)
+          -> Colspec (T10 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10)
+colsT10 = chain colsT9
+
 convert :: (b -> a1) -> (a -> b1) -> (a1 -> b) -> (b1 -> Colspec a1)
           -> a -> Colspec b
 convert u u' f c = colspecApp u f . c . u'
@@ -130,3 +136,8 @@ cols9 :: (Colspec a1, Colspec a2, Colspec a3, Colspec a4, Colspec a5,Colspec a6,
           Colspec a7, Colspec a8, Colspec a9)
          -> Colspec (a1, a2, a3, a4, a5, a6, a7, a8, a9)
 cols9 = convert unflatten9 unflatten9 flatten9 colsT9
+
+cols10 :: (Colspec a1, Colspec a2, Colspec a3, Colspec a4,Colspec a5,Colspec a6,
+          Colspec a7, Colspec a8, Colspec a9, Colspec a10)
+         -> Colspec (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)
+cols10 = convert unflatten10 unflatten10 flatten10 colsT10

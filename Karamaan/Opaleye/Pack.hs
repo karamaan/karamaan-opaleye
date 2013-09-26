@@ -87,6 +87,12 @@ instance (Pack a, Pack b, Pack c, Pack d, Pack e, Pack f, Pack a7, Pack a8)
   unpack = unpack . unflatten8
 
 instance (Pack a, Pack b, Pack c, Pack d, Pack e, Pack f, Pack a7, Pack a8,
+          Pack a9)
+         => Pack (a, b, c, d, e, f, a7, a8, a9) where
+  packMap f = flatten9 . (packMap f *** packMap f) . unflatten9
+  unpack = unpack . unflatten9
+
+instance (Pack a, Pack b, Pack c, Pack d, Pack e, Pack f, Pack a7, Pack a8,
           Pack a9, Pack a10)
          => Pack (a, b, c, d, e, f, a7, a8, a9, a10) where
   packMap f = flatten10 . (packMap f *** packMap f) . unflatten10

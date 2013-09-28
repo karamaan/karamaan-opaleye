@@ -41,7 +41,7 @@ instance Profunctor PackMap where
 
 instance ProductProfunctor PackMap where
   empty = PackMap (\_ -> id)
-  (PackMap p) ***! (PackMap p') = PackMap (\s -> p s *** p' s)
+  (PackMap p) ***! (PackMap p') = PackMap ((***) <$> p <*> p')
 
 runWriter :: Writer t -> t -> [String]
 runWriter (Writer w) x = w x

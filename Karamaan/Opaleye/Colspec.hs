@@ -15,7 +15,7 @@ import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 -- and I can't be bothered to type it all
 import Karamaan.Opaleye.Tuples
 import Control.Arrow ((***))
-import Data.Functor.Contravariant
+import Data.Functor.Contravariant (Contravariant, contramap)
 import Data.Profunctor (Profunctor, dimap)
 import Karamaan.Opaleye.ProductProfunctor (ProductProfunctor, empty, (***!))
 

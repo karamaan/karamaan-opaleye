@@ -10,11 +10,12 @@ import Karamaan.Opaleye.Pack (unflatten1, flatten1,
                               unflatten8, flatten8,
                               unflatten9, flatten9,
                               unflatten10, flatten10)
-import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
+import Karamaan.Opaleye.Wire (Wire(Wire))
 -- FIXME: don't want to import everything, but we're importing a lot
 -- and I can't be bothered to type it all
 import Karamaan.Opaleye.Tuples
 import Control.Arrow ((***))
+import Control.Applicative (Applicative, pure, (<$>), (<*>))
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Data.Profunctor (Profunctor, dimap)
 import Karamaan.Opaleye.ProductProfunctor (ProductProfunctor, empty, (***!),
@@ -63,30 +64,36 @@ instance ProductProfunctor Colspec' where
 -- for example.  Then we could make ValueMaker a profunctor too.
 -- Lots of things would probably become simpler.
 -- Aggregator could probably become a profunctor too.
-newtype Colspec a = Colspec (Colspec' a a)
+data Colspec a = Colspec [String] ((String -> String) -> a)
+
+instance Functor Colspec where
+  fmap f (Colspec s m) = Colspec s (f . m)
+
+instance Applicative Colspec where
+  pure = Colspec [] . const
+  Colspec s mf <*> Colspec s' m = Colspec (s ++ s') (mf <*> m)
 
 runWriterOfColspec :: Colspec a -> [String]
-runWriterOfColspec (Colspec (Colspec' x w _)) = runWriter w x
+runWriterOfColspec (Colspec s _) = s
 
 runPackMapOfColspec :: Colspec a -> (String -> String) -> a
-runPackMapOfColspec (Colspec (Colspec' x _ p)) f = runPackMap p f x
+runPackMapOfColspec (Colspec _ m) f = m f
 
-colspec :: a -> Writer a -> (PackMap a a) -> Colspec a
-colspec x w p = Colspec (Colspec' x w p)
+colspec :: [String] -> ((String -> String) -> a) -> Colspec a
+colspec s m = Colspec s m
 
 col :: String -> Colspec (Wire a)
-col s = colspec (Wire s) (writer (return . unWire))
-                (PackMap (\f -> Wire . f . unWire))
+col s = colspec [s] (\f -> Wire (f s))
 
 colspecApp :: (b -> a) -> (a -> b) -> Colspec a -> Colspec b
-colspecApp f g (Colspec c) = Colspec (dimap f g c)
+colspecApp _ = fmap
 
 colsT1 :: T1 (Colspec a1) -> Colspec (T1 a1)
 colsT1 = id
 
 -- TODO: dup with *:
 colsT2 :: T2 (Colspec a1) (Colspec a2) -> Colspec (T2 a1 a2)
-colsT2 (Colspec c, Colspec c') = Colspec (c ***! c')
+colsT2 (c, c') = (,) <$> c <*> c'
 
 chain :: (t -> Colspec b) -> (Colspec a, t) -> Colspec (a, b)
 chain rest (a, as) = colsT2 (a, rest as)

@@ -18,7 +18,8 @@ import Control.Arrow ((***))
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Data.Profunctor (Profunctor, dimap)
 import Karamaan.Opaleye.ProductProfunctor (ProductProfunctor, empty, (***!),
-                                           ProductContravariant, (***<))
+                                           ProductContravariant, point, (***<))
+import Data.Monoid (mempty)
 
 newtype Writer a = Writer (a -> [String])
 
@@ -26,6 +27,7 @@ instance Contravariant Writer where
   contramap f (Writer w) = Writer (w . f)
 
 instance ProductContravariant Writer where
+  point = Writer (const mempty)
   w ***< w' = writer (uncurry (++) . (runWriter w *** runWriter w'))
 
 data PackMap a b = PackMap ((String -> String) -> a -> b)
@@ -46,29 +48,45 @@ runWriter (Writer w) x = w x
 writer :: (t -> [String]) -> Writer t
 writer = Writer
 
+data Colspec' a b = Colspec' b (Writer a) (PackMap a b)
+
+instance Profunctor Colspec' where
+  dimap f g (Colspec' x w p) = Colspec' (g x) (contramap f w) (dimap f g p)
+
+instance ProductProfunctor Colspec' where
+  empty = Colspec' () point empty
+  (Colspec' x w p) ***! (Colspec' x' w' p') =
+    Colspec' (x, x') (w ***< w') (p ***! p')
+
 -- I'd prefer to make this a profunctor really, to give something
 -- like Colspec (String, (String, String) (Wire Int, (Wire Bool, Wire String))
 -- for example.  Then we could make ValueMaker a profunctor too.
 -- Lots of things would probably become simpler.
 -- Aggregator could probably become a profunctor too.
-data Colspec a = Colspec a (Writer a) (PackMap a a)
+newtype Colspec a = Colspec (Colspec' a a)
+
+runWriterOfColspec :: Colspec a -> [String]
+runWriterOfColspec (Colspec (Colspec' x w _)) = runWriter w x
+
+runPackMapOfColspec :: Colspec a -> (String -> String) -> a
+runPackMapOfColspec (Colspec (Colspec' x _ p)) f = runPackMap p f x
+
+colspec :: a -> Writer a -> (PackMap a a) -> Colspec a
+colspec x w p = Colspec (Colspec' x w p)
 
 col :: String -> Colspec (Wire a)
-col s = Colspec (Wire s) (writer (return . unWire))
+col s = colspec (Wire s) (writer (return . unWire))
                 (PackMap (\f -> Wire . f . unWire))
 
 colspecApp :: (b -> a) -> (a -> b) -> Colspec a -> Colspec b
-colspecApp f g (Colspec a w p) = Colspec (g a) (contramap f w) (dimap f g p)
+colspecApp f g (Colspec c) = Colspec (dimap f g c)
 
 colsT1 :: T1 (Colspec a1) -> Colspec (T1 a1)
 colsT1 = id
 
 -- TODO: dup with *:
 colsT2 :: T2 (Colspec a1) (Colspec a2) -> Colspec (T2 a1 a2)
-colsT2 (Colspec a1 w1 p1, Colspec a2 w2 p2)
-  = Colspec (a1, a2) w' p'
-  where w' = w1 ***< w2
-        p' = p1 ***! p2
+colsT2 (Colspec c, Colspec c') = Colspec (c ***! c')
 
 chain :: (t -> Colspec b) -> (Colspec a, t) -> Colspec (a, b)
 chain rest (a, as) = colsT2 (a, rest as)

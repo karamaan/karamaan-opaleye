@@ -8,4 +8,5 @@ class Profunctor p => ProductProfunctor p where
   (***!) :: p a b -> p a' b' -> p (a, a') (b, b')
 
 class Contravariant f => ProductContravariant f where
+  point :: f ()
   (***<) :: f a -> f b -> f (a, b)

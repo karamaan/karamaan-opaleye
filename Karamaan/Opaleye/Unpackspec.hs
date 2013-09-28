@@ -3,7 +3,7 @@ module Karamaan.Opaleye.Unpackspec where
 import Karamaan.Opaleye.Colspec (Writer)
 import Karamaan.Opaleye.Tuples
 import Karamaan.Opaleye.Pack hiding (unpack)
-import Karamaan.Opaleye.ProductProfunctor ((***<), ProductContravariant)
+import Karamaan.Opaleye.ProductProfunctor ((***<), ProductContravariant, point)
 import Data.Functor.Contravariant (Contravariant, contramap)
 
 newtype Unpackspec a = Unpackspec (Writer a)
@@ -12,6 +12,7 @@ instance Contravariant Unpackspec where
   contramap f (Unpackspec w) = Unpackspec (contramap f w)
 
 instance ProductContravariant Unpackspec where
+  point = Unpackspec point
   (Unpackspec u) ***< (Unpackspec u') = Unpackspec (u ***< u')
 
 convert :: (b -> a1) -> (a -> b1) -> (b1 -> Unpackspec a1) -> a -> Unpackspec b

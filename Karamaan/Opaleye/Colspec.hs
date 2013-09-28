@@ -17,12 +17,16 @@ import Karamaan.Opaleye.Tuples
 import Control.Arrow ((***))
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Data.Profunctor (Profunctor, dimap)
-import Karamaan.Opaleye.ProductProfunctor (ProductProfunctor, empty, (***!))
+import Karamaan.Opaleye.ProductProfunctor (ProductProfunctor, empty, (***!),
+                                           ProductContravariant, (***<))
 
 newtype Writer a = Writer (a -> [String])
 
 instance Contravariant Writer where
   contramap f (Writer w) = Writer (w . f)
+
+instance ProductContravariant Writer where
+  w ***< w' = writer (uncurry (++) . (runWriter w *** runWriter w'))
 
 data PackMap a b = PackMap ((String -> String) -> a -> b)
 
@@ -36,18 +40,11 @@ instance ProductProfunctor PackMap where
   empty = PackMap (\_ -> id)
   (PackMap p) ***! (PackMap p') = PackMap (\s -> p s *** p' s)
 
-modifyWriter :: Writer b -> (a -> b) -> Writer a
-modifyWriter w f = writer (runWriter w . f)
-
 runWriter :: Writer t -> t -> [String]
 runWriter (Writer w) x = w x
 
 writer :: (t -> [String]) -> Writer t
 writer = Writer
-
--- FIXME: These are ridiculous names
-(+++) :: Writer a -> Writer b -> Writer (a, b)
-w +++ w' = writer (uncurry (++) . (runWriter w *** runWriter w'))
 
 -- I'd prefer to make this a profunctor really, to give something
 -- like Colspec (String, (String, String) (Wire Int, (Wire Bool, Wire String))
@@ -61,7 +58,7 @@ col s = Colspec (Wire s) (writer (return . unWire))
                 (PackMap (\f -> Wire . f . unWire))
 
 colspecApp :: (b -> a) -> (a -> b) -> Colspec a -> Colspec b
-colspecApp f g (Colspec a w p) = Colspec (g a) (modifyWriter w f) (dimap f g p)
+colspecApp f g (Colspec a w p) = Colspec (g a) (contramap f w) (dimap f g p)
 
 colsT1 :: T1 (Colspec a1) -> Colspec (T1 a1)
 colsT1 = id
@@ -70,7 +67,7 @@ colsT1 = id
 colsT2 :: T2 (Colspec a1) (Colspec a2) -> Colspec (T2 a1 a2)
 colsT2 (Colspec a1 w1 p1, Colspec a2 w2 p2)
   = Colspec (a1, a2) w' p'
-  where w' = w1 +++ w2
+  where w' = w1 ***< w2
         p' = p1 ***! p2
 
 chain :: (t -> Colspec b) -> (Colspec a, t) -> Colspec (a, b)

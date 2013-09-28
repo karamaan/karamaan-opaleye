@@ -10,15 +10,16 @@ import Karamaan.Opaleye.Pack (unflatten1, flatten1,
                               unflatten7, flatten7,
                               unflatten8, flatten8,
                               unflatten9, flatten9)
-import Karamaan.Opaleye.Colspec (modifyWriter)
 import Karamaan.Opaleye.Tuples (T1, T2, T3, T4, T5, T6, T7, T8, T9)
 import Data.Profunctor (dimap)
+import Data.Functor.Contravariant (contramap)
 -- These really belong in Karamaan.Opaleye.Aggregate but the
 -- implementations are somewhat verbose so I wanted to sequester them
 
 aggApp :: (a -> b) -> (b -> a) -> Aggregator a -> Aggregator b
-aggApp f f' (Aggregator s w p) = Aggregator s (modifyWriter w  f') p'
-  where p' = dimap f' f  p
+aggApp f f' (Aggregator s w p) = Aggregator s w' p'
+  where w' = contramap f' w
+        p' = dimap f' f  p
 
 chain :: (t -> Aggregator a') -> (Aggregator a, t) -> Aggregator (a, a')
 chain agg (a, as) = a *: agg as

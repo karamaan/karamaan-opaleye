@@ -1,19 +1,21 @@
 module Karamaan.Opaleye.Unpackspec where
 
-import Karamaan.Opaleye.Colspec (Writer, (+++), modifyWriter)
+import Karamaan.Opaleye.Colspec (Writer)
 import Karamaan.Opaleye.Tuples
 import Karamaan.Opaleye.Pack hiding (unpack)
+import Karamaan.Opaleye.ProductProfunctor ((***<), ProductContravariant)
+import Data.Functor.Contravariant (Contravariant, contramap)
 
 newtype Unpackspec a = Unpackspec (Writer a)
 
-unpackspecApp :: (b -> a) -> Unpackspec a -> Unpackspec b
-unpackspecApp f (Unpackspec u) = Unpackspec (modifyWriter u f)
+instance Contravariant Unpackspec where
+  contramap f (Unpackspec w) = Unpackspec (contramap f w)
+
+instance ProductContravariant Unpackspec where
+  (Unpackspec u) ***< (Unpackspec u') = Unpackspec (u ***< u')
 
 convert :: (b -> a1) -> (a -> b1) -> (b1 -> Unpackspec a1) -> a -> Unpackspec b
-convert u u' c = unpackspecApp u . c . u'
-
-(^:) :: Unpackspec a -> Unpackspec b -> Unpackspec (a, b)
-(Unpackspec f1) ^: (Unpackspec f2) = Unpackspec (f1 +++ f2)
+convert u u' c = contramap u . c . u'
 
 chain :: (t -> Unpackspec a2) -> (Unpackspec a1, t) -> Unpackspec (a1, a2)
 chain unpack (a, as) = unpackT2 (a, unpack as)
@@ -22,7 +24,7 @@ unpackT1 :: T1 (Unpackspec a) -> Unpackspec (T1 a)
 unpackT1 = id
 
 unpackT2 :: T2 (Unpackspec a1) (Unpackspec a2) -> Unpackspec (T2 a1 a2)
-unpackT2 = uncurry (^:)
+unpackT2 = uncurry (***<)
 
 unpackT3 :: T3 (Unpackspec a1) (Unpackspec a2) (Unpackspec a3)
             -> Unpackspec (T3 a1 a2 a3)

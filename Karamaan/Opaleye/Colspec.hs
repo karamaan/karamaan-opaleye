@@ -70,7 +70,7 @@ instance Functor Colspec where
   fmap f (Colspec s m) = Colspec s (f . m)
 
 instance Applicative Colspec where
-  pure = Colspec [] . const
+  pure = Colspec mempty . pure
   Colspec s mf <*> Colspec s' m = Colspec (s ++ s') (mf <*> m)
 
 runWriterOfColspec :: Colspec a -> [String]

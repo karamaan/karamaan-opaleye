@@ -59,11 +59,6 @@ instance ProductProfunctor Colspec' where
   (Colspec' x w p) ***! (Colspec' x' w' p') =
     Colspec' (x, x') (w ***< w') (p ***! p')
 
--- I'd prefer to make this a profunctor really, to give something
--- like Colspec (String, (String, String) (Wire Int, (Wire Bool, Wire String))
--- for example.  Then we could make ValueMaker a profunctor too.
--- Lots of things would probably become simpler.
--- Aggregator could probably become a profunctor too.
 data Colspec a = Colspec [String] ((String -> String) -> a)
 
 instance Functor Colspec where

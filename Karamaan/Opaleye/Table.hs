@@ -4,7 +4,7 @@ import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith)
 import Database.HaskellDB.PrimQuery (PrimQuery(Project, BaseTable),
                                      PrimExpr(AttrExpr),
                                      Attribute, Assoc, times)
-import Karamaan.Opaleye.Colspec (Colspec(Colspec), runWriter)
+import Karamaan.Opaleye.Colspec (Colspec(Colspec), runWriter, runPackMap)
 import Control.Arrow ((***))
 
 
@@ -29,4 +29,4 @@ makeTable'' (Colspec a _ p) cols table_name tag' =
       projcols = map makeAssoc cols
       q :: PrimQuery
       q = Project projcols (BaseTable table_name basetablecols)
-  in (p tag' a, q)
+  in (runPackMap p tag' a, q)

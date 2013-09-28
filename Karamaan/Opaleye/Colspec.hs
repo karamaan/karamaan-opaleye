@@ -15,9 +15,26 @@ import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 -- and I can't be bothered to type it all
 import Karamaan.Opaleye.Tuples
 import Control.Arrow ((***))
+import Data.Functor.Contravariant
+import Data.Profunctor (Profunctor, dimap)
+import Karamaan.Opaleye.ProductProfunctor (ProductProfunctor, empty, (***!))
 
 newtype Writer a = Writer (a -> [String])
-type PackMap a = (String -> String) -> a -> a
+
+instance Contravariant Writer where
+  contramap f (Writer w) = Writer (w . f)
+
+data PackMap a b = PackMap ((String -> String) -> a -> b)
+
+runPackMap :: PackMap a b -> (String -> String) -> a -> b
+runPackMap (PackMap p) = p
+
+instance Profunctor PackMap where
+  dimap f g (PackMap p) = PackMap (\s -> g . p s . f)
+
+instance ProductProfunctor PackMap where
+  empty = PackMap (\_ -> id)
+  (PackMap p) ***! (PackMap p') = PackMap (\s -> p s *** p' s)
 
 modifyWriter :: Writer b -> (a -> b) -> Writer a
 modifyWriter w f = writer (runWriter w . f)
@@ -32,21 +49,19 @@ writer = Writer
 (+++) :: Writer a -> Writer b -> Writer (a, b)
 w +++ w' = writer (uncurry (++) . (runWriter w *** runWriter w'))
 
-(++++) :: PackMap a -> PackMap b -> PackMap (a, b)
-f ++++ g = \ss -> f ss *** g ss
-
 -- I'd prefer to make this a profunctor really, to give something
 -- like Colspec (String, (String, String) (Wire Int, (Wire Bool, Wire String))
 -- for example.  Then we could make ValueMaker a profunctor too.
 -- Lots of things would probably become simpler.
 -- Aggregator could probably become a profunctor too.
-data Colspec a = Colspec a (Writer a) (PackMap a)
+data Colspec a = Colspec a (Writer a) (PackMap a a)
 
 col :: String -> Colspec (Wire a)
-col s = Colspec (Wire s) (writer (return . unWire)) (\f -> Wire . f . unWire)
+col s = Colspec (Wire s) (writer (return . unWire))
+                (PackMap (\f -> Wire . f . unWire))
 
 colspecApp :: (b -> a) -> (a -> b) -> Colspec a -> Colspec b
-colspecApp f g (Colspec a w p) = Colspec (g a) (modifyWriter w f) (\ss -> g . p ss . f)
+colspecApp f g (Colspec a w p) = Colspec (g a) (modifyWriter w f) (dimap f g p)
 
 colsT1 :: T1 (Colspec a1) -> Colspec (T1 a1)
 colsT1 = id
@@ -56,7 +71,7 @@ colsT2 :: T2 (Colspec a1) (Colspec a2) -> Colspec (T2 a1 a2)
 colsT2 (Colspec a1 w1 p1, Colspec a2 w2 p2)
   = Colspec (a1, a2) w' p'
   where w' = w1 +++ w2
-        p' = p1 ++++ p2
+        p' = p1 ***! p2
 
 chain :: (t -> Colspec b) -> (Colspec a, t) -> Colspec (a, b)
 chain rest (a, as) = colsT2 (a, rest as)

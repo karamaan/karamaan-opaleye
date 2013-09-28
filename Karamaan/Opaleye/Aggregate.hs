@@ -11,14 +11,15 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, Empty),
 import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.Pack (unpack, packMap)
 import Control.Arrow ((&&&))
-import Karamaan.Opaleye.Colspec (Writer, writer, PackMap, (+++), runWriter,
-                                 (++++))
+import Karamaan.Opaleye.Colspec (Writer, writer, PackMap(PackMap), (+++),
+                                 runWriter, runPackMap)
+import Karamaan.Opaleye.ProductProfunctor ((***!))
 
 -- I used to have "Aggregator a b" for a's that would get turned
 -- into b's when aggregated, but I never used it.
 -- I removed it for simplicity, but it might need to be
 -- used again at some point in the future
-data Aggregator a = Aggregator [Maybe AggrOp] (Writer a) (PackMap a)
+data Aggregator a = Aggregator [Maybe AggrOp] (Writer a) (PackMap a a)
 
 instance Show (Aggregator a) where
   show (Aggregator ops _ _) = show ops
@@ -27,13 +28,13 @@ instance Show (Aggregator a) where
 (Aggregator s w p) *: (Aggregator s' w' p') = Aggregator s'' w'' p''
   where s'' = s ++ s'
         w'' = w +++ w'
-        p'' = p ++++ p'
+        p'' = p ***! p'
 
 aggregatorMaker :: AggrOp -> Aggregator (Wire a)
 aggregatorMaker = aggregatorMaker' . Just
 
 aggregatorMaker' :: Maybe AggrOp -> Aggregator (Wire a)
-aggregatorMaker' op = Aggregator [op] (writer unpack) packMap
+aggregatorMaker' op = Aggregator [op] (writer unpack) (PackMap packMap)
 
 sum :: Aggregator (Wire a)
 sum = aggregatorMaker AggrSum
@@ -73,7 +74,7 @@ aggregate'' mf out j primQ' =
         zipped = zip3 new_names aggrs old_names
         jobber :: PrimQuery
         jobber = Project (map assoc zipped) primQ'
-    in (mapper tag' out, next j, jobber)
+    in (runPackMap mapper tag' out, next j, jobber)
 
 assoc :: (String, Maybe AggrOp, String) -> (Attribute, PrimExpr)
 assoc (snew, mop, sold) = (snew, makeAggr mop (AttrExpr sold))

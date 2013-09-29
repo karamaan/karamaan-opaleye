@@ -9,11 +9,14 @@ import Karamaan.Opaleye.Wire (Wire)
 import Control.Arrow ((***), first)
 import Control.Monad.State (State, get, put, runState)
 import Control.Monad.Reader (ReaderT, runReaderT, ask)
-import Karamaan.Opaleye.Colspec (Colspec, colsT2)
+import Karamaan.Opaleye.Colspec (Colspec)
 import qualified Karamaan.WhaleUtil.Date as UD
 import Data.Time.Calendar
 import Karamaan.Opaleye.Predicates (singleEnquoten)
-import Control.Applicative (liftA2)
+import Control.Applicative (liftA2, pure)
+import Data.Profunctor (Profunctor, dimap)
+import Karamaan.Opaleye.ProductProfunctor (ProductProfunctor, empty, (***!))
+import Data.Monoid (mempty)
 
 type S a = ReaderT String (State Int) a
 
@@ -40,12 +43,17 @@ data ValuesMaker a b = ValuesMaker (a -> [String], S (Colspec b), [SQLType])
 --bimap :: (a' -> a) -> (b -> b' ) -> ValuesMaker a b -> ValuesMaker a' b'
 --bimap f g (ValuesMaker p q) = ValuesMaker (fmap (. f) p) (fmap g q)
 
-(****) :: ValuesMaker a b -> ValuesMaker a' b' -> ValuesMaker (a, a') (b, b')
-(****) (ValuesMaker (f, m, ts)) (ValuesMaker (f', m', ts'))
-  = ValuesMaker (f'', m'', ts'')
-  where f'' = catResults f f'
-        m'' = liftA2 (curry colsT2) m m'
-        ts'' = ts ++ ts'
+instance Profunctor ValuesMaker where
+  dimap f g (ValuesMaker (w, c, ts)) =
+    ValuesMaker ((w . f), ((fmap . fmap) g c), ts)
+
+instance ProductProfunctor ValuesMaker where
+  empty = ValuesMaker (pure mempty, pure (pure ()), [])
+  ValuesMaker (w, c, ts) ***! ValuesMaker (w', c', ts') =
+    ValuesMaker (w'', c'', ts'')
+    where w'' = uncurry (++) . (w *** w')
+          c'' = (liftA2 . liftA2) (,) c c'
+          ts'' = ts ++ ts'
 
 (.:.) :: (r -> z) -> (a -> b -> c -> r) -> (a -> b -> c -> z)
 (f .:. g) x y z = f (g x y z)
@@ -98,6 +106,9 @@ runS m c s = runState (runReaderT m c) s
 -- I guess we'll have a bug if there are no columns at all, but it doesn't seem
 -- like we can create a zero column ValuesMaker without the constructor, so
 -- that's nice.
+-- ^^ TODO: This is no longer true, because of our ProductProfunctor instance.
+--    Is that actually going to be a problem?
+--    Perhaps we could just generate an empty query in such a case.
 -- We *had* a bug where we couldn't create tables with no rows, but I fixed
 -- that with a hack.  It requires the Postgres type information to be passed
 -- around unfortunately, too, because the trick requires we use NULLs, and

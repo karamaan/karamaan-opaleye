@@ -5,6 +5,8 @@ import Karamaan.Opaleye.Tuples
 import Karamaan.Opaleye.Pack hiding (unpack)
 import Karamaan.Opaleye.ProductProfunctor ((***<), ProductContravariant, point)
 import Data.Functor.Contravariant (Contravariant, contramap)
+import Control.Arrow (second)
+import Karamaan.WhaleUtil ((.:))
 
 newtype Unpackspec a = Unpackspec (Writer a)
 
@@ -15,76 +17,76 @@ instance ProductContravariant Unpackspec where
   point = Unpackspec point
   (Unpackspec u) ***< (Unpackspec u') = Unpackspec (u ***< u')
 
-convert :: (b -> a1) -> (a -> b1) -> (b1 -> Unpackspec a1) -> a -> Unpackspec b
+convert :: ProductContravariant f => (b -> a1) -> (a -> b1) -> (b1 -> f a1) -> a -> f b
 convert u u' c = contramap u . c . u'
 
-chain :: (t -> Unpackspec a2) -> (Unpackspec a1, t) -> Unpackspec (a1, a2)
-chain unpack (a, as) = unpackT2 (a, unpack as)
+chain :: ProductContravariant f => (t -> f a2) -> (f a1, t) -> f (a1, a2)
+chain = pcT2 .: second
 
-unpackT1 :: T1 (Unpackspec a) -> Unpackspec (T1 a)
-unpackT1 = id
+pcT1 :: ProductContravariant f => T1 (f a) -> f (T1 a)
+pcT1 = id
 
-unpackT2 :: T2 (Unpackspec a1) (Unpackspec a2) -> Unpackspec (T2 a1 a2)
-unpackT2 = uncurry (***<)
+pcT2 :: ProductContravariant f => T2 (f a1) (f a2) -> f (T2 a1 a2)
+pcT2 = uncurry (***<)
 
-unpackT3 :: T3 (Unpackspec a1) (Unpackspec a2) (Unpackspec a3)
-            -> Unpackspec (T3 a1 a2 a3)
-unpackT3 = chain unpackT2
+pcT3 :: ProductContravariant f => T3 (f a1) (f a2) (f a3)
+            -> f (T3 a1 a2 a3)
+pcT3 = chain pcT2
 
-unpackT4 :: T4 (Unpackspec a1) (Unpackspec a2) (Unpackspec a3) (Unpackspec a4)
-            -> Unpackspec (T4 a1 a2 a3 a4)
-unpackT4 = chain unpackT3
+pcT4 :: ProductContravariant f => T4 (f a1) (f a2) (f a3) (f a4)
+            -> f (T4 a1 a2 a3 a4)
+pcT4 = chain pcT3
 
-unpackT5 :: T5 (Unpackspec a1) (Unpackspec a2) (Unpackspec a3) (Unpackspec a4)
-               (Unpackspec a5)
-            -> Unpackspec (T5 a1 a2 a3 a4 a5)
-unpackT5 = chain unpackT4
+pcT5 :: ProductContravariant f => T5 (f a1) (f a2) (f a3) (f a4)
+               (f a5)
+            -> f (T5 a1 a2 a3 a4 a5)
+pcT5 = chain pcT4
 
-unpackT6 :: T6 (Unpackspec a1) (Unpackspec a2) (Unpackspec a3) (Unpackspec a4)
-               (Unpackspec a5) (Unpackspec a6)
-            -> Unpackspec (T6 a1 a2 a3 a4 a5 a6)
-unpackT6 = chain unpackT5
+pcT6 :: ProductContravariant f => T6 (f a1) (f a2) (f a3) (f a4)
+               (f a5) (f a6)
+            -> f (T6 a1 a2 a3 a4 a5 a6)
+pcT6 = chain pcT5
 
-unpackT7 :: T7 (Unpackspec a1) (Unpackspec a2) (Unpackspec a3) (Unpackspec a4)
-               (Unpackspec a5) (Unpackspec a6) (Unpackspec a7)
-            -> Unpackspec (T7 a1 a2 a3 a4 a5 a6 a7)
-unpackT7 = chain unpackT6
+pcT7 :: ProductContravariant f => T7 (f a1) (f a2) (f a3) (f a4)
+               (f a5) (f a6) (f a7)
+            -> f (T7 a1 a2 a3 a4 a5 a6 a7)
+pcT7 = chain pcT6
 
-unpackT8 :: T8 (Unpackspec a1) (Unpackspec a2) (Unpackspec a3) (Unpackspec a4)
-               (Unpackspec a5) (Unpackspec a6) (Unpackspec a7) (Unpackspec a8)
-            -> Unpackspec (T8 a1 a2 a3 a4 a5 a6 a7 a8)
-unpackT8 = chain unpackT7
+pcT8 :: ProductContravariant f => T8 (f a1) (f a2) (f a3) (f a4)
+               (f a5) (f a6) (f a7) (f a8)
+            -> f (T8 a1 a2 a3 a4 a5 a6 a7 a8)
+pcT8 = chain pcT7
 
-unpackT :: Unpackspec a -> Unpackspec a
-unpackT = unpackT1
+pcT :: ProductContravariant f => f a -> f a
+pcT = pcT1
 
-unpack2 :: (Unpackspec a1, Unpackspec a2) -> Unpackspec (a1, a2)
-unpack2 = convert unflatten2 unflatten2 unpackT2
+pc2 :: ProductContravariant f => (f a1, f a2) -> f (a1, a2)
+pc2 = convert unflatten2 unflatten2 pcT2
 
-unpack3 :: (Unpackspec a1, Unpackspec a2, Unpackspec a3)
-           -> Unpackspec (a1, a2, a3)
-unpack3 = convert unflatten3 unflatten3 unpackT3
+pc3 :: ProductContravariant f => (f a1, f a2, f a3)
+           -> f (a1, a2, a3)
+pc3 = convert unflatten3 unflatten3 pcT3
 
-unpack4 :: (Unpackspec a1, Unpackspec a2, Unpackspec a3, Unpackspec a4)
-           -> Unpackspec (a1, a2, a3, a4)
-unpack4 = convert unflatten4 unflatten4 unpackT4
+pc4 :: ProductContravariant f => (f a1, f a2, f a3, f a4)
+           -> f (a1, a2, a3, a4)
+pc4 = convert unflatten4 unflatten4 pcT4
 
-unpack5 :: (Unpackspec a1, Unpackspec a2, Unpackspec a3, Unpackspec a4,
-            Unpackspec a5)
-           -> Unpackspec (a1, a2, a3, a4, a5)
-unpack5 = convert unflatten5 unflatten5 unpackT5
+pc5 :: ProductContravariant f => (f a1, f a2, f a3, f a4,
+            f a5)
+           -> f (a1, a2, a3, a4, a5)
+pc5 = convert unflatten5 unflatten5 pcT5
 
-unpack6 :: (Unpackspec a1, Unpackspec a2, Unpackspec a3, Unpackspec a4,
-            Unpackspec a5, Unpackspec a6)
-           -> Unpackspec (a1, a2, a3, a4, a5, a6)
-unpack6 = convert unflatten6 unflatten6 unpackT6
+pc6 :: ProductContravariant f => (f a1, f a2, f a3, f a4,
+            f a5, f a6)
+           -> f (a1, a2, a3, a4, a5, a6)
+pc6 = convert unflatten6 unflatten6 pcT6
 
-unpack7 :: (Unpackspec a1, Unpackspec a2, Unpackspec a3, Unpackspec a4,
-            Unpackspec a5, Unpackspec a6, Unpackspec a7)
-           -> Unpackspec (a1, a2, a3, a4, a5, a6, a7)
-unpack7 = convert unflatten7 unflatten7 unpackT7
+pc7 :: ProductContravariant f => (f a1, f a2, f a3, f a4,
+            f a5, f a6, f a7)
+           -> f (a1, a2, a3, a4, a5, a6, a7)
+pc7 = convert unflatten7 unflatten7 pcT7
 
-unpack8 :: (Unpackspec a1, Unpackspec a2, Unpackspec a3, Unpackspec a4,
-            Unpackspec a5, Unpackspec a6, Unpackspec a7, Unpackspec a8)
-           -> Unpackspec (a1, a2, a3, a4, a5, a6, a7, a8)
-unpack8 = convert unflatten8 unflatten8 unpackT8
+pc8 :: ProductContravariant f => (f a1, f a2, f a3, f a4,
+            f a5, f a6, f a7, f a8)
+           -> f (a1, a2, a3, a4, a5, a6, a7, a8)
+pc8 = convert unflatten8 unflatten8 pcT8

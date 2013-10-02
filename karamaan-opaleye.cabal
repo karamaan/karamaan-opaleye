@@ -15,6 +15,7 @@ library
                    mtl, profunctors, contravariant
   exposed-modules: Karamaan.Opaleye.Aggregate,
                    Karamaan.Opaleye.Aggregators,
+                   Karamaan.Opaleye.Applicative,
                    Karamaan.Opaleye.Bend,
                    Karamaan.Opaleye.Colspec,
                    Karamaan.Opaleye.Distinct,

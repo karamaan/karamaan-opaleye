@@ -4,7 +4,7 @@ module Karamaan.Opaleye.Explore where
 
 import Karamaan.Opaleye.Table (makeTable)
 import Karamaan.Opaleye.Colspec (col)
-import Karamaan.Opaleye.ProductProfunctor (a1)
+import Karamaan.Opaleye.Applicative (a1)
 import Karamaan.Opaleye.QueryArr (equals, Query)
 import Karamaan.Opaleye.SQL (showSqlForPostgreSQLSimple, showSqlUnopt)
 import Karamaan.Opaleye.Predicates (equalsC)

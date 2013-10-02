@@ -67,6 +67,13 @@ pT10 :: ProductProfunctor p => T10 (p a1 b1) (p a2 b2) (p a3 b3) (p a4 b4)
             (T10 b1 b2 b3 b4 b5 b6 b7 b8 b9 b10)
 pT10 = chain pT9
 
+pT11 :: ProductProfunctor p => T11 (p a1 b1) (p a2 b2) (p a3 b3) (p a4 b4)
+                                   (p a5 b5) (p a6 b6) (p a7 b7) (p a8 b8)
+                                   (p a9 b9) (p a10 b10) (p a11 b11)
+       -> p (T11 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11)
+            (T11 b1 b2 b3 b4 b5 b6 b7 b8 b9 b10 b11)
+pT11 = chain pT10
+
 p0 :: ProductProfunctor p => () -> p () ()
 p0 = const empty
 

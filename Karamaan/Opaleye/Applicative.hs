@@ -69,7 +69,6 @@ colspecApp _ = fmap
 aT1 :: Applicative f => T1 (f a1) -> f (T1 a1)
 aT1 = id
 
--- TODO: dup with *:
 aT2 :: Applicative f => T2 (f a1) (f a2) -> f (T2 a1 a2)
 aT2 (c, c') = (,) <$> c <*> c'
 

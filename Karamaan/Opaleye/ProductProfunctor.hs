@@ -6,7 +6,6 @@ import Data.Functor.Contravariant (Contravariant)
 import Karamaan.Opaleye.Pack
 -- vv and these
 import Karamaan.Opaleye.Tuples
-import Control.Arrow (second)
 
 class Profunctor p => ProductProfunctor p where
   empty :: p () ()

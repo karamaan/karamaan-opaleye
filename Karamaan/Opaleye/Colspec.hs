@@ -36,6 +36,7 @@ runWriter (Writer w) x = w x
 writer :: (t -> [String]) -> Writer t
 writer = Writer
 
+-- TODO: this needs a better name
 data Colspec' a b = Colspec' b (Writer a) (PackMap a b)
 
 instance Profunctor Colspec' where

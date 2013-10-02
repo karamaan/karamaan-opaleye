@@ -1,6 +1,5 @@
 module Karamaan.Opaleye.Applicative where
 
-import Data.Functor.Contravariant (Contravariant)
 import Control.Applicative (Applicative, (<$>), (<*>), pure)
 -- vv TODO: don't want to have to import all those explicitly.  What to do?
 import Karamaan.Opaleye.Pack

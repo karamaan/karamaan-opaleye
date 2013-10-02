@@ -1,5 +1,6 @@
 module Karamaan.Opaleye.Tuples where
 
+type T0 = ()
 type T1 a = a
 type T2 a b = (a, T1 b)
 type T3 a b c = (a, T2 b c)

@@ -18,6 +18,9 @@ instance (Pack a, Pack b) => Pack (a, b) where
   packMap f = packMap f *** packMap f
   unpack (a, b) = unpack a ++ unpack b
 
+flatten0 () = ()
+unflatten0 () = ()
+
 flatten1 a = a
 unflatten1 a = a
 

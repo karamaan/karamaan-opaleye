@@ -1,5 +1,6 @@
 module Karamaan.Opaleye.Aggregate where
 
+import Prelude hiding (sum)
 import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), runQueryArr,
                                   Tag, next, tagWith)
 import Database.HaskellDB.PrimQuery (PrimQuery(Project, Empty),
@@ -11,11 +12,11 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, Empty),
 import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.Colspec (Writer, PackMap, writerWire, packMapWire,
                                  runWriter, runPackMap, LWriter, writer)
-import Data.Profunctor (Profunctor, dimap)
+import Data.Profunctor (Profunctor, dimap, lmap)
 import Karamaan.Opaleye.ProductProfunctor (ProductProfunctor, empty, (***!),
-                                           ProductContravariant, point, (***<))
+                                           ProductContravariant, point, (***<),
+                                           p3)
 import Data.Functor.Contravariant (contramap)
-import Control.Arrow ((&&&))
 
 -- Maybe it would be safer if we combined the two writers into
 -- "LWriter (Maybe AggrOp, String) a"?  That way we'd know they output
@@ -86,15 +87,12 @@ makeAggr :: Maybe AggrOp -> PrimExpr -> PrimExpr
 makeAggr = maybe id AggrExpr
 
 -- Christopher preferred this API for aggregation
-(+:) :: (Aggregator a a', x -> a) -> (Aggregator b b', x -> b)
-        -> (Aggregator (a, b) (a', b'), x -> (a, b))
-(agg, f) +: (agg', f') = (agg ***! agg', f &&& f')
+(>:) :: Aggregator a b -> (x -> a) -> Aggregator x b
+(>:) = flip lmap
 
-mkAggregator :: (Aggregator a b, x -> a) -> Aggregator x b
-mkAggregator (m, f) = dimap f id m
+pa3 :: ProductProfunctor p => (p a b1, p a b2, p a b3) -> p a (b1, b2, b3)
+pa3 = lmap (\x -> (x,x,x)) . p3
 
 example :: Aggregator (Wire String, Wire Int)
-                      ((Wire String, Wire Int), Wire Int)
-example = mkAggregator $ (groupBy, fst)
-                       +: (Karamaan.Opaleye.Aggregate.sum, snd)
-                       +: (avg, snd)
+                      (Wire String, Wire Int, Wire Int)
+example = pa3 (groupBy >: fst, sum >: snd, avg >: snd)

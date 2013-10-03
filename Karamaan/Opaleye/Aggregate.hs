@@ -9,48 +9,53 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, Empty),
                                               AggrExpr),
                                      Attribute, times)
 import Karamaan.Opaleye.Wire (Wire)
-import Control.Arrow ((&&&))
 import Karamaan.Opaleye.Colspec (Writer, PackMap, writerWire, packMapWire,
-                                 runWriter, runPackMap)
-import Karamaan.Opaleye.ProductProfunctor ((***!), (***<))
+                                 runWriter, runPackMap, LWriter, writer)
+import Data.Profunctor (Profunctor, dimap)
+import Karamaan.Opaleye.ProductProfunctor (ProductProfunctor, empty, (***!),
+                                           ProductContravariant, point, (***<))
+import Data.Functor.Contravariant (contramap)
+import Control.Arrow ((&&&))
 
--- I used to have "Aggregator a b" for a's that would get turned
--- into b's when aggregated, but I never used it.
--- I removed it for simplicity, but it might need to be
--- used again at some point in the future
-data Aggregator a = Aggregator [Maybe AggrOp] (Writer a) (PackMap a a)
+-- Maybe it would be safer if we combined the two writers into
+-- "LWriter (Maybe AggrOp, String) a"?  That way we'd know they output
+-- the same number of results
+data Aggregator a b = Aggregator (LWriter (Maybe AggrOp) a) (Writer a)
+                                 (PackMap a b)
 
-instance Show (Aggregator a) where
-  show (Aggregator ops _ _) = show ops
 
-(*:) :: Aggregator a -> Aggregator a' -> Aggregator (a, a')
-(Aggregator s w p) *: (Aggregator s' w' p') = Aggregator s'' w'' p''
-  where s'' = s ++ s'
-        w'' = w ***< w'
-        p'' = p ***! p'
+instance Profunctor Aggregator where
+  dimap f g (Aggregator a w p) = Aggregator (contramap f a) (contramap f w)
+                                            (dimap f g p)
 
-aggregatorMaker :: AggrOp -> Aggregator (Wire a)
+instance ProductProfunctor Aggregator where
+  empty = Aggregator point point empty
+  Aggregator a w p ***! Aggregator a' w' p' = Aggregator (a ***< a') (w ***< w')
+                                                         (p ***! p')
+
+aggregatorMaker :: AggrOp -> Aggregator (Wire a) (Wire b)
 aggregatorMaker = aggregatorMaker' . Just
 
-aggregatorMaker' :: Maybe AggrOp -> Aggregator (Wire a)
-aggregatorMaker' op = Aggregator [op] writerWire packMapWire
+aggregatorMaker' :: Maybe AggrOp -> Aggregator (Wire a) (Wire b)
+aggregatorMaker' op = Aggregator (writer (const [op])) writerWire packMapWire
 
-sum :: Aggregator (Wire a)
+-- TODO: the numeric ones should have some num constraint
+sum :: Aggregator (Wire a) (Wire a)
 sum = aggregatorMaker AggrSum
 
-avg :: Aggregator (Wire a)
+avg :: Aggregator (Wire a) (Wire a)
 avg = aggregatorMaker AggrAvg
 
-max :: Aggregator (Wire a)
+max :: Aggregator (Wire a) (Wire a)
 max = aggregatorMaker AggrMax
 
-groupBy :: Aggregator (Wire a)
+groupBy :: Aggregator (Wire a) (Wire a)
 groupBy = aggregatorMaker' Nothing
 
-count :: Aggregator (Wire a)
+count :: Aggregator (Wire a) (Wire Int)
 count = aggregatorMaker AggrCount
 
-aggregate :: Aggregator a -> Query a -> Query a
+aggregate :: Aggregator a b -> Query a -> Query b
 aggregate mf q = QueryArr (\((), primQuery, t0) ->
   let (a, primQ, t1) = runQueryArr q ((), Empty, t0)
       (the_new_names, t2, primQ') = aggregate'' mf a t1 primQ
@@ -59,18 +64,17 @@ aggregate mf q = QueryArr (\((), primQuery, t0) ->
 -- This is messy and there should be a lot more structure to it, but I can't see
 -- how, currently.  Once there's another function like this
 -- and binrel it will perhaps be easy to see where the real duplication is.
-aggregate'' :: Aggregator t -> t -> Tag -> PrimQuery -> (t, Tag, PrimQuery)
+aggregate'' :: Aggregator a b -> a -> Tag -> PrimQuery -> (b, Tag, PrimQuery)
 aggregate'' mf out j primQ' =
     let tag' :: String -> String
         tag' = tagWith j
-        aggrs :: [Maybe AggrOp]
         (Aggregator aggrs writer' mapper) = mf
         old_names :: [String]
         old_names = runWriter writer' out
         new_names :: [String]
         new_names = map tag' old_names
         zipped :: [(String, Maybe AggrOp, String)]
-        zipped = zip3 new_names aggrs old_names
+        zipped = zip3 new_names (runWriter aggrs out) old_names
         jobber :: PrimQuery
         jobber = Project (map assoc zipped) primQ'
     in (runPackMap mapper tag' out, next j, jobber)
@@ -82,11 +86,11 @@ makeAggr :: Maybe AggrOp -> PrimExpr -> PrimExpr
 makeAggr = maybe id AggrExpr
 
 -- Christopher preferred this API for aggregation
-(+:) :: (Aggregator a, x -> a) -> (Aggregator b, x -> b)
-        -> (Aggregator (a, b), x -> (a, b))
-(agg, f) +: (agg', f') = (agg *: agg', f &&& f')
+(+:) :: (Aggregator a a', x -> a) -> (Aggregator b b', x -> b)
+        -> (Aggregator (a, b) (a', b'), x -> (a, b))
+(agg, f) +: (agg', f') = (agg ***! agg', f &&& f')
 
-aggregate' :: (Aggregator a, x -> a) -> Query x -> Query a
+aggregate' :: (Aggregator a b, x -> a) -> Query x -> Query b
 aggregate' (m, f) q = aggregate m (fmap f q)
 
 example :: Query (Wire String, Wire Int)

@@ -7,16 +7,21 @@ import Data.Functor.Contravariant (Contravariant, contramap)
 import Data.Profunctor (Profunctor, dimap)
 import Karamaan.Opaleye.ProductProfunctor (ProductProfunctor, empty, (***!),
                                            ProductContravariant, point, (***<))
-import Data.Monoid (mempty)
+import Data.Monoid (Monoid, mempty, (<>))
 
-newtype Writer a = Writer (a -> [String])
+-- The constructor is called Writer as a historical accident.
+-- TODO: need to think about naming a lot in this library
+newtype MWriter m a = Writer (a -> m)
 
-instance Contravariant Writer where
+instance Contravariant (MWriter m) where
   contramap f (Writer w) = Writer (w . f)
 
-instance ProductContravariant Writer where
+instance Monoid m => ProductContravariant (MWriter m) where
   point = Writer (const mempty)
-  w ***< w' = writer (uncurry (++) . (runWriter w *** runWriter w'))
+  w ***< w' = writer (uncurry (<>) . (runWriter w *** runWriter w'))
+
+type LWriter e = MWriter [e]
+type Writer = LWriter String
 
 data PackMap a b = PackMap ((String -> String) -> a -> b)
 
@@ -30,13 +35,15 @@ instance ProductProfunctor PackMap where
   empty = PackMap (\_ -> id)
   (PackMap p) ***! (PackMap p') = PackMap ((***) <$> p <*> p')
 
-runWriter :: Writer t -> t -> [String]
+runWriter :: MWriter m t -> t -> m
 runWriter (Writer w) x = w x
 
-writer :: (t -> [String]) -> Writer t
+writer :: (t -> m) -> MWriter m t
 writer = Writer
 
-packMapWire :: PackMap (Wire a) (Wire a)
+-- Need this to have different argument and return type
+-- for aggregatorMaker', which can change types
+packMapWire :: PackMap (Wire a) (Wire b)
 packMapWire = PackMap (\f -> Wire . f . unWire)
 
 writerWire :: Writer (Wire a)

@@ -14,7 +14,6 @@ library
                    -- Remove this dependency when we write our own monad.
                    mtl, profunctors, contravariant
   exposed-modules: Karamaan.Opaleye.Aggregate,
-                   Karamaan.Opaleye.Aggregators,
                    Karamaan.Opaleye.Applicative,
                    Karamaan.Opaleye.Bend,
                    Karamaan.Opaleye.Colspec,

@@ -1,6 +1,6 @@
 module Karamaan.Opaleye.Colspec where
 
-import Karamaan.Opaleye.Wire (Wire(Wire))
+import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 import Control.Arrow ((***))
 import Control.Applicative (Applicative, pure, (<$>), (<*>))
 import Data.Functor.Contravariant (Contravariant, contramap)
@@ -35,6 +35,12 @@ runWriter (Writer w) x = w x
 
 writer :: (t -> [String]) -> Writer t
 writer = Writer
+
+packMapWire :: PackMap (Wire a) (Wire a)
+packMapWire = PackMap (\f -> Wire . f . unWire)
+
+writerWire :: Writer (Wire a)
+writerWire = Writer (return . unWire)
 
 -- TODO: this needs a better name
 data Colspec' a b = Colspec' (Writer a) (PackMap a b)

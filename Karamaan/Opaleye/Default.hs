@@ -2,9 +2,8 @@
 
 module Karamaan.Opaleye.Default where
 
-import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
-import Karamaan.Opaleye.Colspec (Colspec'(Colspec'), Writer(Writer),
-                                 PackMap(PackMap))
+import Karamaan.Opaleye.Wire (Wire)
+import Karamaan.Opaleye.Colspec (Colspec'(Colspec'), writerWire, packMapWire)
 import Karamaan.Opaleye.ProductProfunctor
 
 class Default p a b where
@@ -12,7 +11,7 @@ class Default p a b where
   def :: p a b
 
 instance Default Colspec' (Wire a) (Wire a) where
-  def = Colspec' (Writer (return . unWire)) (PackMap (\f -> Wire . f . unWire))
+  def = Colspec' writerWire packMapWire
 
 instance (ProductProfunctor p, Default p a1 b1, Default p a2 b2)
          => Default p (a1, a2) (b1, b2) where

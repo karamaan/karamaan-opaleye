@@ -9,9 +9,8 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, Empty),
                                               AggrExpr),
                                      Attribute, times)
 import Karamaan.Opaleye.Wire (Wire)
-import Karamaan.Opaleye.Pack (unpack, packMap)
 import Control.Arrow ((&&&))
-import Karamaan.Opaleye.Colspec (Writer, writer, PackMap(PackMap),
+import Karamaan.Opaleye.Colspec (Writer, PackMap, writerWire, packMapWire,
                                  runWriter, runPackMap)
 import Karamaan.Opaleye.ProductProfunctor ((***!), (***<))
 
@@ -34,7 +33,7 @@ aggregatorMaker :: AggrOp -> Aggregator (Wire a)
 aggregatorMaker = aggregatorMaker' . Just
 
 aggregatorMaker' :: Maybe AggrOp -> Aggregator (Wire a)
-aggregatorMaker' op = Aggregator [op] (writer unpack) (PackMap packMap)
+aggregatorMaker' op = Aggregator [op] writerWire packMapWire
 
 sum :: Aggregator (Wire a)
 sum = aggregatorMaker AggrSum

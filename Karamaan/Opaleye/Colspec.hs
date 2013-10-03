@@ -37,16 +37,23 @@ writer :: (t -> [String]) -> Writer t
 writer = Writer
 
 -- TODO: this needs a better name
-data Colspec' a b = Colspec' b (Writer a) (PackMap a b)
+data Colspec' a b = Colspec' (Writer a) (PackMap a b)
 
 instance Profunctor Colspec' where
-  dimap f g (Colspec' x w p) = Colspec' (g x) (contramap f w) (dimap f g p)
+  dimap f g (Colspec' w p) = Colspec' (contramap f w) (dimap f g p)
 
 instance ProductProfunctor Colspec' where
-  empty = Colspec' () point empty
-  (Colspec' x w p) ***! (Colspec' x' w' p') =
-    Colspec' (x, x') (w ***< w') (p ***! p')
+  empty = Colspec' point empty
+  (Colspec' w p) ***! (Colspec' w' p') =
+    Colspec' (w ***< w') (p ***! p')
 
+runWriterOfColspec' :: Colspec' a b -> a -> [String]
+runWriterOfColspec' (Colspec' f _) = runWriter f
+
+runPackMapOfColspec' :: Colspec' a b -> (String -> String) -> a -> b
+runPackMapOfColspec' (Colspec' _ p) = runPackMap p
+
+-- This seems to be basically a Colspec' with the column names already applied
 data Colspec a = Colspec [String] ((String -> String) -> a)
 
 instance Functor Colspec where

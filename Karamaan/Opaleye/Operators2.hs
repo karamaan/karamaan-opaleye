@@ -22,6 +22,10 @@ import Karamaan.Opaleye.Pack (Pack, packMap, unpack)
 import Control.Arrow ((***), arr, (<<<), second)
 import Data.Time.Calendar (Day)
 import qualified Karamaan.Opaleye.Values as Values
+import Karamaan.Opaleye.Colspec (Colspec'(Colspec'), runWriterOfColspec',
+                                 runPackMapOfColspec', Writer(Writer),
+                                 PackMap(PackMap))
+
 
 unOp :: ShowConstant c => BinOp -> String -> String -> c
         -> QueryArr (Wire a) (Wire a)
@@ -107,14 +111,26 @@ constantDay = unsafeConstant . Values.dayToSQL
 unsafeConstant :: String -> Query (Wire a)
 unsafeConstant = constantLit . OtherLit
 
-intersect :: Pack b => QueryArr () b -> QueryArr () b -> QueryArr () b
-intersect = binrel Intersect
+colspec'OfPack :: Pack a => Colspec' a a
+colspec'OfPack = Colspec' (Writer unpack) (PackMap packMap)
 
-union :: Pack b => QueryArr () b -> QueryArr () b -> QueryArr () b
-union = binrel Union
+intersect :: Pack a =>  QueryArr () a -> QueryArr () a -> QueryArr () a
+intersect = intersect' colspec'OfPack
 
-difference :: Pack b => QueryArr () b -> QueryArr () b -> QueryArr () b
-difference = binrel Difference
+union :: Pack a =>  QueryArr () a -> QueryArr () a -> QueryArr () a
+union = union' colspec'OfPack
+
+difference :: Pack a =>  QueryArr () a -> QueryArr () a -> QueryArr () a
+difference = union' colspec'OfPack
+
+intersect' :: Colspec' a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
+intersect' = binrel Intersect
+
+union' :: Colspec' a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
+union' = binrel Union
+
+difference' :: Colspec' a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
+difference' = binrel Difference
 
 -- I tried Query (a, a) a and couldn't get it to work.  Also
 -- I guess this would lead to a loss of sharing and much bigger queries.
@@ -122,19 +138,25 @@ difference = binrel Difference
 --
 -- Needs to be converted away from the Pack typeclass.
 -- Needes a datatype with unpack and packMap
-binrel :: Pack b => RelOp -> QueryArr () b -> QueryArr () b -> QueryArr () b
-binrel op q1 q2 = QueryArr f where
+binrel :: RelOp -> Colspec' a b -> QueryArr () a -> QueryArr () a
+          -> QueryArr () b
+binrel op colspec q1 q2 = QueryArr f where
   f ((), primQ, t0) = (w_out, PrimQuery.times primQ primQ', next t2)
   -- I didn't know what to do with primQ here, so I just copied
   -- aggregate and timesed it onto primQ'
     where (w1, primQ1, t1) = runQueryArr q1 ((), Empty, t0)
           (w2, primQ2, t2) = runQueryArr q2 ((), Empty, t1)
 
-          old1 = unpack w1
-          old2 = unpack w2
+          old1 = unpack' w1
+          old2 = unpack' w2
 
-          w_out = packMap (tagWith t2) w1
-          new = unpack w_out
+          w_out = packMap' (tagWith t2) w1
+          -- This used to be
+          -- new = unpack w_out
+          -- which wasn't well typed when changed to use the new Colspec'
+          -- interface.  This implementation is equivalent, but somehow
+          -- seems less satisfying.  Should it?
+          new = (map (tagWith t2)) (unpack' w1)
 
           old1_assoc = zip new (map AttrExpr old1)
           old2_assoc = zip new (map AttrExpr old2)
@@ -145,6 +167,9 @@ binrel op q1 q2 = QueryArr f where
           r2 = Project old2_assoc primQ2
 
           primQ' = Binary op r1 r2
+
+          packMap' = runPackMapOfColspec' colspec
+          unpack' = runWriterOfColspec' colspec
 
 case_ :: QueryArr ([(Wire Bool, Wire a)], Wire a) (Wire a)
 case_ = QueryArr f where

@@ -19,6 +19,7 @@ library
                    Karamaan.Opaleye.Bend,
                    Karamaan.Opaleye.Colspec,
                    Karamaan.Opaleye.Distinct,
+                   Karamaan.Opaleye.Default,
                    Karamaan.Opaleye.Explore,
                    Karamaan.Opaleye.Operators,
                    Karamaan.Opaleye.Operators2,

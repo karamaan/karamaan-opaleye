@@ -1,4 +1,4 @@
-{-# LANGUAGE Arrows #-}
+{-# LANGUAGE Arrows, FlexibleContexts #-}
 
 module Karamaan.Opaleye.Operators2 where
 
@@ -18,14 +18,12 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, Binary,
 import qualified Database.HaskellDB.PrimQuery as PrimQuery
 import Karamaan.Opaleye.Operators (binOp')
 import qualified Karamaan.Opaleye.Operators as Operators
-import Karamaan.Opaleye.Pack (Pack, packMap, unpack)
 import Control.Arrow ((***), arr, (<<<), second)
 import Data.Time.Calendar (Day)
 import qualified Karamaan.Opaleye.Values as Values
-import Karamaan.Opaleye.Colspec (Colspec'(Colspec'), runWriterOfColspec',
-                                 runPackMapOfColspec', Writer(Writer),
-                                 PackMap(PackMap))
-
+import Karamaan.Opaleye.Colspec (Colspec', runWriterOfColspec',
+                                 runPackMapOfColspec')
+import Karamaan.Opaleye.Default (Default, def)
 
 unOp :: ShowConstant c => BinOp -> String -> String -> c
         -> QueryArr (Wire a) (Wire a)
@@ -111,17 +109,17 @@ constantDay = unsafeConstant . Values.dayToSQL
 unsafeConstant :: String -> Query (Wire a)
 unsafeConstant = constantLit . OtherLit
 
-colspec'OfPack :: Pack a => Colspec' a a
-colspec'OfPack = Colspec' (Writer unpack) (PackMap packMap)
+intersect :: Default Colspec' a a =>
+             QueryArr () a -> QueryArr () a -> QueryArr () a
+intersect = intersect' def
 
-intersect :: Pack a =>  QueryArr () a -> QueryArr () a -> QueryArr () a
-intersect = intersect' colspec'OfPack
+union :: Default Colspec' a a
+         => QueryArr () a -> QueryArr () a -> QueryArr () a
+union = union' def
 
-union :: Pack a =>  QueryArr () a -> QueryArr () a -> QueryArr () a
-union = union' colspec'OfPack
-
-difference :: Pack a =>  QueryArr () a -> QueryArr () a -> QueryArr () a
-difference = union' colspec'OfPack
+difference :: Default Colspec' a a =>
+              QueryArr () a -> QueryArr () a -> QueryArr () a
+difference = union' def
 
 intersect' :: Colspec' a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
 intersect' = binrel Intersect

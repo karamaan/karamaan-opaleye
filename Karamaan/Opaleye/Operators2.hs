@@ -134,8 +134,6 @@ difference' = binrel Difference
 -- I guess this would lead to a loss of sharing and much bigger queries.
 -- Maybe the optimiser will prune all the uncessary stuff though.
 --
--- Needs to be converted away from the Pack typeclass.
--- Needes a datatype with unpack and packMap
 binrel :: RelOp -> Colspec' a b -> QueryArr () a -> QueryArr () a
           -> QueryArr () b
 binrel op colspec q1 q2 = QueryArr f where

@@ -1,7 +1,6 @@
 module Karamaan.Opaleye.Distinct where
 
-import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), runQueryArr, next,
-                                  tagWith)
+import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), runQueryArr)
 import Karamaan.Opaleye.Wire (Wire(Wire))
 import Database.HaskellDB.PrimQuery (PrimQuery(Group, Empty),PrimExpr(AttrExpr),
                                      times)

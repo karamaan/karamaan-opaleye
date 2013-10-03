@@ -90,11 +90,11 @@ makeAggr = maybe id AggrExpr
         -> (Aggregator (a, b) (a', b'), x -> (a, b))
 (agg, f) +: (agg', f') = (agg ***! agg', f &&& f')
 
-aggregate' :: (Aggregator a b, x -> a) -> Query x -> Query b
-aggregate' (m, f) q = aggregate m (fmap f q)
+mkAggregator :: (Aggregator a b, x -> a) -> Aggregator x b
+mkAggregator (m, f) = dimap f id m
 
-example :: Query (Wire String, Wire Int)
-           -> Query ((Wire String, Wire Int), Wire Int)
-example = aggregate' $ (groupBy, fst)
+example :: Aggregator (Wire String, Wire Int)
+                      ((Wire String, Wire Int), Wire Int)
+example = mkAggregator $ (groupBy, fst)
                        +: (Karamaan.Opaleye.Aggregate.sum, snd)
                        +: (avg, snd)

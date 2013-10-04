@@ -5,13 +5,15 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Empty, Restrict, Project),
                                      PrimExpr(AttrExpr, BinExpr),
                                      BinOp(OpEq))
 import Karamaan.Opaleye.Wire (Wire, unwire)
-import Control.Arrow (Arrow, arr, first, (&&&))
+import Control.Arrow (Arrow, arr, first, (&&&), (***))
 import Control.Category (Category, id, (.), (<<<))
 import Control.Applicative (Applicative, pure, (<*>))
 import Karamaan.Opaleye.Pack (Pack, unpack)
 import Karamaan.Opaleye.Colspec (runWriter, writer)
 import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
 import Data.Function (on)
+import Data.Profunctor (Profunctor, dimap)
+import Karamaan.Opaleye.ProductProfunctor (ProductProfunctor, empty, (***!))
 
 -- This is probably too general
 data QueryArr a b = QueryArr ((a, PrimQuery, Tag) -> (b, PrimQuery, Tag))
@@ -69,6 +71,13 @@ instance Functor (QueryArr a) where
 instance Applicative (QueryArr a) where
   pure = arr . const
   f <*> g = arr (uncurry ($)) <<< (f &&& g)
+
+instance Profunctor QueryArr where
+  dimap f g a = arr g <<< a <<< arr f
+
+instance ProductProfunctor QueryArr where
+  empty = id
+  (***!) = (***)
 
 -- Is it possible to implement ArrowChoice for QueryArr?
 -- The reason I think it might be is that the shape seems

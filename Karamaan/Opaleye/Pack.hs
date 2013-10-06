@@ -2,22 +2,6 @@
 
 module Karamaan.Opaleye.Pack where
 
-import Control.Arrow ((***))
-
-import Karamaan.Opaleye.Wire (Wire(Wire), unwire)
-
-class Pack a where
-  packMap :: (String -> String) -> a -> a
-  unpack :: a -> [String]
-
-instance Pack (Wire a) where
-  packMap f = Wire . f . unwire
-  unpack = return . unwire
-
-instance (Pack a, Pack b) => Pack (a, b) where
-  packMap f = packMap f *** packMap f
-  unpack (a, b) = unpack a ++ unpack b
-
 flatten0 () = ()
 unflatten0 () = ()
 
@@ -78,48 +62,3 @@ flatten14 (a, (b, (c, (a4, (a5, (a6, (a7, (a8, (a9, (a10, (a11, (a12,
   = (a, b, c, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)
 unflatten14 (a, b, c, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)
   = (a, (b, (c, (a4, (a5, (a6, (a7, (a8, (a9, (a10, (a11, (a12, (a13, a14)))))))))))))
-
-instance (Pack a, Pack b, Pack c) => Pack (a, b, c) where
-  packMap f = flatten3 . (packMap f *** packMap f) . unflatten3
-  unpack = unpack . unflatten3
-
-instance (Pack a, Pack b, Pack c, Pack d) => Pack (a, b, c, d) where
-  packMap f = flatten4 . (packMap f *** packMap f) . unflatten4
-  unpack = unpack . unflatten4
-
-instance (Pack a, Pack b, Pack c, Pack d, Pack e) => Pack (a, b, c, d, e) where
-  packMap f = flatten5 . (packMap f *** packMap f) . unflatten5
-  unpack = unpack . unflatten5
-
-instance (Pack a, Pack b, Pack c, Pack d, Pack e, Pack f)
-         => Pack (a, b, c, d, e, f) where
-  packMap f = flatten6 . (packMap f *** packMap f) . unflatten6
-  unpack = unpack . unflatten6
-
-instance (Pack a, Pack b, Pack c, Pack d, Pack e, Pack f, Pack a7)
-         => Pack (a, b, c, d, e, f, a7) where
-  packMap f = flatten7 . (packMap f *** packMap f) . unflatten7
-  unpack = unpack . unflatten7
-
-instance (Pack a, Pack b, Pack c, Pack d, Pack e, Pack f, Pack a7, Pack a8)
-         => Pack (a, b, c, d, e, f, a7, a8) where
-  packMap f = flatten8 . (packMap f *** packMap f) . unflatten8
-  unpack = unpack . unflatten8
-
-instance (Pack a, Pack b, Pack c, Pack d, Pack e, Pack f, Pack a7, Pack a8,
-          Pack a9)
-         => Pack (a, b, c, d, e, f, a7, a8, a9) where
-  packMap f = flatten9 . (packMap f *** packMap f) . unflatten9
-  unpack = unpack . unflatten9
-
-instance (Pack a, Pack b, Pack c, Pack d, Pack e, Pack f, Pack a7, Pack a8,
-          Pack a9, Pack a10)
-         => Pack (a, b, c, d, e, f, a7, a8, a9, a10) where
-  packMap f = flatten10 . (packMap f *** packMap f) . unflatten10
-  unpack = unpack . unflatten10
-
-instance (Pack a, Pack b, Pack c, Pack d, Pack e, Pack f, Pack a7, Pack a8,
-          Pack a9, Pack a10, Pack a11)
-         => Pack (a, b, c, d, e, f, a7, a8, a9, a10, a11) where
-  packMap f = flatten11 . (packMap f *** packMap f) . unflatten11
-  unpack = unpack . unflatten11

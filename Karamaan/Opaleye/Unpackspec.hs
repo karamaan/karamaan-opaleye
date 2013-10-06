@@ -2,7 +2,7 @@ module Karamaan.Opaleye.Unpackspec where
 
 import Karamaan.Opaleye.Colspec (Writer)
 import Karamaan.Opaleye.Tuples
-import Karamaan.Opaleye.Pack hiding (unpack)
+import Karamaan.Opaleye.Pack
 import Karamaan.Opaleye.ProductProfunctor ((***<), ProductContravariant, point)
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Control.Arrow (second)

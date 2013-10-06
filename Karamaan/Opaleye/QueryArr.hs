@@ -8,8 +8,7 @@ import Karamaan.Opaleye.Wire (Wire, unwire)
 import Control.Arrow (Arrow, arr, first, (&&&), (***))
 import Control.Category (Category, id, (.), (<<<))
 import Control.Applicative (Applicative, pure, (<*>))
-import Karamaan.Opaleye.Pack (Pack, unpack)
-import Karamaan.Opaleye.Colspec (runWriter, writer)
+import Karamaan.Opaleye.Colspec (runWriter)
 import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
 import Data.Function (on)
 import Data.Profunctor (Profunctor, dimap)
@@ -39,12 +38,6 @@ tagWith = appendShow . unsafeUnTag
 
 runQueryArr :: QueryArr a b -> (a, PrimQuery, Tag) -> (b, PrimQuery, Tag)
 runQueryArr (QueryArr f) = f
-
-packToUnpackspec :: Pack a => Unpackspec a
-packToUnpackspec = Unpackspec (writer unpack)
-
-runQueryArrPrim :: Pack b => Query b -> PrimQuery
-runQueryArrPrim = runQueryArrPrim' packToUnpackspec
 
 runQueryArrPrim' :: Unpackspec b -> Query b -> PrimQuery
 runQueryArrPrim' (Unpackspec g) f

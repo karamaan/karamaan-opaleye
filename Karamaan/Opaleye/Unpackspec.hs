@@ -1,9 +1,9 @@
 module Karamaan.Opaleye.Unpackspec where
 
 import Karamaan.Opaleye.Colspec (Writer)
-import Karamaan.Opaleye.Tuples
-import Karamaan.Opaleye.Pack
-import Karamaan.Opaleye.ProductProfunctor ((***<), ProductContravariant, point)
+import Data.Profunctor.Product.Tuples
+import Data.Profunctor.Product.Flatten
+import Data.Profunctor.Product ((***<), ProductContravariant, point)
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Control.Arrow (second)
 import Karamaan.WhaleUtil ((.:))

@@ -15,7 +15,7 @@ import Data.Time.Calendar
 import Karamaan.Opaleye.Predicates (singleEnquoten)
 import Control.Applicative (liftA2, pure)
 import Data.Profunctor (Profunctor, dimap)
-import Karamaan.Opaleye.ProductProfunctor (ProductProfunctor, empty, (***!))
+import Data.Profunctor.Product (ProductProfunctor, empty, (***!))
 import Data.Monoid (mempty)
 
 type S a = ReaderT String (State Int) a

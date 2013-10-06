@@ -2,9 +2,9 @@ module Karamaan.Opaleye.Applicative where
 
 import Control.Applicative (Applicative, (<$>), (<*>), pure)
 -- vv TODO: don't want to have to import all those explicitly.  What to do?
-import Karamaan.Opaleye.Pack
+import Data.Profunctor.Product.Flatten
 -- vv and these
-import Karamaan.Opaleye.Tuples
+import Data.Profunctor.Product.Tuples
 
 liftA0 :: Applicative f => r -> f r
 liftA0 f = pure f

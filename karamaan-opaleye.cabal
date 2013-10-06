@@ -12,7 +12,7 @@ library
   build-depends:   base >= 4 && < 5, time, haskelldb, karamaan-whaleutil,
                    -- vv mtl just for the State monad in Values.
                    -- Remove this dependency when we write our own monad.
-                   mtl, profunctors, contravariant,
+                   mtl, profunctors, contravariant, product-profunctors,
                    -- vv This is just for RunQuery.  If we ever move
                    -- RunQuery elsewhere we should remove this dependency.
                    postgresql-simple,
@@ -28,14 +28,11 @@ library
                    Karamaan.Opaleye.Operators,
                    Karamaan.Opaleye.Operators2,
                    Karamaan.Opaleye.Operators.Numeric,
-                   Karamaan.Opaleye.Pack,
                    Karamaan.Opaleye.Predicates,
-                   Karamaan.Opaleye.ProductProfunctor,
                    Karamaan.Opaleye.QueryArr,
                    Karamaan.Opaleye.RunQuery,
                    Karamaan.Opaleye.SQL,
                    Karamaan.Opaleye.Table,
-                   Karamaan.Opaleye.Tuples,
                    Karamaan.Opaleye.Wire,
                    Karamaan.Opaleye.Unpackspec,
                    Karamaan.Opaleye.Values

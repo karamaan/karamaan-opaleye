@@ -5,8 +5,8 @@ import Control.Arrow ((***))
 import Control.Applicative (Applicative, pure, (<$>), (<*>))
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Data.Profunctor (Profunctor, dimap)
-import Karamaan.Opaleye.ProductProfunctor (ProductProfunctor, empty, (***!),
-                                           ProductContravariant, point, (***<))
+import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
+                                ProductContravariant, point, (***<))
 import Data.Monoid (Monoid, mempty, (<>))
 
 -- The constructor is called Writer as a historical accident.

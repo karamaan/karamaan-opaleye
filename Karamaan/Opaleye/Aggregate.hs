@@ -13,9 +13,9 @@ import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.Colspec (Writer, PackMap, writerWire, packMapWire,
                                  runWriter, runPackMap, LWriter, writer)
 import Data.Profunctor (Profunctor, dimap, lmap)
-import Karamaan.Opaleye.ProductProfunctor (ProductProfunctor, empty, (***!),
-                                           ProductContravariant, point, (***<),
-                                           p3)
+import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
+                                ProductContravariant, point, (***<),
+                                p3)
 import Data.Functor.Contravariant (contramap)
 
 -- Maybe it would be safer if we combined the two writers into

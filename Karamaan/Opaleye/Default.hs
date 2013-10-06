@@ -4,7 +4,8 @@ module Karamaan.Opaleye.Default where
 
 import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.Colspec (Colspec'(Colspec'), writerWire, packMapWire)
-import Karamaan.Opaleye.ProductProfunctor
+-- TODO: vv this imports a lot of names.  Should we list them all?
+import Data.Profunctor.Product
 
 class Default p a b where
   -- Would rather call it "default", but that's a keyword

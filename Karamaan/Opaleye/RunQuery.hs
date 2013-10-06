@@ -11,8 +11,8 @@ import Database.PostgreSQL.Simple.FromField (FromField)
 import Database.PostgreSQL.Simple.FromRow (FromRow, fromRow, field)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Functor.Contravariant (Contravariant, contramap)
-import Karamaan.Opaleye.ProductProfunctor (ProductProfunctor, empty, (***!),
-                                           point, (***<))
+import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
+                                point, (***<))
 import Control.Applicative (pure, liftA2)
 import Karamaan.Opaleye.Default (Default, def)
 import Karamaan.Opaleye.Colspec (writerWire)

@@ -12,7 +12,7 @@ import Karamaan.Opaleye.Colspec (runWriter)
 import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
 import Data.Function (on)
 import Data.Profunctor (Profunctor, dimap)
-import Karamaan.Opaleye.ProductProfunctor (ProductProfunctor, empty, (***!))
+import Data.Profunctor.Product (ProductProfunctor, empty, (***!))
 
 -- This is probably too general
 data QueryArr a b = QueryArr ((a, PrimQuery, Tag) -> (b, PrimQuery, Tag))

@@ -63,3 +63,15 @@ instance (ProductProfunctor p, Default p a1 b1, Default p a2 b2,
                       (b1, b2, b3, b4, b5, b6, b7, b8,
                       b9, b10, b11, b12) where
   def = p12 (def, def, def, def, def, def, def, def, def, def, def, def)
+
+instance (ProductProfunctor p, Default p a1 b1, Default p a2 b2,
+          Default p a3 b3, Default p a4 b4, Default p a5 b5,
+          Default p a6 b6, Default p a7 b7, Default p a8 b8,
+          Default p a9 b9, Default p a10 b10, Default p a11 b11,
+          Default p a12 b12, Default p a13 b13, Default p a14 b14)
+         => Default p (a1, a2, a3, a4, a5, a6, a7, a8,
+                       a9, a10, a11, a12, a13, a14)
+                      (b1, b2, b3, b4, b5, b6, b7, b8,
+                      b9, b10, b11, b12, b13, b14) where
+  def = p14 (def, def, def, def, def, def, def, def, def, def,
+             def, def, def, def)

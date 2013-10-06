@@ -67,6 +67,18 @@ flatten12 (a, (b, (c, (a4, (a5, (a6, (a7, (a8, (a9, (a10, (a11, a12)))))))))))
 unflatten12 (a, b, c, a4, a5, a6, a7, a8, a9, a10, a11, a12)
   = (a, (b, (c, (a4, (a5, (a6, (a7, (a8, (a9, (a10, (a11, a12)))))))))))
 
+flatten13 (a, (b, (c, (a4, (a5, (a6, (a7, (a8, (a9, (a10, (a11, (a12,
+           a13))))))))))))
+  = (a, b, c, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)
+unflatten13 (a, b, c, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)
+  = (a, (b, (c, (a4, (a5, (a6, (a7, (a8, (a9, (a10, (a11, (a12, a13))))))))))))
+
+flatten14 (a, (b, (c, (a4, (a5, (a6, (a7, (a8, (a9, (a10, (a11, (a12,
+           (a13, a14)))))))))))))
+  = (a, b, c, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)
+unflatten14 (a, b, c, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)
+  = (a, (b, (c, (a4, (a5, (a6, (a7, (a8, (a9, (a10, (a11, (a12, (a13, a14)))))))))))))
+
 instance (Pack a, Pack b, Pack c) => Pack (a, b, c) where
   packMap f = flatten3 . (packMap f *** packMap f) . unflatten3
   unpack = unpack . unflatten3

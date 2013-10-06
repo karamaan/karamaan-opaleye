@@ -1,11 +1,14 @@
 module Karamaan.Opaleye.ProductProfunctor where
 
+import Prelude hiding (id)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Functor.Contravariant (Contravariant)
 -- vv TODO: don't want to have to import all those explicitly.  What to do?
 import Karamaan.Opaleye.Pack
 -- vv and these
 import Karamaan.Opaleye.Tuples
+import Control.Category (id)
+import Control.Arrow ((***))
 
 class Profunctor p => ProductProfunctor p where
   empty :: p () ()
@@ -14,6 +17,10 @@ class Profunctor p => ProductProfunctor p where
 class Contravariant f => ProductContravariant f where
   point :: f ()
   (***<) :: f a -> f b -> f (a, b)
+
+instance ProductProfunctor (->) where
+  empty = id
+  (***!) = (***)
 
 pT0 :: ProductProfunctor p => T0 -> p T0 T0
 pT0 = const empty

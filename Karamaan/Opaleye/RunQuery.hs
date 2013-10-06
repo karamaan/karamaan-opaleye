@@ -60,6 +60,9 @@ instance Default QueryRunner (Wire Bool) Bool where
 instance Default QueryRunner (Wire (Maybe Double)) (Maybe Double) where
   def = fieldQueryRunner
 
+instance Default QueryRunner (Wire (Maybe Int)) (Maybe Int) where
+  def = fieldQueryRunner
+
 -- Reflection stuff, see
 -- https://github.com/ekmett/reflection/blob/master/examples/Monoid.hs
 newtype FR a s = FR { runFR :: a }

@@ -54,6 +54,9 @@ instance Default QueryRunner (Wire Double) Double where
 instance Default QueryRunner (Wire Day) Day where
   def = fieldQueryRunner
 
+instance Default QueryRunner (Wire Bool) Bool where
+  def = fieldQueryRunner
+
 instance Default QueryRunner (Wire (Maybe Double)) (Maybe Double) where
   def = fieldQueryRunner
 

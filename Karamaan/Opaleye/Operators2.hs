@@ -119,7 +119,7 @@ union = union' def
 
 difference :: Default Colspec' a a =>
               QueryArr () a -> QueryArr () a -> QueryArr () a
-difference = union' def
+difference = difference' def
 
 intersect' :: Colspec' a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
 intersect' = binrel Intersect

@@ -11,6 +11,9 @@ class Default p a b where
   -- Would rather call it "default", but that's a keyword
   def :: p a b
 
+instance ProductProfunctor p => Default p () () where
+  def = empty
+
 instance Default Colspec' (Wire a) (Wire a) where
   def = Colspec' writerWire packMapWire
 

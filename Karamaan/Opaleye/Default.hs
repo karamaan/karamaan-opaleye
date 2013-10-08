@@ -14,6 +14,7 @@ class Default p a b where
 instance ProductProfunctor p => Default p () () where
   def = empty
 
+-- FIXME: um, shouldn't this be defined in Colspec?
 instance Default Colspec' (Wire a) (Wire a) where
   def = Colspec' writerWire packMapWire
 

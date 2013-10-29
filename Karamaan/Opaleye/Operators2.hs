@@ -185,8 +185,7 @@ ifThenElse = proc (cond, ifTrue, ifFalse) -> do
 fromMaybe :: QueryArr (Wire a, Wire (Maybe a)) (Wire a)
 fromMaybe = proc (d, m) -> do
   isNull' <- isNull -< m
-  -- TODO: can now do this with ifThenElse
-  case_ -< ([ (isNull', d) ], Wire.unsafeCoerce m)
+  ifThenElse -< (isNull', d, Wire.unsafeCoerce m)
 
 fromMaybe' :: Query (Wire a) -> QueryArr (Wire (Maybe a)) (Wire a)
 fromMaybe' d = proc m -> do

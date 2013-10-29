@@ -41,9 +41,9 @@ equalsDay = restrictWith . flip wireIs . literalDay
 --
 -- Predicates.isNull = restrict <<< Operators2.isNull
 --
--- Thus 'Predicates.isNull' should be redundant.  However I'm keeping it around
--- for historical reasons and will only get a chance to look at it when I get
--- a lot of free time to polish the Opaleye API.  -- Tom 2013-10-29
+-- Prefer the right hand side in new code.  Predicates.isNull should probably
+-- be removed.
+{-# DEPRECATED isNull "Use 'restrict <<< Operators2.isNull' instead" #-}
 isNull :: QueryArr (Wire a) ()
 isNull = restrictWith null'
 

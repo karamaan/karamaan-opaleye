@@ -36,6 +36,14 @@ equalsDay :: Day -> QueryArr (Wire Day) ()
 equalsDay = restrictWith . flip wireIs . literalDay
 
 -- FIXME: Should be (Wire (Maybe a))?
+-- 'Predicates.isNull' existed before 'Operators2.isNull', and the following
+-- condition is supposed to hold:
+--
+-- Predicates.isNull = restrict <<< Operators2.isNull
+--
+-- Thus 'Predicates.isNull' should be redundant.  However I'm keeping it around
+-- for historical reasons and will only get a chance to look at it when I get
+-- a lot of free time to polish the Opaleye API.  -- Tom 2013-10-29
 isNull :: QueryArr (Wire a) ()
 isNull = restrictWith null'
 

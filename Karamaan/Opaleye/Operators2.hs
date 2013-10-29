@@ -182,8 +182,6 @@ ifThenElse :: QueryArr (Wire Bool, Wire a, Wire a) (Wire a)
 ifThenElse = proc (cond, ifTrue, ifFalse) -> do
   case_ -< ([(cond, ifTrue)], ifFalse)
 
--- TODO: These are some useful null-related Opaleye arrows that don't
--- belong here.  They belong with Opaleye.
 fromMaybe :: QueryArr (Wire a, Wire (Maybe a)) (Wire a)
 fromMaybe = proc (d, m) -> do
   isNull' <- isNull -< m

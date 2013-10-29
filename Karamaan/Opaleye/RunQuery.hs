@@ -84,6 +84,11 @@ runQueryDefault q = do
   runQuery def q conn
 
 -- SQL.query_ with explicit RowParser
+--
+-- This uses Data.Reflection, and as such is very mysterious to me, so BE
+-- CAREFUL!  Data.Reflection oughtt to be a known Haskell quantity, albeit
+-- a powerful one, however no one really seems to understand this well
+-- apart from Oleg and Edward Kmett.
 query_ :: RowParser c -> SQL.Connection -> SQL.Query -> IO [c]
 query_ rowParser conn sql = reify rowParser (fmap (map runFR)
                                             . asProxyOf3 (SQL.query_ conn sql))

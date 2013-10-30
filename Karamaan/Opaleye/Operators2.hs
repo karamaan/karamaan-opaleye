@@ -33,9 +33,6 @@ unOp op opname constname constval = QueryArr f
                 t_string = s
                 t'_string = constname
                 t = AttrExpr s
-                -- FIXME: vv sort out the types properly
-                -- so this type sig doesn't have to be
-                -- specified
                 t' = Operators.constant constval
                 (assoc, w') = binOp' op opname t t_string t' t'_string
                                      (tagWith t0)

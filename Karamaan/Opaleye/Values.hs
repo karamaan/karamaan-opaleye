@@ -12,7 +12,6 @@ import Control.Monad.Reader (ReaderT, runReaderT, ask)
 import Karamaan.Opaleye.Colspec (Colspec)
 import qualified Karamaan.WhaleUtil.Date as UD
 import Data.Time.Calendar
-import Karamaan.Opaleye.Predicates (singleEnquoten)
 import Control.Applicative (liftA2, pure)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!))
@@ -21,6 +20,15 @@ import Data.Monoid (mempty)
 type S a = ReaderT String (State Int) a
 
 data SQLType = Integer | Text | Date | Boolean deriving Show
+
+sqlStringOfDay :: Day -> String
+sqlStringOfDay = singleEnquoten . UD.dayToSQL
+
+-- TODO: What's the correct location for this?
+-- FIXME: any usage of this risks an SQL injection bug.
+-- Need to come up with a principled way of dealing with these.
+singleEnquoten :: String -> String
+singleEnquoten = ("'" ++) . (++"'")
 
 showSQLType :: SQLType -> String
 -- vv Just using show works currently, but there's no reason
@@ -85,7 +93,7 @@ valuesMakerMaker f t = ValuesMaker ((:[]) . f, w, [t])
 
 -- TODO: this doesn't belong here
 dayToSQL :: Day -> String
-dayToSQL = (++ " :: date") . singleEnquoten . UD.dayToSQL
+dayToSQL = (++ " :: date") . sqlStringOfDay
 
 -- colsT0 doesn't exist, but if it did I think this would work
 --unit :: ValuesMaker () ()

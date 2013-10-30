@@ -2,6 +2,7 @@ module Karamaan.Opaleye.Predicates where
 
 import Karamaan.Opaleye.Wire (Wire, unWire)
 import Karamaan.Opaleye.QueryArr (QueryArr, restrictWith)
+import Karamaan.Opaleye.Values (sqlStringOfDay)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Database.HaskellDB.PrimQuery (PrimExpr(AttrExpr, UnExpr, ConstExpr,
                                               BinExpr),
@@ -9,7 +10,6 @@ import Database.HaskellDB.PrimQuery (PrimExpr(AttrExpr, UnExpr, ConstExpr,
                                      BinOp(OpOr, OpEq, OpNotEq),
                                      UnOp(OpIsNull), Literal(OtherLit))
 import Data.Time.Calendar (Day)
-import qualified Karamaan.WhaleUtil.Date as UD
 import Control.Arrow (arr, Arrow)
 import qualified Karamaan.WhaleUtil.Arrow as UA
 
@@ -26,7 +26,7 @@ equalsC :: ShowConstant a => a -> QueryArr (Wire a) ()
 equalsC = restrictWith . flip wireIs . showConstant
 
 literalDay :: Day -> Literal
-literalDay = OtherLit . singleEnquoten . UD.dayToSQL
+literalDay = OtherLit . sqlStringOfDay
                   -- ^^ I guess this should really be a DateLit, but I can't
                   -- work out how to use HaskellDB's CalendarTime
 
@@ -64,13 +64,6 @@ wireIs = wireOp OpEq
 
 wireIsNot :: Wire a -> Literal -> PrimExpr
 wireIsNot = wireOp OpNotEq
-
--- TODO: this should really be put somewhere else, or perhaps
--- singleEnquoten . UD.dayToSQL should be
--- FIXME: any usage of this risks an SQL injection bug.
--- Need to come up with a principled way of dealing with these.
-singleEnquoten :: String -> String
-singleEnquoten = ("'" ++) . (++"'")
 
 noOp :: Arrow arr => arr a ()
 noOp = arr (const ())

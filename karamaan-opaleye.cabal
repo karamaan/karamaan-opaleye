@@ -27,6 +27,7 @@ library
                    Karamaan.Opaleye.Distinct,
                    Karamaan.Opaleye.Default,
                    Karamaan.Opaleye.Explore,
+                   Karamaan.Opaleye.Join,
                    Karamaan.Opaleye.Operators,
                    Karamaan.Opaleye.Operators2,
                    Karamaan.Opaleye.Operators.Numeric,

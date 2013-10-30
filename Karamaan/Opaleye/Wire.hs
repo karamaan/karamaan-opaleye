@@ -9,5 +9,7 @@ unWire (Wire a) = a
 unwire :: Wire a -> String
 unwire = unWire
 
+-- TODO: should this always be within a Query?
+-- If so, replace Join.unsafeCoerce with it
 unsafeCoerce :: Wire a -> Wire b
 unsafeCoerce = Wire . unWire

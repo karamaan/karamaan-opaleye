@@ -43,7 +43,15 @@ joinWithNull q1 q2 = proc () -> do
   replacement <- q2 -< ()
   returnA -< (a, replacement)
 
--- FIXME: comment this
+
+-- Semijoin effectively does a LEFT JOIN between queries.
+--
+-- q1 has a nullable column, and it is joined to q2 which has a non-nullable
+-- column of the same type.  Where nulls appear in the column of q1 they are of
+-- course not joined to q2, but instead replaced by the value of q3.
+--
+-- Be careful with q3.  If it contains more than one row then you will get
+-- duplicated rows in the output.
 semijoin :: (Default Colspec' a a, Default Colspec' c c)
          => Query (a, Wire (Maybe b))
          -> Query (Wire b, c)

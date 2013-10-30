@@ -31,8 +31,8 @@ literalDay = OtherLit . sqlStringOfDay
                   -- ^^ I guess this should really be a DateLit, but I can't
                   -- work out how to use HaskellDB's CalendarTime
 
--- We only need equalsDay because HaskellDB insists on using CalendarTime
--- for some reason
+-- We only need equalsDay because HaskellDB doesn't have a
+-- ShowConstant instance for Day, only for CalendarTime from old-time.
 equalsDay :: Day -> QueryArr (Wire Day) ()
 equalsDay day = restrict
                 <<< eq

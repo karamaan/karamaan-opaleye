@@ -2,8 +2,6 @@
 
 module Karamaan.Opaleye.Default where
 
-import Karamaan.Opaleye.Wire (Wire)
-import Karamaan.Opaleye.Colspec (Colspec'(Colspec'), writerWire, packMapWire)
 -- TODO: vv this imports a lot of names.  Should we list them all?
 import Data.Profunctor.Product
 
@@ -13,10 +11,6 @@ class Default p a b where
 
 instance ProductProfunctor p => Default p () () where
   def = empty
-
--- FIXME: um, shouldn't this be defined in Colspec?
-instance Default Colspec' (Wire a) (Wire a) where
-  def = Colspec' writerWire packMapWire
 
 instance (ProductProfunctor p, Default p a1 b1, Default p a2 b2)
          => Default p (a1, a2) (b1, b2) where

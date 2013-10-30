@@ -1,3 +1,5 @@
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
+
 module Karamaan.Opaleye.Colspec where
 
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
@@ -8,6 +10,7 @@ import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
                                 ProductContravariant, point, (***<))
 import Data.Monoid (Monoid, mempty, (<>))
+import Karamaan.Opaleye.Default (Default, def)
 
 -- The constructor is called Writer as a historical accident.
 -- TODO: need to think about naming a lot in this library
@@ -54,6 +57,9 @@ data Colspec' a b = Colspec' (Writer a) (PackMap a b)
 
 instance Profunctor Colspec' where
   dimap f g (Colspec' w p) = Colspec' (contramap f w) (dimap f g p)
+
+instance Default Colspec' (Wire a) (Wire a) where
+  def = Colspec' writerWire packMapWire
 
 instance ProductProfunctor Colspec' where
   empty = Colspec' point empty

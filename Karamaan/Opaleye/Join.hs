@@ -18,8 +18,8 @@ unsafeCoerce = arr Wire.unsafeCoerce
 
 -- This is slightly subtle.  The eq *can* return Unknown
 -- (see http://en.wikipedia.org/wiki/Null_%28SQL%29#Comparisons_with_NULL_and_the_three-valued_logic_.283VL.29)
--- but since we restrict immediately the Unknown is indistinguishable
--- from false.
+-- but since we restrict immediately the Unknown is not distinguised
+-- from false in the overall result.
 restrictMaybeEq :: QueryArr (Wire (Maybe a), Wire a) ()
 restrictMaybeEq = restrict <<< eq <<< first unsafeCoerce
 

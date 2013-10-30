@@ -52,6 +52,9 @@ joinWithNull q1 q2 = proc () -> do
 --
 -- Be careful with q3.  If it contains more than one row then you will get
 -- duplicated rows in the output.
+--
+-- I suspect this could actually be implemented in terms of a LEFT JOIN, and
+-- that might even give better performance.
 semijoin :: (Default Colspec' a a, Default Colspec' c c)
          => Query (a, Wire (Maybe b))
          -> Query (Wire b, c)

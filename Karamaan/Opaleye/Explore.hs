@@ -5,12 +5,12 @@ module Karamaan.Opaleye.Explore where
 import Karamaan.Opaleye.Table (makeTable)
 import Karamaan.Opaleye.Colspec (col)
 import Karamaan.Opaleye.Applicative (a1)
-import Karamaan.Opaleye.QueryArr (equals, Query)
+import Karamaan.Opaleye.QueryArr (Query)
 import Karamaan.Opaleye.SQL (showSqlForPostgreSQLSimple' {-, showSqlUnopt-})
-import Karamaan.Opaleye.Predicates (equalsC)
-import Control.Arrow (returnA)
+import Karamaan.Opaleye.Predicates (equalsC, restrict)
+import Control.Arrow (returnA, (<<<))
 import Karamaan.Opaleye.Wire (Wire)
-import Karamaan.Opaleye.Operators2 (union, constant)
+import Karamaan.Opaleye.Operators2 (union, constant, eq)
 import Karamaan.Opaleye.Operators.Numeric (plus, divide)
 import Karamaan.Opaleye.Colspec (writerWire)
 import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
@@ -19,7 +19,7 @@ exampleTable :: Query (Wire Int)
 exampleTable = makeTable (a1 (col "id")) "exampleTable"
 
 -- Happily the optimised versions of these are equal.  This means that
--- equals could be implemented in terms of constant and equals.
+-- equals could be implemented in terms of constant and restrict << eq.
 example1 :: Query (Wire Int)
 example1 = proc () -> do
   id' <- exampleTable -< ()
@@ -34,7 +34,7 @@ example2 :: Query (Wire Int)
 example2 = proc () -> do
   id' <- exampleTable -< ()
   id'' <- constant 1 -< ()
-  equals -< (id', id'')
+  restrict <<< eq -< (id', id'')
   returnA -< id'
 
 run1_opt :: String

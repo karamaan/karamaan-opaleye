@@ -83,8 +83,11 @@ restrictWith :: (a -> PrimExpr) -> QueryArr a ()
 restrictWith predicate = QueryArr f where
   f (ws, primQ, t0) = ((), Restrict (predicate ws) primQ, t0)
 
+-- FIXME: can I get rid of this
+{-# DEPRECATED equals "Use 'Predicates.restrict <<< Operators2.eq' instead" #-}
 equals :: QueryArr (Wire a, Wire a) ()
 equals = restrictWith (uncurry equalsWire)
 
+{-# DEPRECATED equalsWire "Do not use equalsWire" #-}
 equalsWire :: Wire a -> Wire a -> PrimExpr
 equalsWire = BinExpr OpEq `on` (AttrExpr . unwire)

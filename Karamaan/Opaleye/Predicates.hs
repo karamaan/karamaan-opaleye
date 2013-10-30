@@ -3,6 +3,7 @@ module Karamaan.Opaleye.Predicates where
 import Karamaan.Opaleye.Wire (Wire, unWire)
 import Karamaan.Opaleye.QueryArr (QueryArr, restrictWith)
 import Karamaan.Opaleye.Values (sqlStringOfDay)
+import Karamaan.Opaleye.Operators2 (eq, constantDay)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Database.HaskellDB.PrimQuery (PrimExpr(AttrExpr, UnExpr, ConstExpr,
                                               BinExpr),
@@ -10,7 +11,7 @@ import Database.HaskellDB.PrimQuery (PrimExpr(AttrExpr, UnExpr, ConstExpr,
                                      BinOp(OpOr, OpEq, OpNotEq),
                                      UnOp(OpIsNull), Literal(OtherLit))
 import Data.Time.Calendar (Day)
-import Control.Arrow (arr, Arrow)
+import Control.Arrow (arr, Arrow, first, (<<<))
 import qualified Karamaan.WhaleUtil.Arrow as UA
 
 equalsOneOf :: ShowConstant a => [a] -> QueryArr (Wire a) ()
@@ -33,7 +34,10 @@ literalDay = OtherLit . sqlStringOfDay
 -- We only need equalsDay because HaskellDB insists on using CalendarTime
 -- for some reason
 equalsDay :: Day -> QueryArr (Wire Day) ()
-equalsDay = restrictWith . flip wireIs . literalDay
+equalsDay day = restrict
+                <<< eq
+                <<< first (constantDay day)
+                <<< arr (\d -> ((), d))
 
 -- FIXME: Should be (Wire (Maybe a))?
 -- 'Predicates.isNull' existed before 'Operators2.isNull', and the following

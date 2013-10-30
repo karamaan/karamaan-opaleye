@@ -23,6 +23,7 @@ doesntEqualAnyOf = UA.all_ . map notEqualC
 notEqualC :: ShowConstant a => a -> QueryArr (Wire a) ()
 notEqualC = restrictWith . flip wireIsNot . showConstant
 
+-- TODO: replace this with something like equalsDay?
 equalsC :: ShowConstant a => a -> QueryArr (Wire a) ()
 equalsC = restrictWith . flip wireIs . showConstant
 
@@ -31,8 +32,7 @@ literalDay = OtherLit . sqlStringOfDay
                   -- ^^ I guess this should really be a DateLit, but I can't
                   -- work out how to use HaskellDB's CalendarTime
 
--- We only need equalsDay because HaskellDB doesn't have a
--- ShowConstant instance for Day, only for CalendarTime from old-time.
+-- TODO: should we get rid of this as it is somewhat redundant?
 equalsDay :: Day -> QueryArr (Wire Day) ()
 equalsDay day = restrict
                 <<< eq

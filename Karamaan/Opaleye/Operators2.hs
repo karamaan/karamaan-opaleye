@@ -100,6 +100,9 @@ constant = constantLit . showConstant
 constantString :: String -> Query (Wire String)
 constantString = unsafeConstant . ("'" ++) . (++"' :: text")
 
+-- HaskellDB doesn't have a ShowConstant instance for Day, only for
+-- CalendarTime from old-time.  We could perhaps just add an orphan
+-- instance.
 constantDay :: Day -> Query (Wire Day)
 constantDay = unsafeConstant . Values.dayToSQL
 

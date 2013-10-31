@@ -2,9 +2,9 @@
 
 module Karamaan.Opaleye.Distinct where
 
-import Karamaan.Opaleye.QueryArr (Query, runQueryArr, simpleQueryArr)
+import Karamaan.Opaleye.QueryArr (Query, runSimpleQueryArr, simpleQueryArr)
 import Karamaan.Opaleye.Wire (Wire(Wire))
-import Database.HaskellDB.PrimQuery (PrimQuery(Group, Empty),PrimExpr(AttrExpr))
+import Database.HaskellDB.PrimQuery (PrimQuery(Group),PrimExpr(AttrExpr))
 import Karamaan.Opaleye.Operators2 (union)
 import Karamaan.Opaleye.Colspec (Colspec')
 import Karamaan.Opaleye.Default (Default)
@@ -21,7 +21,7 @@ distinct x = x `union` x
 -- trouble dealing with GROUP BY. See Report.Trade.Descendants.activeEdgesBroken
 distinct1 :: Query (Wire a) -> Query (Wire a)
 distinct1 q = simpleQueryArr $ \((), t0) ->
-  let (Wire oldCol, primQ, t1) = runQueryArr q ((), Empty, t0)
+  let (Wire oldCol, primQ, t1) = runSimpleQueryArr q ((), t0)
 -- vv We used to do
 --    newCol = tagWith t1 oldCol
 --    t2 = next t1

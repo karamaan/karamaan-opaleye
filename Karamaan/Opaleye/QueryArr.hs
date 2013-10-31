@@ -3,7 +3,7 @@ module Karamaan.Opaleye.QueryArr where
 import Prelude hiding ((.), id)
 import Database.HaskellDB.PrimQuery (PrimQuery(Empty, Restrict, Project),
                                      PrimExpr(AttrExpr, BinExpr),
-                                     BinOp(OpEq))
+                                     BinOp(OpEq), times)
 import Karamaan.Opaleye.Wire (Wire, unwire)
 import Control.Arrow (Arrow, arr, first, (&&&), (***))
 import Control.Category (Category, id, (.), (<<<))
@@ -76,6 +76,11 @@ instance Profunctor QueryArr where
 instance ProductProfunctor QueryArr where
   empty = id
   (***!) = (***)
+
+simpleQueryArr :: ((a, Tag) -> (b, PrimQuery, Tag)) -> QueryArr a b
+simpleQueryArr f = QueryArr g
+  where g (a0, primQuery, t0) = (a1, times primQuery primQuery', t1)
+          where (a1, primQuery', t1) = f (a0, t0)
 
 -- Is it possible to implement ArrowChoice for QueryArr?
 -- The reason I think it might be is that the shape seems

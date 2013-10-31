@@ -59,14 +59,13 @@ count = aggregatorMaker AggrCount
 
 aggregate :: Aggregator a b -> Query a -> Query b
 aggregate mf q = simpleQueryArr (\((), t0) ->
-  let (a, primQ, t1) = runSimpleQueryArr q ((), t0)
-  in aggregate'' mf a primQ t1)
+  aggregate'' mf (runSimpleQueryArr q ((), t0)))
 
 -- This is messy and there should be a lot more structure to it, but I can't see
 -- how, currently.  Once there's another function like this
 -- and binrel it will perhaps be easy to see where the real duplication is.
-aggregate'' :: Aggregator a b -> a -> PrimQuery -> Tag -> (b, PrimQuery, Tag)
-aggregate'' mf out primQ' j =
+aggregate'' :: Aggregator a b -> (a, PrimQuery, Tag) -> (b, PrimQuery, Tag)
+aggregate'' mf (out, primQ', j) =
     let tag' :: String -> String
         tag' = tagWith j
         (Aggregator aggrs writer' mapper) = mf

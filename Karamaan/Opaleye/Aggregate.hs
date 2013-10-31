@@ -1,10 +1,10 @@
 module Karamaan.Opaleye.Aggregate where
 
 import Prelude hiding (sum)
-import Karamaan.Opaleye.QueryArr (Query, runQueryArr,
+import Karamaan.Opaleye.QueryArr (Query, runSimpleQueryArr,
                                   Tag, next, tagWith,
                                   simpleQueryArr)
-import Database.HaskellDB.PrimQuery (PrimQuery(Project, Empty),
+import Database.HaskellDB.PrimQuery (PrimQuery(Project),
                                      AggrOp(AggrSum, AggrAvg, AggrMax,
                                             AggrCount),
                                      PrimExpr(AttrExpr,
@@ -59,7 +59,7 @@ count = aggregatorMaker AggrCount
 
 aggregate :: Aggregator a b -> Query a -> Query b
 aggregate mf q = simpleQueryArr (\((), t0) ->
-  let (a, primQ, t1) = runQueryArr q ((), Empty, t0)
+  let (a, primQ, t1) = runSimpleQueryArr q ((), t0)
       (the_new_names, t2, primQ') = aggregate'' mf a t1 primQ
   in (the_new_names, primQ', t2))
 

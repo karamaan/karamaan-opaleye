@@ -1,14 +1,15 @@
 module Karamaan.Opaleye.Aggregate where
 
 import Prelude hiding (sum)
-import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), runQueryArr,
-                                  Tag, next, tagWith)
+import Karamaan.Opaleye.QueryArr (Query, runQueryArr,
+                                  Tag, next, tagWith,
+                                  simpleQueryArr)
 import Database.HaskellDB.PrimQuery (PrimQuery(Project, Empty),
                                      AggrOp(AggrSum, AggrAvg, AggrMax,
                                             AggrCount),
                                      PrimExpr(AttrExpr,
                                               AggrExpr),
-                                     Attribute, times)
+                                     Attribute)
 import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.Colspec (Writer, PackMap, writerWire, packMapWire,
                                  runWriter, runPackMap, LWriter, writer)
@@ -57,10 +58,10 @@ count :: Aggregator (Wire a) (Wire Int)
 count = aggregatorMaker AggrCount
 
 aggregate :: Aggregator a b -> Query a -> Query b
-aggregate mf q = QueryArr (\((), primQuery, t0) ->
+aggregate mf q = simpleQueryArr (\((), t0) ->
   let (a, primQ, t1) = runQueryArr q ((), Empty, t0)
       (the_new_names, t2, primQ') = aggregate'' mf a t1 primQ
-  in (the_new_names, times primQuery primQ', t2))
+  in (the_new_names, primQ', t2))
 
 -- This is messy and there should be a lot more structure to it, but I can't see
 -- how, currently.  Once there's another function like this

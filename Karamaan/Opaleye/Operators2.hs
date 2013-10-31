@@ -149,7 +149,7 @@ binrel op colspec q1 q2 = simpleQueryArr f where
           -- which wasn't well typed when changed to use the new Colspec'
           -- interface.  This implementation is equivalent, but somehow
           -- seems less satisfying.  Should it?
-          new = (map tag') (runWriter w1)
+          new = map tag' (runWriter w1)
 
           assoc = zip new . map AttrExpr . runWriter
 

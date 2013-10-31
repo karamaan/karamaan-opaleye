@@ -2,10 +2,9 @@
 
 module Karamaan.Opaleye.Distinct where
 
-import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), runQueryArr)
+import Karamaan.Opaleye.QueryArr (Query, runQueryArr, simpleQueryArr)
 import Karamaan.Opaleye.Wire (Wire(Wire))
-import Database.HaskellDB.PrimQuery (PrimQuery(Group, Empty),PrimExpr(AttrExpr),
-                                     times)
+import Database.HaskellDB.PrimQuery (PrimQuery(Group, Empty),PrimExpr(AttrExpr))
 import Karamaan.Opaleye.Operators2 (union)
 import Karamaan.Opaleye.Colspec (Colspec')
 import Karamaan.Opaleye.Default (Default)
@@ -21,7 +20,7 @@ distinct x = x `union` x
 -- I think this is a correct implementation, but HaskellDB still seems to have
 -- trouble dealing with GROUP BY. See Report.Trade.Descendants.activeEdgesBroken
 distinct1 :: Query (Wire a) -> Query (Wire a)
-distinct1 q = QueryArr $ \((), primQuery, t0) ->
+distinct1 q = simpleQueryArr $ \((), t0) ->
   let (Wire oldCol, primQ, t1) = runQueryArr q ((), Empty, t0)
 -- vv We used to do
 --    newCol = tagWith t1 oldCol
@@ -32,5 +31,4 @@ distinct1 q = QueryArr $ \((), primQuery, t0) ->
 -- and HaskellDB seems happier with that.  Note that 'tagWith t1
 -- oldCol' adds an *additional* tag to a column name that presumably
 -- already has one.  I wasn't sure if that was a good idea anyway.
-      queryMapper = times primQuery . Group [(newCol, AttrExpr oldCol)]
-  in (Wire newCol, queryMapper primQ, t2)
+  in (Wire newCol, Group [(newCol, AttrExpr oldCol)] primQ, t2)

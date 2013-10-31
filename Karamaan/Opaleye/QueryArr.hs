@@ -15,6 +15,11 @@ import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!))
 
 -- This is probably too general
+-- We want something more like
+--   data QueryArr a b = QueryArr ((a, Tag) -> (b, PrimQuery, Tag))
+-- but can't get it easily with the AST that HaskellDB gives us, because
+-- restrict has to modify the PrimQuery, rather than just doing a product,
+-- I think.
 data QueryArr a b = QueryArr ((a, PrimQuery, Tag) -> (b, PrimQuery, Tag))
 
 type Query b = QueryArr () b

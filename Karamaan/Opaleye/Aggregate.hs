@@ -60,8 +60,7 @@ count = aggregatorMaker AggrCount
 aggregate :: Aggregator a b -> Query a -> Query b
 aggregate mf q = simpleQueryArr (\((), t0) ->
   let (a, primQ, t1) = runSimpleQueryArr q ((), t0)
-      (the_new_names, t2, primQ') = aggregate'' mf a t1 primQ
-  in (the_new_names, t2, primQ'))
+  in aggregate'' mf a t1 primQ)
 
 -- This is messy and there should be a lot more structure to it, but I can't see
 -- how, currently.  Once there's another function like this

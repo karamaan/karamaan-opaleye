@@ -64,10 +64,10 @@ aggregate agg q = simpleQueryArr (aggregate' agg . runSimpleQueryArr q)
 -- how, currently.  Once there's another function like this
 -- and binrel it will perhaps be easy to see where the real duplication is.
 aggregate' :: Aggregator a b -> (a, PrimQuery, Tag) -> (b, PrimQuery, Tag)
-aggregate' mf (out, primQ', j) =
+aggregate' agg (out, primQ', j) =
     let tag' :: String -> String
         tag' = tagWith j
-        (Aggregator aggrs writer' mapper) = mf
+        (Aggregator aggrs writer' mapper) = agg
         old_names :: [String]
         old_names = runWriter writer' out
         new_names :: [String]

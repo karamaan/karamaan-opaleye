@@ -5,10 +5,9 @@ module Karamaan.Opaleye.Operators2 where
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 import qualified Karamaan.Opaleye.Wire as Wire
 import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith, Tag,
-                                  runQueryArr, simpleQueryArr)
+                                  simpleQueryArr, runSimpleQueryArr)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
-import Database.HaskellDB.PrimQuery (PrimQuery(Project, Binary,
-                                               Empty),
+import Database.HaskellDB.PrimQuery (PrimQuery(Project, Binary),
                                      RelOp(Union, Intersect, Difference), extend,
                                      PrimExpr(AttrExpr, ConstExpr),
                                      BinOp,
@@ -138,8 +137,8 @@ binrel :: RelOp -> Colspec' a b -> QueryArr () a -> QueryArr () a
           -> QueryArr () b
 binrel op colspec q1 q2 = simpleQueryArr f where
   f ((), t0) = (w_out, primQ, next t2)
-    where (w1, primQ1, t1) = runQueryArr q1 ((), Empty, t0)
-          (w2, primQ2, t2) = runQueryArr q2 ((), Empty, t1)
+    where (w1, primQ1, t1) = runSimpleQueryArr q1 ((), t0)
+          (w2, primQ2, t2) = runSimpleQueryArr q2 ((), t1)
 
           old1 = unpack' w1
           old2 = unpack' w2

@@ -44,6 +44,9 @@ tagWith = appendShow . unsafeUnTag
 runQueryArr :: QueryArr a b -> (a, PrimQuery, Tag) -> (b, PrimQuery, Tag)
 runQueryArr (QueryArr f) = f
 
+runSimpleQueryArr :: QueryArr a b -> (a, Tag) -> (b, PrimQuery, Tag)
+runSimpleQueryArr f (a, t) = runQueryArr f (a, Empty, t)
+
 runQueryArrPrim' :: Unpackspec b -> Query b -> PrimQuery
 runQueryArrPrim' (Unpackspec g) f
   =  Project (map (id &&& AttrExpr) cols) primQuery

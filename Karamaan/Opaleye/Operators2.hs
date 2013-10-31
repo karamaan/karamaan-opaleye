@@ -140,9 +140,6 @@ binrel op colspec q1 q2 = simpleQueryArr f where
     where (w1, primQ1, t1) = runSimpleQueryArr q1 ((), t0)
           (w2, primQ2, t2) = runSimpleQueryArr q2 ((), t1)
 
-          old1 = unpack' w1
-          old2 = unpack' w2
-
           w_out = packMap' (tagWith t2) w1
           -- This used to be
           -- new = unpack w_out
@@ -151,8 +148,10 @@ binrel op colspec q1 q2 = simpleQueryArr f where
           -- seems less satisfying.  Should it?
           new = (map (tagWith t2)) (unpack' w1)
 
-          old1_assoc = zip new (map AttrExpr old1)
-          old2_assoc = zip new (map AttrExpr old2)
+          assoc = zip new . map AttrExpr . unpack'
+
+          old1_assoc = assoc w1
+          old2_assoc = assoc w2
 
           r1 :: PrimQuery
           r1 = Project old1_assoc primQ1

@@ -140,13 +140,16 @@ binrel op colspec q1 q2 = simpleQueryArr f where
     where (w1, primQ1, t1) = runSimpleQueryArr q1 ((), t0)
           (w2, primQ2, t2) = runSimpleQueryArr q2 ((), t1)
 
-          w_out = runPackMap (tagWith t2) w1
+          tag' :: String -> String
+          tag' = tagWith t2
+
+          w_out = runPackMap tag' w1
           -- This used to be
           -- new = unpack w_out
           -- which wasn't well typed when changed to use the new Colspec'
           -- interface.  This implementation is equivalent, but somehow
           -- seems less satisfying.  Should it?
-          new = (map (tagWith t2)) (runWriter w1)
+          new = (map tag') (runWriter w1)
 
           assoc = zip new . map AttrExpr . runWriter
 

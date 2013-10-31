@@ -61,12 +61,12 @@ aggregate :: Aggregator a b -> Query a -> Query b
 aggregate mf q = simpleQueryArr (\((), t0) ->
   let (a, primQ, t1) = runSimpleQueryArr q ((), t0)
       (the_new_names, t2, primQ') = aggregate'' mf a t1 primQ
-  in (the_new_names, primQ', t2))
+  in (the_new_names, t2, primQ'))
 
 -- This is messy and there should be a lot more structure to it, but I can't see
 -- how, currently.  Once there's another function like this
 -- and binrel it will perhaps be easy to see where the real duplication is.
-aggregate'' :: Aggregator a b -> a -> Tag -> PrimQuery -> (b, Tag, PrimQuery)
+aggregate'' :: Aggregator a b -> a -> Tag -> PrimQuery -> (b, PrimQuery, Tag)
 aggregate'' mf out j primQ' =
     let tag' :: String -> String
         tag' = tagWith j
@@ -79,7 +79,7 @@ aggregate'' mf out j primQ' =
         zipped = zip3 new_names (runWriter aggrs out) old_names
         jobber :: PrimQuery
         jobber = Project (map assoc zipped) primQ'
-    in (runPackMap mapper tag' out, next j, jobber)
+    in (runPackMap mapper tag' out, jobber, next j)
 
 assoc :: (String, Maybe AggrOp, String) -> (Attribute, PrimExpr)
 assoc (snew, mop, sold) = (snew, makeAggr mop (AttrExpr sold))

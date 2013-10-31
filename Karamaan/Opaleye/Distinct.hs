@@ -13,6 +13,7 @@ import Karamaan.Opaleye.Default (Default)
 -- I realised you can implement distinct x = x `union` x!
 -- This may fail massively with large queries unless the optimiser realises
 -- that I'm taking the union of the same query twice.
+-- TODO: Try to just implement this as x `union` "empty"?
 distinct :: Default Colspec' a a => Query a -> Query a
 distinct x = x `union` x
 

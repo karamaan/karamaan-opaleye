@@ -58,8 +58,7 @@ count :: Aggregator (Wire a) (Wire Int)
 count = aggregatorMaker AggrCount
 
 aggregate :: Aggregator a b -> Query a -> Query b
-aggregate mf q = simpleQueryArr (\((), t0) ->
-  aggregate'' mf (runSimpleQueryArr q ((), t0)))
+aggregate mf q = simpleQueryArr (aggregate'' mf . runSimpleQueryArr q)
 
 -- This is messy and there should be a lot more structure to it, but I can't see
 -- how, currently.  Once there's another function like this

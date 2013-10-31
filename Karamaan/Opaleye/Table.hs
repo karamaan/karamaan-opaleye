@@ -1,9 +1,9 @@
 module Karamaan.Opaleye.Table where
 
-import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith)
+import Karamaan.Opaleye.QueryArr (Query, next, tagWith, simpleQueryArr)
 import Database.HaskellDB.PrimQuery (PrimQuery(Project, BaseTable),
                                      PrimExpr(AttrExpr),
-                                     Attribute, Assoc, times)
+                                     Attribute, Assoc)
 import Karamaan.Opaleye.Colspec (Colspec, runWriterOfColspec,
                                  runPackMapOfColspec)
 import Control.Arrow ((***))
@@ -14,9 +14,9 @@ makeTable colspec = makeTable' colspec (zip x x)
   where x = runWriterOfColspec colspec
 
 makeTable' :: Colspec a -> [(String, String)] -> String -> Query a
-makeTable' colspec cols table_name = QueryArr f
-  where f ((), primQuery, t0) = (retwires, times primQuery primQuery', next t0)
-          where (retwires, primQuery') = makeTable'' colspec cols table_name (tagWith t0)
+makeTable' colspec cols table_name = simpleQueryArr f
+  where f ((), t0) = (retwires, primQuery, next t0)
+          where (retwires, primQuery) = makeTable'' colspec cols table_name (tagWith t0)
 
 -- TODO: this needs tidying
 makeTable'' :: Colspec a -> [(String, String)] -> String -> (String -> String)

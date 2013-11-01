@@ -86,7 +86,7 @@ runQueryDefault q = do
 -- SQL.query_ with explicit RowParser
 --
 -- This uses Data.Reflection, and as such is very mysterious to me, so BE
--- CAREFUL!  Data.Reflection oughtt to be a known Haskell quantity, albeit
+-- CAREFUL!  Data.Reflection ought to be a known Haskell quantity, albeit
 -- a powerful one, however no one really seems to understand this well
 -- apart from Oleg and Edward Kmett.
 query_ :: RowParser c -> SQL.Connection -> SQL.Query -> IO [c]

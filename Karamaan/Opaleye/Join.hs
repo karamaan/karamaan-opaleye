@@ -48,7 +48,7 @@ joinWithNull q1 q2 = proc () -> do
 --
 -- q1 has a nullable column, and it is joined to q2 which has a non-nullable
 -- column of the same type.  Where nulls appear in the column of q1 they are of
--- course not joined to q2, but instead replaced by the value of q3.
+-- course not joined to q2.  Instead they are replaced by the value of q3.
 --
 -- Be careful with q3.  If it contains more than one row then you will get
 -- duplicated rows in the output.

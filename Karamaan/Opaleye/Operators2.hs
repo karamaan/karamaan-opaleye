@@ -17,7 +17,7 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, Binary),
 import qualified Database.HaskellDB.PrimQuery as PrimQuery
 import Karamaan.Opaleye.Operators (binOp')
 import qualified Karamaan.Opaleye.Operators as Operators
-import Control.Arrow ((***), arr, (<<<), second)
+import Control.Arrow ((***), arr, (<<<), second, Arrow)
 import Data.Time.Calendar (Day)
 import qualified Karamaan.Opaleye.Values as Values
 import Karamaan.Opaleye.Colspec (Colspec', runWriterOfColspec',
@@ -194,5 +194,5 @@ fromMaybe' d = proc m -> do
 wireToPrimExpr :: Wire a -> PrimExpr
 wireToPrimExpr = AttrExpr . unWire
 
-opC :: QueryArr (a, b) c -> Query b -> QueryArr a c
+opC :: Arrow arr => arr (a, b) c -> arr () b -> arr a c
 opC op q = op <<< second q <<< arr (\a -> (a, ()))

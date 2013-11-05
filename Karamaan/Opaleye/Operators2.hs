@@ -40,6 +40,9 @@ unOp op opname constname constval = QueryArr f
 eq :: QueryArr (Wire a, Wire a) (Wire Bool)
 eq = opArr PrimQuery.OpEq "eq"
 
+and :: QueryArr (Wire Bool, Wire Bool) (Wire Bool)
+and = opArr PrimQuery.OpAnd "and"
+
 notEq :: QueryArr (Wire a, Wire a) (Wire Bool)
 notEq = opArr PrimQuery.OpNotEq "not_eq"
 

@@ -2,6 +2,7 @@
 
 module Karamaan.Opaleye.Operators2 where
 
+import Prelude hiding (and)
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 import qualified Karamaan.Opaleye.Wire as Wire
 import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith, Tag,
@@ -17,12 +18,13 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, Binary),
 import qualified Database.HaskellDB.PrimQuery as PrimQuery
 import Karamaan.Opaleye.Operators (binOp')
 import qualified Karamaan.Opaleye.Operators as Operators
-import Control.Arrow ((***), arr, (<<<), second, Arrow)
+import Control.Arrow ((***), arr, (<<<), second, Arrow, (&&&))
 import Data.Time.Calendar (Day)
 import qualified Karamaan.Opaleye.Values as Values
 import Karamaan.Opaleye.Colspec (Colspec', runWriterOfColspec',
                                  runPackMapOfColspec')
 import Karamaan.Opaleye.Default (Default, def)
+import Karamaan.WhaleUtil.Arrow (replaceWith)
 
 unOp :: ShowConstant c => BinOp -> String -> String -> c
         -> QueryArr (Wire a) (Wire a)
@@ -45,6 +47,12 @@ and = opArr PrimQuery.OpAnd "and"
 
 notEq :: QueryArr (Wire a, Wire a) (Wire Bool)
 notEq = opArr PrimQuery.OpNotEq "not_eq"
+
+doesntEqualAnyOf :: ShowConstant a => [a] -> QueryArr (Wire a) (Wire Bool)
+-- TODO: Should this be foldl', since laziness gets us nothing here?
+doesntEqualAnyOf = foldr (\x rest -> and <<< (x &&& rest)) true
+                   . map (opC notEq . constant)
+  where true = replaceWith (constant True)
 
 -- TODO: does HaskellDB support this?  Is it another Postgres incompatibility
 -- thing and we should use the Postgres SQL generator explicitly?

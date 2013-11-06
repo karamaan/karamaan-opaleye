@@ -14,6 +14,8 @@ import Data.Time.Calendar (Day)
 import Control.Arrow (arr, Arrow, first, (<<<))
 import qualified Karamaan.WhaleUtil.Arrow as UA
 
+{-# DEPRECATED equalsOneOf
+    "Use '\\xs -> (restrict <<<) . Operators2.equalsOneOf xs' instead" #-}
 equalsOneOf :: ShowConstant a => [a] -> QueryArr (Wire a) ()
 equalsOneOf = restrictWith . flip wireIsOneOf . map showConstant
 

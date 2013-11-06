@@ -2,7 +2,7 @@
 
 module Karamaan.Opaleye.Operators2 where
 
-import Prelude hiding (and)
+import Prelude hiding (and, or)
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 import qualified Karamaan.Opaleye.Wire as Wire
 import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith, Tag,
@@ -45,6 +45,9 @@ eq = opArr PrimQuery.OpEq "eq"
 and :: QueryArr (Wire Bool, Wire Bool) (Wire Bool)
 and = opArr PrimQuery.OpAnd "and"
 
+or :: QueryArr (Wire Bool, Wire Bool) (Wire Bool)
+or = opArr PrimQuery.OpOr "or"
+
 notEq :: QueryArr (Wire a, Wire a) (Wire Bool)
 notEq = opArr PrimQuery.OpNotEq "not_eq"
 
@@ -52,6 +55,11 @@ doesntEqualAnyOf :: ShowConstant a => [a] -> QueryArr (Wire a) (Wire Bool)
 -- TODO: Should this be foldl', since laziness gets us nothing here?
 doesntEqualAnyOf = foldrArr and true . map (opC notEq . constant)
   where true = replaceWith (constant True)
+
+equalsOneOf :: ShowConstant a => [a] -> QueryArr (Wire a) (Wire Bool)
+-- TODO: Should this be foldl', since laziness gets us nothing here?
+equalsOneOf = foldrArr or false . map (opC eq . constant)
+  where false = replaceWith (constant False)
 
 -- TODO: does HaskellDB support this?  Is it another Postgres incompatibility
 -- thing and we should use the Postgres SQL generator explicitly?

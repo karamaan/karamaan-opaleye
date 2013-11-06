@@ -18,8 +18,13 @@ import qualified Karamaan.WhaleUtil.Arrow as UA
 -- Predicates contains code from an earlier time when I didn't understand the
 -- more convenient ways to work with Arrows.
 
-{-# DEPRECATED equalsOneOf
-    "Use '\\xs -> (restrict <<<) . Operators2.equalsOneOf xs' instead" #-}
+-- We would have liked to deprecate this but it seems that it's a lot faster
+-- than the one in Operators2, probably because it works entirely in terms of
+-- PrimExpr.
+-- (NB they generate the same (or very similar) queries, but for some reason
+-- it seems much slower to go through QueryArr)
+-- {-# DEPRECATED equalsOneOf
+--    "Use '\\xs -> (restrict <<<) . Operators2.equalsOneOf xs' instead" #-}
 equalsOneOf :: ShowConstant a => [a] -> QueryArr (Wire a) ()
 equalsOneOf = restrictWith . flip wireIsOneOf . map showConstant
 

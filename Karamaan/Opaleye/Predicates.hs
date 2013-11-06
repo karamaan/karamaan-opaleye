@@ -18,7 +18,7 @@ equalsOneOf :: ShowConstant a => [a] -> QueryArr (Wire a) ()
 equalsOneOf = restrictWith . flip wireIsOneOf . map showConstant
 
 {-# DEPRECATED doesntEqualAnyOf
-    "Use '\\xs -> restrict <<< . Operators2.doesntEqualAnyOf xs' instead" #-}
+    "Use '\\xs -> (restrict <<<) . Operators2.doesntEqualAnyOf xs' instead" #-}
 doesntEqualAnyOf :: ShowConstant a => [a] -> QueryArr (Wire a) ()
 doesntEqualAnyOf = UA.all_ . map notEqualC
 

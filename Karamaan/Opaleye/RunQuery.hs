@@ -17,7 +17,8 @@ import Control.Applicative (pure, liftA2)
 import Karamaan.Opaleye.Default (Default, def)
 import Karamaan.Opaleye.Colspec (writerWire)
 import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
-import Karamaan.Opaleye.SQL (showSqlForPostgreSQLSimple')
+import Karamaan.Opaleye.SQL (showSqlForPostgreSQLSimple,
+                             showSqlForPostgreSQLSimpleUnopt)
 import Karamaan.Opaleye.QueryArr (Query)
 import Data.String (fromString)
 
@@ -76,7 +77,7 @@ asProxyOf3 a _ = a
 runQuery :: QueryRunner a b -> Query a -> SQL.Connection -> IO [b]
 runQuery (QueryRunner u rowParser) q conn = query_ rowParser conn sql
   where sql :: SQL.Query
-        sql = fromString (showSqlForPostgreSQLSimple' u q)
+        sql = fromString (showSqlForPostgreSQLSimple u q)
 
 runQueryDefault :: Default QueryRunner a b => Query a -> IO [b]
 runQueryDefault q = do

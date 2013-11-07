@@ -9,8 +9,13 @@ import Karamaan.Opaleye.QueryArr (Query, runQueryArrPrim')
 import Karamaan.Opaleye.Unpackspec (Unpackspec)
 import Karamaan.WhaleUtil ((.:))
 
+{-# DEPRECATED showSqlForPostgreSQLSimple'
+    "Use the unprimed version instead" #-}
 showSqlForPostgreSQLSimple' :: Unpackspec a -> Query a -> String
-showSqlForPostgreSQLSimple' = optimizeFormatAndShowSQL .: runQueryArrPrim'
+showSqlForPostgreSQLSimple' = showSqlForPostgreSQLSimple
+
+showSqlForPostgreSQLSimple :: Unpackspec a -> Query a -> String
+showSqlForPostgreSQLSimple = optimizeFormatAndShowSQL .: runQueryArrPrim'
 
 formatAndShowSQL :: PrimQuery -> String
 formatAndShowSQL = show

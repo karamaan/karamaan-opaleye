@@ -6,7 +6,7 @@ import Karamaan.Opaleye.Table (makeTable)
 import Karamaan.Opaleye.Colspec (col)
 import Karamaan.Opaleye.Applicative (a1)
 import Karamaan.Opaleye.QueryArr (Query)
-import Karamaan.Opaleye.SQL (showSqlForPostgreSQLSimple' {-, showSqlUnopt-})
+import Karamaan.Opaleye.SQL (showSqlForPostgreSQLSimple {-, showSqlUnopt-})
 import Karamaan.Opaleye.Predicates (equalsC, restrict)
 import Control.Arrow (returnA, (<<<))
 import Karamaan.Opaleye.Wire (Wire)
@@ -28,7 +28,7 @@ example1 = proc () -> do
 
 -- TODO: need to generalize this somehow, perhaps with Default
 showSql :: Query (Wire a) -> String
-showSql = showSqlForPostgreSQLSimple' (Unpackspec writerWire)
+showSql = showSqlForPostgreSQLSimple (Unpackspec writerWire)
 
 example2 :: Query (Wire Int)
 example2 = proc () -> do

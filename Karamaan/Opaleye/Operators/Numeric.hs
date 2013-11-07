@@ -43,4 +43,10 @@ gt :: QueryArr (Wire a, Wire a) (Wire Bool)
 gt = opArr PrimQuery.OpGt "gt"
 
 gte :: QueryArr (Wire a, Wire a) (Wire Bool)
-gte = opArr PrimQuery.OpGtEq "gteq"
+gte = opArr PrimQuery.OpGtEq "gte"
+
+lt :: QueryArr (Wire a, Wire a) (Wire Bool)
+lt = opArr PrimQuery.OpLt "lt"
+
+lte :: QueryArr (Wire a, Wire a) (Wire Bool)
+lte = opArr PrimQuery.OpLtEq "lte"

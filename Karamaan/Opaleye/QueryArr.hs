@@ -20,6 +20,7 @@ import Data.Profunctor.Product (ProductProfunctor, empty, (***!))
 -- but can't get it easily with the AST that HaskellDB gives us, because
 -- restrict has to modify the PrimQuery, rather than just doing a product,
 -- I think.
+-- TODO: make this a newtype?
 data QueryArr a b = QueryArr ((a, PrimQuery, Tag) -> (b, PrimQuery, Tag))
 
 type Query b = QueryArr () b

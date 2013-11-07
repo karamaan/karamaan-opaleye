@@ -40,6 +40,7 @@ instance ProductProfunctor QueryRunner where
     QueryRunner (u ***< u') (liftA2 (,) b b')
 
 -- TODO: May want to make this "(Wire b) a" in the future
+-- TODO: put 'Unpackspec writerWire' in Unpackspec.hs
 fieldQueryRunner :: FromField a => QueryRunner (Wire a) a
 fieldQueryRunner = QueryRunner (Unpackspec writerWire) field
 

@@ -26,6 +26,10 @@ import Karamaan.Opaleye.Colspec (Colspec', runWriterOfColspec',
 import Karamaan.Opaleye.Default (Default, def)
 import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr, opC)
 
+-- The only reason this is called Operators2 rather than Operators is that
+-- I had to split the Operators module in two to avoid circular dependencies.
+-- At some point I should come up with a better naming system.
+
 unOp :: ShowConstant c => BinOp -> String -> String -> c
         -> QueryArr (Wire a) (Wire a)
 unOp op opname constname constval = QueryArr f

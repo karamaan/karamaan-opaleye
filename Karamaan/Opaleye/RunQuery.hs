@@ -17,8 +17,7 @@ import Control.Applicative (pure, liftA2)
 import Karamaan.Opaleye.Default (Default, def)
 import Karamaan.Opaleye.Colspec (writerWire)
 import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
-import Karamaan.Opaleye.SQL (showSqlForPostgreSQLSimple,
-                             showSqlForPostgreSQLSimpleUnopt)
+import Karamaan.Opaleye.SQL (showSqlForPostgreSQLSimple)
 import Karamaan.Opaleye.QueryArr (Query)
 import Data.String (fromString)
 

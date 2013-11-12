@@ -23,6 +23,12 @@ instance (ProductProfunctor p, Default p a1 b1, Default p a2 b2,
   def = p3 (def, def, def)
 
 instance (ProductProfunctor p, Default p a1 b1, Default p a2 b2,
+          Default p a3 b3, Default p a4 b4)
+         => Default p (a1, a2, a3, a4)
+                      (b1, b2, b3, b4) where
+  def = p4 (def, def, def, def)
+
+instance (ProductProfunctor p, Default p a1 b1, Default p a2 b2,
           Default p a3 b3, Default p a4 b4, Default p a5 b5)
          => Default p (a1, a2, a3, a4, a5)
                       (b1, b2, b3, b4, b5) where

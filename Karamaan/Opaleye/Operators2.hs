@@ -24,7 +24,8 @@ import qualified Karamaan.Opaleye.Values as Values
 import Karamaan.Opaleye.Colspec (Colspec', runWriterOfColspec',
                                  runPackMapOfColspec')
 import Karamaan.Opaleye.Default (Default, def)
-import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr, opC)
+import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr)
+import qualified Karamaan.WhaleUtil.Arrow as A
 
 -- The only reason this is called Operators2 rather than Operators is that
 -- I had to split the Operators module in two to avoid circular dependencies.
@@ -215,3 +216,7 @@ fromMaybe' d = proc m -> do
 
 wireToPrimExpr :: Wire a -> PrimExpr
 wireToPrimExpr = AttrExpr . unWire
+
+-- {-# DEPRECATED opC "Use 'Karamaan.WhaleUtil.Arrow.opC' instead" #-}
+opC :: Arrow arr => arr (a, b) c -> arr () b -> arr a c
+opC = A.opC

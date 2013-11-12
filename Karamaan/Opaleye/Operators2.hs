@@ -178,6 +178,10 @@ binrel op colspec q1 q2 = simpleQueryArr f where
           -- This leads to a select of the form
           -- select w1name as w1nametag, w1name as w1nametag, ...
           -- which is an error as w1nametag is ambiguous.
+          --
+          -- A solution would be to augment Colspec' with a generalization
+          -- of runPackMap that can tag with increasing tags, rather than
+          -- just a fixed one.
           new = map tag' (runWriter w1)
 
           assoc = zip new . map AttrExpr . runWriter

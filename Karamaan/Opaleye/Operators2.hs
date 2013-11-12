@@ -172,6 +172,12 @@ binrel op colspec q1 q2 = simpleQueryArr f where
           -- which wasn't well typed when changed to use the new Colspec'
           -- interface.  This implementation is equivalent, but somehow
           -- seems less satisfying.  Should it?
+          --
+          -- FIXME: Note that there is a bug here.  If two of the wires in w1
+          -- have the same name then they will have the same name in new.
+          -- This leads to a select of the form
+          -- select w1name as w1nametag, w1name as w1nametag, ...
+          -- which is an error as w1nametag is ambiguous.
           new = map tag' (runWriter w1)
 
           assoc = zip new . map AttrExpr . runWriter

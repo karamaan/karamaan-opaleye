@@ -45,11 +45,6 @@ showSQLType = show
 -- and then only provide operators that preserve that condition.
 data ValuesMaker a b = ValuesMaker (a -> [String], S(TableColspec b), [SQLType])
 
--- If and when we make Colspec a profunctor I guess we could make
--- ValuesMaker a profunctor
---bimap :: (a' -> a) -> (b -> b' ) -> ValuesMaker a b -> ValuesMaker a' b'
---bimap f g (ValuesMaker p q) = ValuesMaker (fmap (. f) p) (fmap g q)
-
 instance Profunctor ValuesMaker where
   dimap f g (ValuesMaker (w, c, ts)) =
     ValuesMaker ((w . f), ((fmap . fmap) g c), ts)

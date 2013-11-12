@@ -38,6 +38,8 @@ library
                    Karamaan.Opaleye.QueryArr,
                    Karamaan.Opaleye.QueryColspec,
                    Karamaan.Opaleye.RunQuery,
+                   Karamaan.Opaleye.Reexports,
+                   Karamaan.Opaleye.ReexportsTable,
                    Karamaan.Opaleye.SQL,
                    Karamaan.Opaleye.Table,
                    Karamaan.Opaleye.TableColspec,

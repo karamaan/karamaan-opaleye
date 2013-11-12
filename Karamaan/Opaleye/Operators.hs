@@ -27,5 +27,7 @@ binOp' op opname t t_string t' t'_string tag' =
       newAssoc = [(newWireName, BinExpr op t t')]
   in (newAssoc, Wire newWireName)
 
+-- If you think you want to use this, you're probably better off with
+-- Operators2.constant.  (Sorry for the confusing naming scheme).
 constant :: ShowConstant a => a -> PrimExpr
 constant = ConstExpr . showConstant

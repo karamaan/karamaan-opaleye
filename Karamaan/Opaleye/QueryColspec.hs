@@ -39,7 +39,7 @@ instance ProductProfunctor PackMap where
   (PackMap p) ***! (PackMap p') = PackMap ((***) <$> p <*> p')
 
 runWriter :: MWriter m t -> t -> m
-runWriter (Writer w) x = w x
+runWriter (Writer w) = w
 
 writer :: (t -> m) -> MWriter m t
 writer = Writer

@@ -45,7 +45,8 @@ writer :: (t -> m) -> MWriter m t
 writer = Writer
 
 -- Need this to have different argument and return type
--- for aggregatorMaker', which can change types
+-- for aggregatorMaker', which can change types (when using the
+-- count aggregator)
 packMapWire :: PackMap (Wire a) (Wire b)
 packMapWire = PackMap (\f -> Wire . f . unWire)
 

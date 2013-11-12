@@ -21,8 +21,8 @@ import qualified Karamaan.Opaleye.Operators as Operators
 import Control.Arrow ((***), Arrow)
 import Data.Time.Calendar (Day)
 import qualified Karamaan.Opaleye.Values as Values
-import Karamaan.Opaleye.Colspec (Colspec', runWriterOfColspec',
-                                 runPackMapOfColspec')
+import Karamaan.Opaleye.QueryColspec (QueryColspec, runWriterOfQueryColspec,
+                                      runPackMapOfQueryColspec)
 import Karamaan.Opaleye.Default (Default, def)
 import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr)
 import qualified Karamaan.WhaleUtil.Arrow as A
@@ -131,32 +131,32 @@ constantDay = unsafeConstant . Values.dayToSQL
 unsafeConstant :: String -> Query (Wire a)
 unsafeConstant = constantLit . OtherLit
 
-intersect :: Default Colspec' a a =>
+intersect :: Default QueryColspec a a =>
              QueryArr () a -> QueryArr () a -> QueryArr () a
 intersect = intersect' def
 
-union :: Default Colspec' a a
+union :: Default QueryColspec a a
          => QueryArr () a -> QueryArr () a -> QueryArr () a
 union = union' def
 
-difference :: Default Colspec' a a =>
+difference :: Default QueryColspec a a =>
               QueryArr () a -> QueryArr () a -> QueryArr () a
 difference = difference' def
 
-intersect' :: Colspec' a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
+intersect' :: QueryColspec a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
 intersect' = binrel Intersect
 
-union' :: Colspec' a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
+union' :: QueryColspec a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
 union' = binrel Union
 
-difference' :: Colspec' a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
+difference' :: QueryColspec a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
 difference' = binrel Difference
 
 -- I tried Query (a, a) a and couldn't get it to work.  Also
 -- I guess this would lead to a loss of sharing and much bigger queries.
 -- Maybe the optimiser will prune all the uncessary stuff though.
 --
-binrel :: RelOp -> Colspec' a b -> QueryArr () a -> QueryArr () a
+binrel :: RelOp -> QueryColspec a b -> QueryArr () a -> QueryArr () a
           -> QueryArr () b
 binrel op colspec q1 q2 = simpleQueryArr f where
   f ((), t0) = (w_out, primQ, next t2)
@@ -169,7 +169,7 @@ binrel op colspec q1 q2 = simpleQueryArr f where
           w_out = runPackMap tag' w1
           -- This used to be
           -- new = unpack w_out
-          -- which wasn't well typed when changed to use the new Colspec'
+          -- which wasn't well typed when changed to use the new QueryColspec
           -- interface.  This implementation is equivalent, but somehow
           -- seems less satisfying.  Should it?
           --
@@ -179,7 +179,7 @@ binrel op colspec q1 q2 = simpleQueryArr f where
           -- select w1name as w1nametag, w1name as w1nametag, ...
           -- which is an error as w1nametag is ambiguous.
           --
-          -- A solution would be to augment Colspec' with a generalization
+          -- A solution would be to augment QueryColspec with a generalization
           -- of runPackMap that can tag with increasing tags, rather than
           -- just a fixed one.
           new = map tag' (runWriter w1)
@@ -196,8 +196,8 @@ binrel op colspec q1 q2 = simpleQueryArr f where
 
           primQ = Binary op r1 r2
 
-          runPackMap = runPackMapOfColspec' colspec
-          runWriter = runWriterOfColspec' colspec
+          runPackMap = runPackMapOfQueryColspec colspec
+          runWriter = runWriterOfQueryColspec colspec
 
 case_ :: QueryArr ([(Wire Bool, Wire a)], Wire a) (Wire a)
 case_ = QueryArr f where

@@ -1,10 +1,10 @@
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
 
-module Karamaan.Opaleye.Colspec where
+module Karamaan.Opaleye.QueryColspec where
 
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 import Control.Arrow ((***))
-import Control.Applicative (Applicative, pure, (<$>), (<*>))
+import Control.Applicative (Applicative, (<$>), (<*>))
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
@@ -53,44 +53,21 @@ packMapWire = PackMap (\f -> Wire . f . unWire)
 writerWire :: Writer (Wire a)
 writerWire = Writer (return . unWire)
 
--- TODO: this needs a better name
-data Colspec' a b = Colspec' (Writer a) (PackMap a b)
+data QueryColspec a b = QueryColspec (Writer a) (PackMap a b)
 
-instance Profunctor Colspec' where
-  dimap f g (Colspec' w p) = Colspec' (contramap f w) (dimap f g p)
+instance Profunctor QueryColspec where
+  dimap f g (QueryColspec w p) = QueryColspec (contramap f w) (dimap f g p)
 
-instance Default Colspec' (Wire a) (Wire a) where
-  def = Colspec' writerWire packMapWire
+instance Default QueryColspec (Wire a) (Wire a) where
+  def = QueryColspec writerWire packMapWire
 
-instance ProductProfunctor Colspec' where
-  empty = Colspec' point empty
-  (Colspec' w p) ***! (Colspec' w' p') =
-    Colspec' (w ***< w') (p ***! p')
+instance ProductProfunctor QueryColspec where
+  empty = QueryColspec point empty
+  (QueryColspec w p) ***! (QueryColspec w' p') =
+    QueryColspec (w ***< w') (p ***! p')
 
-runWriterOfColspec' :: Colspec' a b -> a -> [String]
-runWriterOfColspec' (Colspec' f _) = runWriter f
+runWriterOfQueryColspec :: QueryColspec a b -> a -> [String]
+runWriterOfQueryColspec (QueryColspec f _) = runWriter f
 
-runPackMapOfColspec' :: Colspec' a b -> (String -> String) -> a -> b
-runPackMapOfColspec' (Colspec' _ p) = runPackMap p
-
--- This seems to be basically a Colspec' with the column names already applied
-data Colspec a = Colspec [String] ((String -> String) -> a)
-
-instance Functor Colspec where
-  fmap f (Colspec s m) = Colspec s (f . m)
-
-instance Applicative Colspec where
-  pure = Colspec mempty . pure
-  Colspec s mf <*> Colspec s' m = Colspec (s ++ s') (mf <*> m)
-
-runWriterOfColspec :: Colspec a -> [String]
-runWriterOfColspec (Colspec s _) = s
-
-runPackMapOfColspec :: Colspec a -> (String -> String) -> a
-runPackMapOfColspec (Colspec _ m) f = m f
-
-colspec :: [String] -> ((String -> String) -> a) -> Colspec a
-colspec s m = Colspec s m
-
-col :: String -> Colspec (Wire a)
-col s = colspec [s] (\f -> Wire (f s))
+runPackMapOfQueryColspec :: QueryColspec a b -> (String -> String) -> a -> b
+runPackMapOfQueryColspec (QueryColspec _ p) = runPackMap p

@@ -2,11 +2,11 @@
 
 module Karamaan.Opaleye.Examples where
 
-import Karamaan.Opaleye.Colspec (col)
+import Karamaan.Opaleye.TableColspec (col)
 import qualified Karamaan.Opaleye.Applicative as A
 import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
 import qualified Karamaan.Opaleye.Unpackspec as U
-import Karamaan.Opaleye.Colspec (writerWire)
+import Karamaan.Opaleye.QueryColspec (writerWire)
 import Karamaan.Opaleye.Table (makeTable)
 import Karamaan.Opaleye.QueryArr (Query, QueryArr)
 import qualified Karamaan.Opaleye.Operators2 as Op2

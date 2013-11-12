@@ -2,14 +2,13 @@ module Karamaan.Opaleye.Values where
 
 import Prelude hiding (Integer)
 import Karamaan.Opaleye.QueryArr (Query)
-import Karamaan.Opaleye.Colspec (col)
+import Karamaan.Opaleye.TableColspec (col, TableColspec)
 import Karamaan.Opaleye.Table (makeTable)
 import Data.List (intercalate)
 import Karamaan.Opaleye.Wire (Wire)
 import Control.Arrow ((***), first)
 import Control.Monad.State (State, get, put, runState)
 import Control.Monad.Reader (ReaderT, runReaderT, ask)
-import Karamaan.Opaleye.Colspec (Colspec)
 import qualified Karamaan.WhaleUtil.Date as UD
 import Data.Time.Calendar
 import Control.Applicative (liftA2, pure)
@@ -44,7 +43,7 @@ showSQLType = show
 -- Probably should make a type for it, in fact.
 -- data ConstLengthListMap a = C (a -> [String])
 -- and then only provide operators that preserve that condition.
-data ValuesMaker a b = ValuesMaker (a -> [String], S (Colspec b), [SQLType])
+data ValuesMaker a b = ValuesMaker (a -> [String], S(TableColspec b), [SQLType])
 
 -- If and when we make Colspec a profunctor I guess we could make
 -- ValuesMaker a profunctor
@@ -100,7 +99,7 @@ dayToSQL = (++ " :: date") . sqlStringOfDay
 --unit = ValuesMaker (return (const [])) (return colsT0)
 
 runValuesMaker :: ValuesMaker a b -> String -> [a]
-                  -> ([[String]], Colspec b, Int, [SQLType])
+                  -> ([[String]], TableColspec b, Int, [SQLType])
 runValuesMaker (ValuesMaker (f, m, ts)) colPrefix a
    = (stringRows, colspec, nextCol', ts)
   where startColNum = 1
@@ -121,7 +120,7 @@ runS m c s = runState (runReaderT m c) s
 -- that with a hack.  It requires the Postgres type information to be passed
 -- around unfortunately, too, because the trick requires we use NULLs, and
 -- Postgres doesn't have polymorphism (at least the right kind of polymorphism).
-valuesToQuery' :: ([[String]], Colspec b, Int, [SQLType]) -> Query b
+valuesToQuery' :: ([[String]], TableColspec b, Int, [SQLType]) -> Query b
 valuesToQuery' (stringRows, colspec, nextCol', ts) = makeTable colspec select
   where colNumbers = map show [1..nextCol'-1]
         columnSelectors = map colNames colNumbers

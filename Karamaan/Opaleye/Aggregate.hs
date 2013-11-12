@@ -11,8 +11,8 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project),
                                               AggrExpr),
                                      Attribute)
 import Karamaan.Opaleye.Wire (Wire)
-import Karamaan.Opaleye.Colspec (Writer, PackMap, writerWire, packMapWire,
-                                 runWriter, runPackMap, LWriter, writer)
+import Karamaan.Opaleye.QueryColspec (Writer, PackMap, writerWire, packMapWire,
+                                      runWriter, runPackMap, LWriter, writer)
 import Data.Profunctor (Profunctor, dimap, lmap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
                                 ProductContravariant, point, (***<),

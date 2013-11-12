@@ -6,7 +6,7 @@ import Karamaan.Opaleye.QueryArr (Query, QueryArr)
 import Karamaan.Opaleye.Wire (Wire)
 import qualified Karamaan.Opaleye.Wire as Wire
 import Karamaan.Opaleye.Default (Default)
-import Karamaan.Opaleye.Colspec (Colspec')
+import Karamaan.Opaleye.QueryColspec (QueryColspec)
 import Karamaan.Opaleye.Predicates (restrict)
 import Karamaan.Opaleye.Operators2 (union, isNull, eq)
 import Control.Arrow (returnA, arr, first)
@@ -55,7 +55,7 @@ joinWithNull q1 q2 = proc () -> do
 --
 -- I suspect this could actually be implemented in terms of a LEFT JOIN, and
 -- that might even give better performance.
-semijoin :: (Default Colspec' a a, Default Colspec' c c)
+semijoin :: (Default QueryColspec a a, Default QueryColspec c c)
          => Query (a, Wire (Maybe b))
          -> Query (Wire b, c)
          -> Query c

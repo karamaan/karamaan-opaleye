@@ -6,14 +6,14 @@ import Karamaan.Opaleye.QueryArr (Query, runSimpleQueryArr, simpleQueryArr)
 import Karamaan.Opaleye.Wire (Wire(Wire))
 import Database.HaskellDB.PrimQuery (PrimQuery(Group),PrimExpr(AttrExpr))
 import Karamaan.Opaleye.Operators2 (union)
-import Karamaan.Opaleye.Colspec (Colspec')
+import Karamaan.Opaleye.QueryColspec (QueryColspec)
 import Karamaan.Opaleye.Default (Default)
 
 -- I realised you can implement distinct x = x `union` x!
 -- This may fail massively with large queries unless the optimiser realises
 -- that I'm taking the union of the same query twice.
 -- TODO: Try to just implement this as x `union` "empty"?
-distinct :: Default Colspec' a a => Query a -> Query a
+distinct :: Default QueryColspec a a => Query a -> Query a
 distinct x = x `union` x
 
 -- This is how I used to implement it.  It didn't work very well.

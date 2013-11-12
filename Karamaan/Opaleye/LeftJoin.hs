@@ -4,7 +4,7 @@
 module Karamaan.Opaleye.LeftJoin where
 
 import Karamaan.Opaleye.Default (Default, def)
-import Karamaan.Opaleye.Colspec (Colspec')
+import Karamaan.Opaleye.QueryColspec (QueryColspec)
 import Karamaan.Opaleye.QueryArr (Query)
 import Karamaan.Opaleye.Wire (Wire)
 import qualified Karamaan.Opaleye.Wire as Wire
@@ -43,7 +43,7 @@ instance ProductProfunctor NullMaker where
   empty = NullMaker id (arr id)
   NullMaker f n ***! NullMaker f' n' = NullMaker (f *** f') (n &&& n')
 
-leftJoin :: (Default Colspec' l l, Default Colspec' r' r')
+leftJoin :: (Default QueryColspec l l, Default QueryColspec r' r')
          => NullMaker r r'
          -> Query l -> (l -> Wire b)
          -> Query r -> (r -> Wire b)

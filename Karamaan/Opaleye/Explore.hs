@@ -3,7 +3,7 @@
 module Karamaan.Opaleye.Explore where
 
 import Karamaan.Opaleye.Table (makeTable)
-import Karamaan.Opaleye.Colspec (col)
+import Karamaan.Opaleye.TableColspec (col)
 import Karamaan.Opaleye.Applicative (a1)
 import Karamaan.Opaleye.QueryArr (Query)
 import Karamaan.Opaleye.SQL (showSqlForPostgreSQLSimple {-, showSqlUnopt-})
@@ -12,7 +12,7 @@ import Control.Arrow (returnA, (<<<))
 import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.Operators2 (union, constant, eq)
 import Karamaan.Opaleye.Operators.Numeric (plus, divide)
-import Karamaan.Opaleye.Colspec (writerWire)
+import Karamaan.Opaleye.QueryColspec (writerWire)
 import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
 
 exampleTable :: Query (Wire Int)

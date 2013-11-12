@@ -4,22 +4,22 @@ import Karamaan.Opaleye.QueryArr (Query, next, tagWith, simpleQueryArr)
 import Database.HaskellDB.PrimQuery (PrimQuery(Project, BaseTable),
                                      PrimExpr(AttrExpr),
                                      Attribute, Assoc)
-import Karamaan.Opaleye.Colspec (Colspec, runWriterOfColspec,
-                                 runPackMapOfColspec)
+import Karamaan.Opaleye.TableColspec (TableColspec, runWriterOfColspec,
+                                      runPackMapOfColspec)
 import Control.Arrow ((***))
 
 
-makeTable :: Colspec a -> String -> Query a
+makeTable :: TableColspec a -> String -> Query a
 makeTable colspec = makeTable' colspec (zip x x)
   where x = runWriterOfColspec colspec
 
-makeTable' :: Colspec a -> [(String, String)] -> String -> Query a
+makeTable' :: TableColspec a -> [(String, String)] -> String -> Query a
 makeTable' colspec cols table_name = simpleQueryArr f
   where f ((), t0) = (retwires, primQuery, next t0)
           where (retwires, primQuery) = makeTable'' colspec cols table_name (tagWith t0)
 
 -- TODO: this needs tidying
-makeTable'' :: Colspec a -> [(String, String)] -> String -> (String -> String)
+makeTable'' :: TableColspec a -> [(String, String)] -> String -> (String -> String)
                -> (a, PrimQuery)
 makeTable'' colspec cols table_name tag' =
   let basetablecols :: [String]

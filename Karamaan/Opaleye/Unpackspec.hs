@@ -1,6 +1,6 @@
 module Karamaan.Opaleye.Unpackspec where
 
-import Karamaan.Opaleye.Colspec (Writer)
+import Karamaan.Opaleye.QueryColspec (Writer)
 import Data.Profunctor.Product.Tuples
 import Data.Profunctor.Product.Flatten
 import Data.Profunctor.Product ((***<), ProductContravariant, point)

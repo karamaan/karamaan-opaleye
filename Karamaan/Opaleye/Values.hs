@@ -144,9 +144,8 @@ valuesToQuery'' :: ValuesMaker a b -> String -> [a] -> Query b
 valuesToQuery'' = valuesToQuery' .:. runValuesMaker
 
 valuesToQuery :: ValuesMaker a b -> [a] -> Query b
--- vv just provide a dummy column name
--- Not really sure what the right thing to do with this is
--- but any dummy name will always work
+-- IMPORTANT: the name provided here must match the name in the generation
+-- of the column names in 'valuesToQuery''
 valuesToQuery = flip valuesToQuery'' "foocol"
 
 embracket :: String -> String

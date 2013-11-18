@@ -89,10 +89,6 @@ valuesMakerMaker f t = ValuesMaker ((:[]) . f, w, [t])
 dayToSQL :: Day -> String
 dayToSQL = (++ " :: date") . sqlStringOfDay
 
--- colsT0 doesn't exist, but if it did I think this would work
---unit :: ValuesMaker () ()
---unit = ValuesMaker (return (const [])) (return colsT0)
-
 runValuesMaker :: ValuesMaker a b -> String -> [a]
                   -> ([[String]], TableColspec b, Int, [SQLType])
 runValuesMaker (ValuesMaker (f, m, ts)) colPrefix a

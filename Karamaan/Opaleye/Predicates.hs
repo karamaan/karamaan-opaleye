@@ -91,8 +91,9 @@ wireIs = wireOp OpEq
 wireIsNot :: Wire a -> Literal -> PrimExpr
 wireIsNot = wireOp OpNotEq
 
+{-# DEPRECATED noOp "Use 'Karamaan.WhaleUtil.Arrow.noOp' instead" #-}
 noOp :: Arrow arr => arr a ()
-noOp = arr (const ())
+noOp = UA.noOp
 
 wireTrue :: Wire a -> PrimExpr
 wireTrue = AttrExpr . unWire

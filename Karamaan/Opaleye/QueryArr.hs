@@ -93,6 +93,8 @@ simpleQueryArr f = QueryArr g
 -- The return value of predicate should be a PrimExpr representing
 -- a boolean expression, but it seems that there is no way to acheieve
 -- such type-safety in Haskell DB
+--
+-- This should probably be implemented as an ExprArr now.
 restrictWith :: (a -> PrimExpr) -> QueryArr a ()
 restrictWith predicate = QueryArr f where
   f (ws, primQ, t0) = ((), Restrict (predicate ws) primQ, t0)

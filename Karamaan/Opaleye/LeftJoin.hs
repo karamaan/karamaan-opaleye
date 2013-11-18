@@ -20,6 +20,11 @@ import qualified Database.HaskellDB.PrimQuery as PQ
 -- a way to work around it (of course: just give the NULLs explicity types!)
 -- but it is annoying.
 
+-- NullMaker a b represents a way of turning a 'QueryArr z a' into a
+-- 'QueryArr z b' where all the columns of 'b' are made nullable.
+-- For example 'QueryArr (Wire Int, Wire Bool, Wire String)' could
+-- become 'QueryArr (Wire (Maybe Int), Wire (Maybe Bool), Wire (Maybe String)'.
+--
 -- I don't really like that this is 'a -> b'.  To be safe it should be
 -- QueryArr a b, or ExprArr a b, when that exists.  I don't think it
 -- will cause any problems though, if it is not exported.

@@ -4,7 +4,7 @@ import Prelude hiding ((.), id)
 import Database.HaskellDB.PrimQuery (PrimQuery(Empty, Restrict, Project),
                                      PrimExpr(AttrExpr, BinExpr),
                                      BinOp(OpEq), times)
-import Karamaan.Opaleye.Wire (Wire, unwire)
+import Karamaan.Opaleye.Wire (Wire, unWire)
 import Control.Arrow (Arrow, arr, first, (&&&), (***))
 import Control.Category (Category, id, (.), (<<<))
 import Control.Applicative (Applicative, pure, (<*>))
@@ -104,4 +104,4 @@ equals = restrictWith (uncurry equalsWire)
 
 {-# DEPRECATED equalsWire "Do not use equalsWire" #-}
 equalsWire :: Wire a -> Wire a -> PrimExpr
-equalsWire = BinExpr OpEq `on` (AttrExpr . unwire)
+equalsWire = BinExpr OpEq `on` (AttrExpr . unWire)

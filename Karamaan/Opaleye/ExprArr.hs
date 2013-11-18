@@ -15,6 +15,10 @@ import qualified Data.Maybe as M
 import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr, opC)
 import Karamaan.Opaleye.Operators (operatorName)
 
+-- This is a more type-safe way, and a nicer API, to doing the PrimExpr
+-- fiddling that Predicates.hs does.  When there's time we'll convert
+-- all of Predicates.hs to this way of doing things.
+
 type Scope = Map String PrimExpr
 
 newtype ExprArr a b = ExprArr ((a, Scope, Tag) -> (b, Scope, Tag))

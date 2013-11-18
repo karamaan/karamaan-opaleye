@@ -146,6 +146,7 @@ valuesToQuery'' = valuesToQuery' .:. runValuesMaker
 valuesToQuery :: ValuesMaker a b -> [a] -> Query b
 -- IMPORTANT: the name provided here must match the name in the generation
 -- of the column names in 'valuesToQuery''
+-- TODO: this isn't robust and needs to be addressed
 valuesToQuery = flip valuesToQuery'' "foocol"
 
 embracket :: String -> String

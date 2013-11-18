@@ -56,3 +56,37 @@ lt = opArr PrimQuery.OpLt "lt"
 
 lte :: NumBinOpH a Bool
 lte = opArr PrimQuery.OpLtEq "lte"
+
+type NumBinOpG a b = NumBinOp2G a b b
+type NumBinOp2G a b c = QueryArr a (Wire b) -> QueryArr a (Wire b) -> QueryArr a (Wire c)
+
+opG :: Arrow arr => arr (a, b) r -> arr z a -> arr z b -> arr z r
+opG op f g = op <<< (f &&& g)
+
+(.+.) :: NumBinOpG a b
+(.+.) = opG plus
+
+(.*.) :: NumBinOpG a b
+(.*.) = opG times
+
+(./.) :: NumBinOpG a b
+(./.) = opG divide
+
+(.-.) :: NumBinOpG a b
+(.-.) = opG minus
+
+(.<.) :: NumBinOp2G a Bool Bool
+(.<.) = opG lt
+
+(.>.) :: NumBinOp2G a Bool Bool
+(.>.) = opG gt
+
+(.<=.) :: NumBinOp2G a Bool Bool
+(.<=.) = opG lte
+
+(.>=.) :: NumBinOp2G a Bool Bool
+(.>=.) = opG gte
+
+-- There's no good reason this is called 'G'
+constantG :: ShowConstant b => b -> QueryArr a (Wire b)
+constantG a = constant a <<< (arr (const ()))

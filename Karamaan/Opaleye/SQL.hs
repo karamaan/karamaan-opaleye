@@ -28,9 +28,7 @@ showSqlForPostgres :: Unpackspec a -> Query a -> String
 showSqlForPostgres = optimizeFormatAndShowSQL .: runQueryArrPrim'
 
 formatAndShowSQL :: PrimQuery -> String
-formatAndShowSQL = show
-                   . ppSql
-                   . sqlQuery defaultSqlGenerator
+formatAndShowSQL = show . ppSql . sqlQuery defaultSqlGenerator
 
 optimizeFormatAndShowSQL :: PrimQuery -> String
 optimizeFormatAndShowSQL = formatAndShowSQL . optimize

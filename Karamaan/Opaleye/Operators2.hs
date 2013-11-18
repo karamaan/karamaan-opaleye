@@ -66,8 +66,9 @@ equalsOneOf :: ShowConstant a => [a] -> QueryArr (Wire a) (Wire Bool)
 equalsOneOf = foldrArr or false . map (opC eq . constant)
   where false = replaceWith (constant False)
 
--- TODO: does HaskellDB support this?  Is it another Postgres incompatibility
--- thing and we should use the Postgres SQL generator explicitly?
+-- TODO: HaskellDB's 'cat' or '.++.' is implemented as SQL's '+' even when
+-- using the PostgreSQL generator.  The correct fix is probably to fix
+-- the PostgreSQL generator (Database.HaskellDB.Sql.PostgreSQL).
 cat :: QueryArr (Wire String, Wire String) (Wire String)
 cat = opArr (PrimQuery.OpOther "||") "cat"
 

@@ -7,7 +7,7 @@ import Data.Profunctor.Product.Flatten
 import Data.Profunctor.Product.Tuples
 
 liftA0 :: Applicative f => r -> f r
-liftA0 f = pure f
+liftA0 = pure
 
 liftA1 :: Applicative f => (a1 -> r) -> (f a1 -> f r)
 liftA1 f x1 = f <$> x1

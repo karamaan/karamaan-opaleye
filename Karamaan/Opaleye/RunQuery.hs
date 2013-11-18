@@ -4,7 +4,6 @@
 module Karamaan.Opaleye.RunQuery where
 
 import Karamaan.Opaleye.Wire (Wire)
-import Karamaan.Opaleye.Unpackspec (Unpackspec)
 import qualified Database.PostgreSQL.Simple as SQL
 import Database.PostgreSQL.Simple.Internal (RowParser)
 import Database.PostgreSQL.Simple.FromField (FromField)

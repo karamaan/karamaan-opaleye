@@ -20,10 +20,10 @@ runWriterOfColspec :: TableColspec a -> [String]
 runWriterOfColspec (TableColspec s _) = s
 
 runPackMapOfColspec :: TableColspec a -> (String -> String) -> a
-runPackMapOfColspec (TableColspec _ m) f = m f
+runPackMapOfColspec (TableColspec _ m) = m
 
 colspec :: [String] -> ((String -> String) -> a) -> TableColspec a
-colspec s m = TableColspec s m
+colspec = TableColspec
 
 col :: String -> TableColspec (Wire a)
 col s = colspec [s] (\f -> Wire (f s))

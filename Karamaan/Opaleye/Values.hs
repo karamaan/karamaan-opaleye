@@ -99,7 +99,7 @@ runValuesMaker (ValuesMaker (f, m, ts)) colPrefix a
         stringRows = map mapper a
 
 runS :: S a -> String -> Int -> (a, Int)
-runS m c s = runState (runReaderT m c) s
+runS m c = runState (runReaderT m c)
 
 -- I guess we'll have a bug if there are no columns at all, but it doesn't seem
 -- like we can create a zero column ValuesMaker without the constructor, so

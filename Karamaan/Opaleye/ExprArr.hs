@@ -13,6 +13,7 @@ import Karamaan.Opaleye.Wire (Wire(Wire))
 import qualified Database.HaskellDB.PrimQuery as PQ
 import qualified Data.Maybe as M
 import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr, opC)
+import Karamaan.Opaleye.Operators (operatorName)
 
 type Scope = Map String PrimExpr
 
@@ -48,7 +49,7 @@ constant c = ExprArr g
 binOp :: PQ.BinOp -> String -> ExprArr (Wire a, Wire a) (Wire b)
 binOp op name = ExprArr g
   where g ((u, u'), scope, t0) = (w, scope', next t0)
-          where ws = tagWith t0 (take 5 v ++ "_" ++ name ++ "_" ++ take 5 v')
+          where ws = tagWith t0 (operatorName v name v')
                 w = Wire ws
                 (Wire v, Wire v') = (u, u')
                 -- Naughty fromJust!

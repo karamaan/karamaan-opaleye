@@ -1,10 +1,13 @@
 module Karamaan.Opaleye.Operators.Numeric where
 
-import Karamaan.Opaleye.Operators2 (unOp, opArr)
+import Karamaan.Opaleye.Operators2 (unOp, opArr, constant)
 import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.QueryArr (QueryArr)
 import Database.HaskellDB.PrimQuery(BinOp(OpMul, OpDiv, OpPlus, OpMinus,
                                           OpOther))
+import Control.Category ((<<<))
+import Control.Arrow ((&&&), arr, Arrow)
+import Database.HaskellDB.Query (ShowConstant)
 
 import qualified Database.HaskellDB.PrimQuery as PrimQuery
 
@@ -15,6 +18,8 @@ import qualified Database.HaskellDB.PrimQuery as PrimQuery
 --
 -- Think about this some more ...
 type NumBinOp a = Int -> QueryArr (Wire a) (Wire a)
+
+type NumBinOpH a b = QueryArr (Wire a, Wire a) (Wire b)
 
 timesC :: NumBinOp a
 timesC x = unOp OpMul "times" (show x) x
@@ -27,26 +32,27 @@ modC :: NumBinOp a
 modC x = unOp (OpOther "%") "mod" (show x) x
 
 -- It's also unclear what types these operations should have
-plus :: QueryArr (Wire a, Wire a) (Wire a)
+-- Should there be a Num typeclass constraint or similar?
+plus :: NumBinOpH a a
 plus = opArr OpPlus "plus"
 
-divide :: QueryArr (Wire a, Wire a) (Wire a)
+divide :: NumBinOpH a a
 divide = opArr OpDiv "div"
 
-times :: QueryArr (Wire a, Wire a) (Wire a)
+times :: NumBinOpH a a
 times = opArr OpMul "times"
 
-minus :: QueryArr (Wire a, Wire a) (Wire a)
+minus :: NumBinOpH a a
 minus = opArr OpMinus "minus"
 
-gt :: QueryArr (Wire a, Wire a) (Wire Bool)
+gt :: NumBinOpH a Bool
 gt = opArr PrimQuery.OpGt "gt"
 
-gte :: QueryArr (Wire a, Wire a) (Wire Bool)
+gte :: NumBinOpH a Bool
 gte = opArr PrimQuery.OpGtEq "gte"
 
-lt :: QueryArr (Wire a, Wire a) (Wire Bool)
+lt :: NumBinOpH a Bool
 lt = opArr PrimQuery.OpLt "lt"
 
-lte :: QueryArr (Wire a, Wire a) (Wire Bool)
+lte :: NumBinOpH a Bool
 lte = opArr PrimQuery.OpLtEq "lte"

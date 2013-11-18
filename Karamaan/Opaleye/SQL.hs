@@ -20,7 +20,7 @@ showSqlForPostgreSQLSimple :: Unpackspec a -> Query a -> String
 showSqlForPostgreSQLSimple = showSqlForPostgres
 
 -- Currently we only support SQL generation for Postgres because,
--- for example, 'cat' is implemented as of '||' and the hackery we do
+-- for example, 'cat' is implemented as '||' and the hackery we do
 -- in, for example, Values.hs, may be Postgres specific.
 --
 -- Support for other DBMSes can be added if required.

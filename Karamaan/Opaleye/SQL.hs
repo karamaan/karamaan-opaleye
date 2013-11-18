@@ -10,12 +10,22 @@ import Karamaan.Opaleye.Unpackspec (Unpackspec)
 import Karamaan.WhaleUtil ((.:))
 
 {-# DEPRECATED showSqlForPostgreSQLSimple'
-    "Use the unprimed version instead" #-}
+    "Use 'showSqlForPostgres' instead" #-}
 showSqlForPostgreSQLSimple' :: Unpackspec a -> Query a -> String
-showSqlForPostgreSQLSimple' = showSqlForPostgreSQLSimple
+showSqlForPostgreSQLSimple' = showSqlForPostgres
 
+{-# DEPRECATED showSqlForPostgreSQLSimple
+    "Use 'showSqlForPostgres' instead" #-}
 showSqlForPostgreSQLSimple :: Unpackspec a -> Query a -> String
-showSqlForPostgreSQLSimple = optimizeFormatAndShowSQL .: runQueryArrPrim'
+showSqlForPostgreSQLSimple = showSqlForPostgres
+
+-- Currently we only support SQL generation for Postgres because,
+-- for example, 'cat' is implemented as of '||' and the hackery we do
+-- in, for example, Values.hs, may be Postgres specific.
+--
+-- Support for other DBMSes can be added if required.
+showSqlForPostgres :: Unpackspec a -> Query a -> String
+showSqlForPostgres = optimizeFormatAndShowSQL .: runQueryArrPrim'
 
 formatAndShowSQL :: PrimQuery -> String
 formatAndShowSQL = show

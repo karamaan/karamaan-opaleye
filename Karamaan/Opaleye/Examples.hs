@@ -13,7 +13,7 @@ import qualified Karamaan.Opaleye.Operators2 as Op2
 import qualified Karamaan.Opaleye.Predicates as P
 import qualified Karamaan.Opaleye.Operators.Numeric as N
 import Karamaan.Opaleye.Wire (Wire)
-import Karamaan.Opaleye.SQL (showSqlForPostgreSQLSimple)
+import Karamaan.Opaleye.SQL (showSqlForPostgres)
 import Control.Category ((<<<))
 import Control.Arrow (arr, (&&&), returnA, (***))
 import Data.Time.Calendar (Day)
@@ -143,4 +143,4 @@ w :: Unpackspec (Wire a)
 w = Unpackspec writerWire
 
 s :: Unpackspec a -> Query a -> String
-s = showSqlForPostgreSQLSimple
+s = showSqlForPostgres

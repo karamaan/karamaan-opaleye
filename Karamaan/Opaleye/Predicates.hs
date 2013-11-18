@@ -18,6 +18,10 @@ import qualified Karamaan.WhaleUtil.Arrow as UA
 -- Predicates contains code from an earlier time when I didn't understand the
 -- more convenient ways to work with Arrows.
 
+-- We now have an alpha implementation of 'ExprArr' which essentially
+-- does all the PrimExpr plumbing with a safer API.  In the future
+-- it's preferable to use 'ExprArr' to any of the combinators here.
+
 -- We would have liked to deprecate this but it seems that it's a lot faster
 -- than the one in Operators2, probably because it works entirely in terms of
 -- PrimExpr.

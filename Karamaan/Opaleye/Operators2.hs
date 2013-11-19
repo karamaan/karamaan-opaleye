@@ -73,6 +73,7 @@ equalsOneOf = foldrArr or false . map (opC eq . constant)
 cat :: QueryArr (Wire String, Wire String) (Wire String)
 cat = opArr (PrimQuery.OpOther "||") "cat"
 
+-- {-# DEPRECATED cat3 "Better to use ReaderCurried operations" #-}
 cat3 :: QueryArr (Wire String, Wire String, Wire String) (Wire String)
 cat3 = proc (s1, s2, s3) -> do
   -- TODO: there must be a nicer way of doing this

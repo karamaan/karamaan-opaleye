@@ -26,6 +26,7 @@ import Karamaan.Opaleye.QueryColspec (QueryColspec, runWriterOfQueryColspec,
 import Karamaan.Opaleye.Default (Default, def)
 import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr)
 import qualified Karamaan.WhaleUtil.Arrow as A
+import Karamaan.WhaleUtil.Arrow.ReaderCurry (readerCurry2)
 
 -- The only reason this is called Operators2 rather than Operators is that
 -- I had to split the Operators module in two to avoid circular dependencies.
@@ -231,3 +232,31 @@ wireToPrimExpr = AttrExpr . unWire
 -- {-# DEPRECATED opC "Use 'Karamaan.WhaleUtil.Arrow.opC' instead" #-}
 opC :: Arrow arr => arr (a, b) c -> arr () b -> arr a c
 opC = A.opC
+
+-- ReaderCurried versions
+
+type NumBinOpG a b = NumBinOp2G a b b
+type NumBinOp2G a b c = QueryArr a (Wire b) -> QueryArr a (Wire b) -> QueryArr a (Wire c)
+
+-- A short name since we will be using it a lot.  Probably not a good idea to import this
+-- into application code, though!
+r :: QueryArr (Wire b, Wire b) (Wire c) -> NumBinOp2G a b c
+r = readerCurry2
+
+constantRC :: ShowConstant b => b -> QueryArr a (Wire b)
+constantRC = replaceWith . constant
+
+(.==.) :: NumBinOp2G a b Bool
+(.==.) = r eq
+
+(./=.) :: NumBinOp2G a b Bool
+(./=.) = r notEq
+
+(.&&.) :: NumBinOpG a Bool
+(.&&.) = r and
+
+(.||.) :: NumBinOpG a Bool
+(.||.) = r or
+
+(.++.) :: NumBinOp2G a String String
+(.++.) = r cat

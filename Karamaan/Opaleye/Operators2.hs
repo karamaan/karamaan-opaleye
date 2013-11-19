@@ -1,4 +1,4 @@
-{-# LANGUAGE Arrows, FlexibleContexts #-}
+{-# LANGUAGE Arrows, FlexibleContexts, MultiParamTypeClasses #-}
 
 module Karamaan.Opaleye.Operators2 where
 
@@ -18,7 +18,7 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, Binary),
 import qualified Database.HaskellDB.PrimQuery as PrimQuery
 import Karamaan.Opaleye.Operators (binOp')
 import qualified Karamaan.Opaleye.Operators as Operators
-import Control.Arrow ((***), Arrow, (&&&), (<<<))
+import Control.Arrow ((***), Arrow, (&&&), (<<<), arr, second, returnA)
 import Data.Time.Calendar (Day)
 import qualified Karamaan.Opaleye.Values as Values
 import Karamaan.Opaleye.QueryColspec (QueryColspec, runWriterOfQueryColspec,
@@ -27,6 +27,9 @@ import Karamaan.Opaleye.Default (Default, def)
 import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr)
 import qualified Karamaan.WhaleUtil.Arrow as A
 import Karamaan.WhaleUtil.Arrow.ReaderCurry (readerCurry2)
+import Data.Profunctor (Profunctor, dimap)
+import Data.Profunctor.Product (ProductProfunctor, (***!), empty)
+
 
 -- The only reason this is called Operators2 rather than Operators is that
 -- I had to split the Operators module in two to avoid circular dependencies.
@@ -202,6 +205,38 @@ binrel op colspec q1 q2 = simpleQueryArr f where
           runPackMap = runPackMapOfQueryColspec colspec
           runWriter = runWriterOfQueryColspec colspec
 
+-- Case stuff
+
+type CaseArg a = ([(Wire Bool, a)], a)
+
+newtype CaseRunner a b = CaseRunner (QueryArr (CaseArg a) b)
+
+instance Profunctor CaseRunner where
+  dimap f g (CaseRunner q) = CaseRunner (arr g <<< q <<< arr (into f))
+    where into :: (a -> b) -> ([(z, a)], a) -> ([(z, b)], b)
+          into h = (map (second h) *** h)
+
+instance ProductProfunctor CaseRunner where
+  empty = CaseRunner (arr (const ()))
+  CaseRunner q1 ***! CaseRunner q2 = CaseRunner $ proc (cases, else_) -> do
+    let cases1 = map (second fst) cases
+        cases2 = map (second snd) cases
+        (else1, else2) = else_
+
+    result1 <- q1 -< (cases1, else1)
+    result2 <- q2 -< (cases2, else2)
+
+    returnA -< (result1, result2)
+
+instance Default CaseRunner (Wire a) (Wire a) where
+  def = CaseRunner case_
+
+runCase :: CaseRunner a b -> QueryArr (CaseArg a) b
+runCase (CaseRunner q) = q
+
+caseDef :: Default CaseRunner a b => QueryArr (CaseArg a) b
+caseDef = runCase def
+
 case_ :: QueryArr ([(Wire Bool, Wire a)], Wire a) (Wire a)
 case_ = QueryArr f where
   f ((cases, otherwise_), primQ, t0) = (w_out, primQ', t1)
@@ -212,6 +247,8 @@ case_ = QueryArr f where
           otherwise' = wireToPrimExpr otherwise_
           caseExpr = PrimQuery.CaseExpr cases' otherwise'
           primQ' = extend [(attrname_out, caseExpr)] primQ
+
+-- End of case stuff
 
 ifThenElse :: QueryArr (Wire Bool, Wire a, Wire a) (Wire a)
 ifThenElse = proc (cond, ifTrue, ifFalse) -> do

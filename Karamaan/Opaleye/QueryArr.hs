@@ -55,6 +55,7 @@ runQueryArrPrim (Unpackspec g) f
         cols = runWriter g a
 
 {-# DEPRECATED runQueryArrPrim' "Use unprimed version instead" #-}
+-- Deprecated 2013-11-19
 runQueryArrPrim' :: Unpackspec b -> Query b -> PrimQuery
 runQueryArrPrim' = runQueryArrPrim
 

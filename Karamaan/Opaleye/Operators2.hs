@@ -273,7 +273,7 @@ ifThenElseRC cond ifTrue ifFalse = proc a -> do
 
   ifThenElse -< (cond', ifTrue', ifFalse')
 
-superCaseRC :: [(QueryArr a (Wire Bool), QueryArr a (Wire b))]
-             -> QueryArr a (Wire b) -> QueryArr a (Wire b)
-superCaseRC cases else_ = case_ <<< (cases' &&& else_)
+caseRC :: [(QueryArr a (Wire Bool), QueryArr a (Wire b))]
+          -> QueryArr a (Wire b) -> QueryArr a (Wire b)
+caseRC cases else_ = case_ <<< (cases' &&& else_)
   where cases' = A.traverseArr (uncurry (&&&)) cases

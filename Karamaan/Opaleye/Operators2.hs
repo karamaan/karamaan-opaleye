@@ -275,10 +275,11 @@ opC = A.opC
 -- ReaderCurried versions
 
 type NumBinOpG a b = NumBinOp2G a b b
-type NumBinOp2G a b c = QueryArr a (Wire b) -> QueryArr a (Wire b) -> QueryArr a (Wire c)
+type NumBinOp2G a b c = QueryArr a (Wire b) -> QueryArr a (Wire b)
+                        -> QueryArr a (Wire c)
 
--- A short name since we will be using it a lot.  Probably not a good idea to import this
--- into application code, though!
+-- A short name since we will be using it a lot.  Probably not a good idea to
+-- import this into application code, though!
 r :: QueryArr (Wire b, Wire b) (Wire c) -> NumBinOp2G a b c
 r = readerCurry2
 

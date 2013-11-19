@@ -5,9 +5,9 @@ import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.QueryArr (QueryArr)
 import Database.HaskellDB.PrimQuery(BinOp(OpMul, OpDiv, OpPlus, OpMinus,
                                           OpOther))
-import Control.Category ((<<<))
-import Control.Arrow ((&&&), arr, Arrow)
 import Database.HaskellDB.Query (ShowConstant)
+import Karamaan.WhaleUtil.Arrow.ReaderCurry (readerCurry2)
+import Karamaan.WhaleUtil.Arrow (replaceWith)
 
 import qualified Database.HaskellDB.PrimQuery as PrimQuery
 
@@ -60,33 +60,33 @@ lte = opArr PrimQuery.OpLtEq "lte"
 type NumBinOpG a b = NumBinOp2G a b b
 type NumBinOp2G a b c = QueryArr a (Wire b) -> QueryArr a (Wire b) -> QueryArr a (Wire c)
 
-opG :: Arrow arr => arr (a, b) r -> arr z a -> arr z b -> arr z r
-opG op f g = op <<< (f &&& g)
+r :: QueryArr (Wire b, Wire b) (Wire c) -> NumBinOp2G a b c
+r = readerCurry2
 
 (.+.) :: NumBinOpG a b
-(.+.) = opG plus
+(.+.) = r plus
 
 (.*.) :: NumBinOpG a b
-(.*.) = opG times
+(.*.) = r times
 
 (./.) :: NumBinOpG a b
-(./.) = opG divide
+(./.) = r divide
 
 (.-.) :: NumBinOpG a b
-(.-.) = opG minus
+(.-.) = r minus
 
 (.<.) :: NumBinOp2G a Bool Bool
-(.<.) = opG lt
+(.<.) = r lt
 
 (.>.) :: NumBinOp2G a Bool Bool
-(.>.) = opG gt
+(.>.) = r gt
 
 (.<=.) :: NumBinOp2G a Bool Bool
-(.<=.) = opG lte
+(.<=.) = r lte
 
 (.>=.) :: NumBinOp2G a Bool Bool
-(.>=.) = opG gte
+(.>=.) = r gte
 
 -- There's no good reason this is called 'G'
 constantG :: ShowConstant b => b -> QueryArr a (Wire b)
-constantG a = constant a <<< (arr (const ()))
+constantG = replaceWith . constant

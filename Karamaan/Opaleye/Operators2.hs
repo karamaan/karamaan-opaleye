@@ -18,7 +18,7 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, Binary),
 import qualified Database.HaskellDB.PrimQuery as PrimQuery
 import Karamaan.Opaleye.Operators (binOp')
 import qualified Karamaan.Opaleye.Operators as Operators
-import Control.Arrow ((***), Arrow)
+import Control.Arrow ((***), Arrow, (&&&), (<<<))
 import Data.Time.Calendar (Day)
 import qualified Karamaan.Opaleye.Values as Values
 import Karamaan.Opaleye.QueryColspec (QueryColspec, runWriterOfQueryColspec,
@@ -272,3 +272,8 @@ ifThenElseRC cond ifTrue ifFalse = proc a -> do
   ifFalse' <- ifFalse -< a
 
   ifThenElse -< (cond', ifTrue', ifFalse')
+
+superCaseRC :: [(QueryArr a (Wire Bool), QueryArr a (Wire b))]
+             -> QueryArr a (Wire b) -> QueryArr a (Wire b)
+superCaseRC cases else_ = case_ <<< (cases' &&& else_)
+  where cases' = A.traverseArr (uncurry (&&&)) cases

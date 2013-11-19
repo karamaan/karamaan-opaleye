@@ -300,6 +300,8 @@ constantRC = replaceWith . constant
 (.++.) :: NumBinOp2G a String String
 (.++.) = r cat
 
+-- TODO: this signature could now be generalised to something involving
+-- CaseRunner
 ifThenElseRC :: QueryArr t (Wire Bool)
                 -> QueryArr t (Wire a)
                 -> QueryArr t (Wire a)

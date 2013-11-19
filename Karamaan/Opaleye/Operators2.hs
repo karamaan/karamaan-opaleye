@@ -261,3 +261,14 @@ constantRC = replaceWith . constant
 
 (.++.) :: NumBinOp2G a String String
 (.++.) = r cat
+
+ifThenElseRC :: QueryArr t (Wire Bool)
+                -> QueryArr t (Wire a)
+                -> QueryArr t (Wire a)
+                -> QueryArr t (Wire a)
+ifThenElseRC cond ifTrue ifFalse = proc a -> do
+  cond' <- cond -< a
+  ifTrue' <- ifTrue -< a
+  ifFalse' <- ifFalse -< a
+
+  ifThenElse -< (cond', ifTrue', ifFalse')

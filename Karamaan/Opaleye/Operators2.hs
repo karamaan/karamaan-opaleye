@@ -250,9 +250,10 @@ case_ = QueryArr f where
 
 -- End of case stuff
 
-ifThenElse :: QueryArr (Wire Bool, Wire a, Wire a) (Wire a)
+ifThenElse :: Default CaseRunner a b
+              => QueryArr (Wire Bool, a, a) b
 ifThenElse = proc (cond, ifTrue, ifFalse) -> do
-  case_ -< ([(cond, ifTrue)], ifFalse)
+  caseDef -< ([(cond, ifTrue)], ifFalse)
 
 fromMaybe :: QueryArr (Wire a, Wire (Maybe a)) (Wire a)
 fromMaybe = proc (d, m) -> do

@@ -15,9 +15,11 @@ import Karamaan.Opaleye.QueryColspec (Writer, PackMap, writerWire, packMapWire,
                                       runWriter, runPackMap, LWriter, writer)
 import Data.Profunctor (Profunctor, dimap, lmap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
-                                ProductContravariant, point, (***<),
+                                defaultEmpty, defaultProfunctorProduct,
                                 p3)
 import Data.Functor.Contravariant (contramap)
+import Control.Applicative (Applicative, (<*>), pure)
+import Data.Monoid (Monoid, mempty, (<>))
 
 -- Maybe it would be safer if we combined the two writers into
 -- "LWriter (Maybe AggrOp, String) a"?  That way we'd know they output
@@ -26,14 +28,21 @@ data Aggregator a b = Aggregator (LWriter (Maybe AggrOp) a) (Writer a)
                                  (PackMap a b)
 
 
+instance Functor (Aggregator a) where
+  fmap f (Aggregator a w p) = Aggregator a w (fmap f p)
+
+instance Applicative (Aggregator a) where
+  pure = Aggregator mempty mempty . pure
+  Aggregator a w p <*> Aggregator a' w' p' =
+    Aggregator (a <> a') (w <> w') (p <*> p')
+
 instance Profunctor Aggregator where
-  dimap f g (Aggregator a w p) = Aggregator (contramap f a) (contramap f w)
-                                            (dimap f g p)
+  dimap f g (Aggregator a w p) =
+    Aggregator (contramap f a) (contramap f w) (dimap f g p)
 
 instance ProductProfunctor Aggregator where
-  empty = Aggregator point point empty
-  Aggregator a w p ***! Aggregator a' w' p' = Aggregator (a ***< a') (w ***< w')
-                                                         (p ***! p')
+  empty = defaultEmpty
+  (***!) = defaultProfunctorProduct
 
 aggregatorMaker :: AggrOp -> Aggregator (Wire a) (Wire b)
 aggregatorMaker = aggregatorMaker' . Just

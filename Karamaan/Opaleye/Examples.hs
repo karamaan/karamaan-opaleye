@@ -1,4 +1,6 @@
 {-# LANGUAGE Arrows, FlexibleContexts #-}
+-- ^^ Get rid of FlexibleContexts if we ever move the definition of s
+--    elsewhere.
 
 module Karamaan.Opaleye.Examples where
 

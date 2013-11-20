@@ -42,6 +42,7 @@ formatAndShowSQL = show . ppSql . sqlQuery defaultSqlGenerator
 optimizeFormatAndShowSQL :: PrimQuery -> String
 optimizeFormatAndShowSQL = formatAndShowSQL . optimize
 
+-- I don't really know why this is an orphan instance.
 instance Default (PPOfContravariant Unpackspec) (Wire a) (Wire a) where
   def = PPOfContravariant (Unpackspec writerWire)
 

@@ -1,22 +1,22 @@
-{-# LANGUAGE Arrows #-}
+{-# LANGUAGE Arrows, FlexibleContexts #-}
 
 module Karamaan.Opaleye.Examples where
 
 import Karamaan.Opaleye.TableColspec (col)
 import qualified Karamaan.Opaleye.Applicative as A
-import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
-import qualified Karamaan.Opaleye.Unpackspec as U
-import Karamaan.Opaleye.QueryColspec (writerWire)
+import Karamaan.Opaleye.Unpackspec (Unpackspec)
 import Karamaan.Opaleye.Table (makeTable)
 import Karamaan.Opaleye.QueryArr (Query, QueryArr)
 import qualified Karamaan.Opaleye.Operators2 as Op2
 import qualified Karamaan.Opaleye.Predicates as P
 import qualified Karamaan.Opaleye.Operators.Numeric as N
 import Karamaan.Opaleye.Wire (Wire)
-import Karamaan.Opaleye.SQL (showSqlForPostgres)
+import Karamaan.Opaleye.SQL (showSqlForPostgresDefault)
 import Control.Category ((<<<))
 import Control.Arrow (arr, (&&&), returnA, (***))
 import Data.Time.Calendar (Day)
+import Karamaan.Opaleye.Default (Default)
+import Data.Profunctor.Product (PPOfContravariant)
 
 personTable :: Query (Wire String, Wire Int, Wire String)
 personTable = makeTable (A.a3 ( col "name"
@@ -109,38 +109,36 @@ notTwentiesAtAddress' = proc () -> do
   returnA -< row
 
 sql_personTable :: String
-sql_personTable = s (U.pc3 (w, w, w)) personTable
+sql_personTable = s personTable
 
 sql_birthdayTable :: String
-sql_birthdayTable = s (U.pc2 (w, w)) birthdayTable
+sql_birthdayTable = s birthdayTable
 
 sql_nameAge :: String
-sql_nameAge = s (U.pc2 (w, w)) nameAge
+sql_nameAge = s nameAge
 
 sql_personBirthdayProduct :: String
-sql_personBirthdayProduct = s unpackspec personBirthdayProduct
-  where unpackspec = U.pc2 (U.pc3 (w, w, w), U.pc2 (w, w))
+sql_personBirthdayProduct = s personBirthdayProduct
 
 sql_totalAge :: String
-sql_totalAge = s (U.pc3 (w, w, w)) totalAge
+sql_totalAge = s totalAge
 
 sql_personAndBirthday :: String
-sql_personAndBirthday = s (U.pc4 (w, w, w, w)) personAndBirthday
+sql_personAndBirthday = s personAndBirthday
 
 sql_personAndBirthday' :: String
-sql_personAndBirthday' = s (U.pc4 (w, w, w, w)) personAndBirthday'
+sql_personAndBirthday' = s personAndBirthday'
 
 sql_children :: String
-sql_children = s (U.pc3 (w, w, w)) children
+sql_children = s children
 
 sql_notTwentiesAtAddress :: String
-sql_notTwentiesAtAddress = s (U.pc3 (w, w, w)) notTwentiesAtAddress
+sql_notTwentiesAtAddress = s notTwentiesAtAddress
 
 sql_notTwentiesAtAddress' :: String
-sql_notTwentiesAtAddress' = s (U.pc3 (w, w, w)) notTwentiesAtAddress'
+sql_notTwentiesAtAddress' = s notTwentiesAtAddress'
 
-w :: Unpackspec (Wire a)
-w = Unpackspec writerWire
-
-s :: Unpackspec a -> Query a -> String
-s = showSqlForPostgres
+s :: Default (PPOfContravariant Unpackspec) a a
+                             => Query a
+                             -> String
+s = showSqlForPostgresDefault

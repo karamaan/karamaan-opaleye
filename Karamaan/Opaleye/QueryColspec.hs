@@ -3,13 +3,15 @@
 module Karamaan.Opaleye.QueryColspec where
 
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
-import Control.Arrow ((***))
-import Control.Applicative (Applicative, (<$>), (<*>))
+import Control.Arrow ((&&&))
+import Control.Applicative (Applicative, (<*>), pure)
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
-                                ProductContravariant, point, (***<))
-import Data.Monoid (Monoid, mempty, (<>))
+                                ProductContravariant, point, (***<),
+                                defaultEmpty, defaultProfunctorProduct,
+                                defaultPoint, defaultContravariantProduct)
+import Data.Monoid (Monoid, mempty, mappend, (<>))
 import Karamaan.Opaleye.Default (Default, def)
 
 -- The constructor is called Writer as a historical accident.
@@ -19,9 +21,13 @@ newtype MWriter m a = Writer (a -> m)
 instance Contravariant (MWriter m) where
   contramap f (Writer w) = Writer (w . f)
 
+instance Monoid m => Monoid (MWriter m a) where
+  mempty = Writer (const mempty)
+  w `mappend` w' = Writer (uncurry (<>) . (runWriter w &&& runWriter w'))
+
 instance Monoid m => ProductContravariant (MWriter m) where
-  point = Writer (const mempty)
-  w ***< w' = writer (uncurry (<>) . (runWriter w *** runWriter w'))
+  point = defaultPoint
+  (***<) = defaultContravariantProduct
 
 type LWriter e = MWriter [e]
 type Writer = LWriter String
@@ -34,9 +40,16 @@ runPackMap (PackMap p) = p
 instance Profunctor PackMap where
   dimap f g (PackMap p) = PackMap (\s -> g . p s . f)
 
+instance Functor (PackMap a) where
+  fmap f (PackMap p) = PackMap (\s -> f . p s)
+
+instance Applicative (PackMap a) where
+  pure = PackMap . const . const
+  PackMap pf <*> PackMap px = PackMap (\ss a -> (pf ss a) (px ss a))
+
 instance ProductProfunctor PackMap where
-  empty = PackMap (\_ -> id)
-  (PackMap p) ***! (PackMap p') = PackMap ((***) <$> p <*> p')
+  empty = defaultEmpty
+  (***!) = defaultProfunctorProduct
 
 runWriter :: MWriter m t -> t -> m
 runWriter (Writer w) = w

@@ -6,8 +6,8 @@ module Karamaan.Opaleye.RunQuery where
 import Karamaan.Opaleye.Wire (Wire)
 import qualified Database.PostgreSQL.Simple as SQL
 import Database.PostgreSQL.Simple.Internal (RowParser)
-import Database.PostgreSQL.Simple.FromField (FromField)
-import Database.PostgreSQL.Simple.FromRow (FromRow, fromRow, field)
+import Database.PostgreSQL.Simple.FromField (FieldParser, FromField, fromField)
+import Database.PostgreSQL.Simple.FromRow (FromRow, fromRow, fieldWith)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
@@ -37,10 +37,19 @@ instance ProductProfunctor QueryRunner where
   QueryRunner u b ***! QueryRunner u' b' =
     QueryRunner (u ***< u') (liftA2 (,) b b')
 
+fieldQueryRunner :: FromField a => QueryRunner (Wire a) a
+fieldQueryRunner = fieldQueryRunnerF id
+
+fieldQueryRunnerF :: FromField a => (a -> b) -> QueryRunner (Wire b) b
+fieldQueryRunnerF = fieldQueryRunnerUnclassed . flip fmapFieldParser fromField
+
+fmapFieldParser :: (a -> b) -> FieldParser a -> FieldParser b
+fmapFieldParser = fmap . fmap . fmap
+
 -- TODO: May want to make this "(Wire b) a" in the future
 -- TODO: put 'Unpackspec writerWire' in Unpackspec.hs
-fieldQueryRunner :: FromField a => QueryRunner (Wire a) a
-fieldQueryRunner = QueryRunner (Unpackspec writerWire) field
+fieldQueryRunnerUnclassed :: FieldParser a -> QueryRunner (Wire a) a
+fieldQueryRunnerUnclassed = QueryRunner (Unpackspec writerWire) . fieldWith
 
 instance Default QueryRunner (Wire Int) Int where
   def = fieldQueryRunner

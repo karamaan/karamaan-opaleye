@@ -27,6 +27,15 @@ import Data.Time.Calendar (Day)
 
 import qualified Karamaan.WhaleUtil.Database as UD
 
+-- How to define new 'QueryRunner's for your own datatypes:
+--
+-- You should probably just do (if you're wrapping an Int with MyType say)
+--
+-- newtype MyType = MyType Int
+--
+-- instance Default QueryRunner (Wire MyType) MyType
+--     where def = fieldQueryRunnerF MyType
+
 data QueryRunner a b = QueryRunner (Unpackspec a) (RowParser b)
 
 instance Profunctor QueryRunner where

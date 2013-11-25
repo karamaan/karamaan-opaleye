@@ -98,6 +98,8 @@ toQueryArr11 :: ExprArr (Wire a) (Wire b) -> QueryArr (Wire a) (Wire b)
 toQueryArr11 exprArr = QueryArr f
   where f (Wire w0, primQ0, t0) = (Wire w1, primQ1, t1)
           where (Wire w1, scope1, t1) = runExprArr exprArr (Wire w0, scope0, t0)
+                -- TODO: Is this w0 tagged?
+                -- Perhaps it is, as we assume it comes out of a query.
                 scope0 = Map.singleton w0 (PQ.AttrExpr w0)
                 expr = M.fromJust (Map.lookup w1 scope1)
                 primQ1 = extend [(w1, expr)] primQ0

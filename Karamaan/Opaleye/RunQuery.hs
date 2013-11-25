@@ -33,8 +33,8 @@ import qualified Karamaan.WhaleUtil.Database as UD
 --
 -- newtype MyType = MyType Int
 --
--- instance Default QueryRunner (Wire MyType) MyType
---     where def = fieldQueryRunnerF MyType
+-- instance Default QueryRunner (Wire MyType) MyType where
+--     def = fieldQueryRunnerF MyType
 
 data QueryRunner a b = QueryRunner (Unpackspec a) (RowParser b)
 

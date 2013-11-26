@@ -106,28 +106,32 @@ colsAndScope' (TableExprRunner (Writer makeScope) adaptCols)
 
 arrangeInsert :: Assocer t' -> TableMaybeWrapper t t' -> Table t -> Expr t'
                  -> SqlInsert
-arrangeInsert (Assocer (MWriter2 assocer))
+arrangeInsert assocer
               (TableMaybeWrapper maybeWrapper)
               (Table tableName tableCols)
               insertExpr
   = sqlInsert defaultSqlGenerator tableName assocs
     where tableMaybeCols = maybeWrapper tableCols
-          (insertCols, scope, _) = runExprArrStartEmpty insertExpr ()
-          assocs = assocer tableMaybeCols insertCols scope
+          assocs = primExprsOfAssocer assocer tableMaybeCols
+                                      (runExprArrStartEmpty insertExpr ())
+
+primExprsOfAssocer :: Assocer t -> t -> (t, Scope, t1) -> [(String, PrimExpr)]
+primExprsOfAssocer (Assocer (MWriter2 assocer)) t (cols, scope, _)
+  = assocer t cols scope
 
 arrangeUpdate :: TableExprRunner t u -> Assocer t' -> TableMaybeWrapper t t'
               -> Table t -> ExprArr u t' -> ExprArr u (Wire Bool) -> SqlUpdate
 arrangeUpdate tableExprRunner
-              (Assocer (MWriter2 assocer))
+              assocer
               (TableMaybeWrapper maybeWrapper)
               (Table tableName tableCols)
               updateExpr
               conditionExpr
   = sqlUpdate defaultSqlGenerator tableName [condition] assocs
   where tableMaybeCols = maybeWrapper tableCols
-        (updateCols, scope, _) = runExprArrStart updateExpr colsAndScope
         colsAndScope = colsAndScope' tableExprRunner tableCols
-        assocs = assocer tableMaybeCols updateCols scope
+        assocs = primExprsOfAssocer assocer tableMaybeCols
+                                    (runExprArrStart updateExpr colsAndScope)
         condition = runExprArr'' conditionExpr colsAndScope
 
 instance Default TableExprRunner (Wire a) (Wire a) where

@@ -5,7 +5,7 @@ module Karamaan.Opaleye.Manipulation where
 import Karamaan.Opaleye.Wire (Wire(Wire))
 import Karamaan.Opaleye.ExprArr (Scope, ExprArr, Expr, runExprArr'',
                                  runExprArrStartEmpty, eq, scopeOfWire, plus,
-                                 unsafeScopeLookup, constant)
+                                 unsafeScopeLookup, constant, runExprArrStart)
 import Karamaan.Opaleye.QueryColspec
 import Database.HaskellDB.PrimQuery (PrimExpr)
 import Data.Profunctor (Profunctor, dimap)
@@ -18,10 +18,10 @@ import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Control.Applicative (Applicative, (<*>), pure)
 import Data.Monoid (Monoid, mempty, mappend, (<>))
-import Database.HaskellDB.Sql (SqlDelete, SqlInsert)
-import Database.HaskellDB.Sql.Generate (sqlDelete, sqlInsert)
+import Database.HaskellDB.Sql (SqlDelete, SqlInsert, SqlUpdate)
+import Database.HaskellDB.Sql.Generate (sqlDelete, sqlInsert, sqlUpdate)
 import Database.HaskellDB.Sql.Default (defaultSqlGenerator)
-import Database.HaskellDB.Sql.Print (ppDelete, ppInsert)
+import Database.HaskellDB.Sql.Print (ppDelete, ppInsert, ppUpdate)
 import Control.Arrow ((&&&), (<<<), first, arr)
 import Karamaan.Opaleye.Default (Default, def)
 
@@ -111,6 +111,21 @@ arrangeInsert (Assocer (MWriter2 assocer))
           (insertCols, scope, _) = runExprArrStartEmpty insertExpr ()
           assocs = assocer tableMaybeCols insertCols scope
 
+arrangeUpdate :: TableExprRunner t u -> Assocer t' -> TableMaybeWrapper t t'
+              -> Table t -> ExprArr u t' -> ExprArr u (Wire Bool) -> SqlUpdate
+arrangeUpdate (TableExprRunner (Writer makeScope) adaptCols)
+              (Assocer (MWriter2 assocer))
+              (TableMaybeWrapper maybeWrapper)
+              (Table tableName tableCols)
+              updateExpr
+              conditionExpr
+  = sqlUpdate defaultSqlGenerator tableName [condition] assocs
+  where tableMaybeCols = maybeWrapper tableCols
+        (updateCols, scope, _) = runExprArrStart updateExpr colsAndScope
+        colsAndScope = (adaptCols &&& makeScope) tableCols
+        assocs = assocer tableMaybeCols updateCols scope
+        condition = runExprArr'' conditionExpr colsAndScope
+
 instance Default TableExprRunner (Wire a) (Wire a) where
   def = TableExprRunner (Writer scopeOfWire) id
 
@@ -143,4 +158,20 @@ testInsert = show (ppInsert sqlInsert')
                       &&& (arr (const Nothing)))
                      &&& (arr Just <<< plus <<< (constant 5 &&& constant 6))
         sqlInsert' = arrangeInsert def' def table insertExpr
+        def' = unPPOfContravariant def
+
+testUpdate :: String
+testUpdate = show (ppUpdate sqlUpdate')
+  where table :: Table ((Wire Int, Wire Int), Wire Int)
+        table  = Table "tablename" ((Wire "col1", Wire "col2"), Wire "col3")
+        updateExpr :: ExprArr ((Wire Int, Wire Int),
+                               Wire Int)
+                              ((Maybe (Wire Int), Maybe (Wire Int)),
+                               Maybe (Wire Int))
+        updateExpr = (arr (const Nothing) &&& (arr Just <<< plus <<< arr fst))
+                     &&& arr (const Nothing)
+        condExpr :: ExprArr ((Wire Int, Wire Int), Wire Int) (Wire Bool)
+        condExpr = eq <<< arr ((fst . fst) &&& snd)
+
+        sqlUpdate' = arrangeUpdate def def' def table updateExpr condExpr
         def' = unPPOfContravariant def

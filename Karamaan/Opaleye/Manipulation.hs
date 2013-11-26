@@ -140,8 +140,8 @@ assocerWire Nothing _ _ = []
 assocerWire _ Nothing _ = []
 assocerWire (Just (Wire s)) (Just w) scope = [(s, unsafeScopeLookup w scope)]
 
-test :: String
-test = show (ppDelete sqlDelete')
+testDelete :: String
+testDelete = show (ppDelete sqlDelete')
   where table :: Table ((Wire Int, Wire Int), Wire Int)
         table = Table "tablename" ((Wire "col1", Wire "col2"), Wire "col3")
         condExpr :: ExprArr ((Wire Int, Wire Int), Wire Int) (Wire Bool)

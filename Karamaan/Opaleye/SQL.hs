@@ -44,6 +44,8 @@ optimizeFormatAndShowSQL :: PrimQuery -> String
 optimizeFormatAndShowSQL = formatAndShowSQL . optimize
 
 -- I don't really know why this is an orphan instance.
+-- Oh, it's because Unpackspec is not defined here!
+-- FIXME: move this
 instance Default (PPOfContravariant Unpackspec) (Wire a) (Wire a) where
   def = PPOfContravariant (Unpackspec writerWire)
 

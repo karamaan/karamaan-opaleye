@@ -98,10 +98,11 @@ arrangeDelete tableExprRunner
               (Table tableName tableCols)
               conditionExpr
   = sqlDelete defaultSqlGenerator tableName [condition]
-  where condition = runExprArr'' conditionExpr (colsAndScope' tableExprRunner tableCols)
+  where condition = runExprArr'' conditionExpr colsAndScope'
+        colsAndScope' = colsAndScope tableExprRunner tableCols
 
-colsAndScope' :: TableExprRunner t u -> t -> (u, Scope)
-colsAndScope' (TableExprRunner (Writer makeScope) adaptCols)
+colsAndScope :: TableExprRunner t u -> t -> (u, Scope)
+colsAndScope (TableExprRunner (Writer makeScope) adaptCols)
   = adaptCols &&& makeScope
 
 arrangeInsert :: Assocer t' -> TableMaybeWrapper t t' -> Table t -> Expr t'
@@ -129,10 +130,10 @@ arrangeUpdate tableExprRunner
               conditionExpr
   = sqlUpdate defaultSqlGenerator tableName [condition] assocs
   where tableMaybeCols = maybeWrapper tableCols
-        colsAndScope = colsAndScope' tableExprRunner tableCols
+        colsAndScope' = colsAndScope tableExprRunner tableCols
         assocs = primExprsOfAssocer assocer tableMaybeCols
-                                    (runExprArrStart updateExpr colsAndScope)
-        condition = runExprArr'' conditionExpr colsAndScope
+                                    (runExprArrStart updateExpr colsAndScope')
+        condition = runExprArr'' conditionExpr colsAndScope'
 
 instance Default TableExprRunner (Wire a) (Wire a) where
   def = TableExprRunner (Writer scopeOfWire) id

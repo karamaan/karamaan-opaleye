@@ -94,11 +94,14 @@ instance ProductContravariant Assocer where
 
 arrangeDelete :: TableExprRunner t a -> Table t -> ExprArr a (Wire Bool)
                  -> SqlDelete
-arrangeDelete (TableExprRunner (Writer makeScope) adaptCols)
+arrangeDelete tableExprRunner
               (Table tableName tableCols)
               conditionExpr
   = sqlDelete defaultSqlGenerator tableName [condition]
-  where condition = runExprArr'' conditionExpr ((adaptCols &&& makeScope) tableCols)
+  where condition = runExprArr'' conditionExpr (colsAndScope' tableExprRunner tableCols)
+colsAndScope' :: TableExprRunner t u -> t -> (u, Scope)
+colsAndScope' (TableExprRunner (Writer makeScope) adaptCols)
+  = adaptCols &&& makeScope
 
 arrangeInsert :: Assocer t' -> TableMaybeWrapper t t' -> Table t -> Expr t'
                  -> SqlInsert
@@ -113,7 +116,7 @@ arrangeInsert (Assocer (MWriter2 assocer))
 
 arrangeUpdate :: TableExprRunner t u -> Assocer t' -> TableMaybeWrapper t t'
               -> Table t -> ExprArr u t' -> ExprArr u (Wire Bool) -> SqlUpdate
-arrangeUpdate (TableExprRunner (Writer makeScope) adaptCols)
+arrangeUpdate tableExprRunner
               (Assocer (MWriter2 assocer))
               (TableMaybeWrapper maybeWrapper)
               (Table tableName tableCols)
@@ -122,7 +125,7 @@ arrangeUpdate (TableExprRunner (Writer makeScope) adaptCols)
   = sqlUpdate defaultSqlGenerator tableName [condition] assocs
   where tableMaybeCols = maybeWrapper tableCols
         (updateCols, scope, _) = runExprArrStart updateExpr colsAndScope
-        colsAndScope = (adaptCols &&& makeScope) tableCols
+        colsAndScope = colsAndScope' tableExprRunner tableCols
         assocs = assocer tableMaybeCols updateCols scope
         condition = runExprArr'' conditionExpr colsAndScope
 

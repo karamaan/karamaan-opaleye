@@ -38,9 +38,15 @@ instance Arrow ExprArr where
 runExprArr :: ExprArr a b -> (a, Scope, Tag) -> (b, Scope, Tag)
 runExprArr (ExprArr f) = f
 
+runExprArrStart :: ExprArr a b -> (a, Scope) -> (b, Scope, Tag)
+runExprArrStart expr (a, scope) = runExprArr expr (a, scope, start)
+
+runExprArrStartEmpty :: ExprArr a b -> a -> (b, Scope, Tag)
+runExprArrStartEmpty expr a = runExprArr expr (a, Map.empty, start)
+
 runExprArr'' :: ExprArr a (Wire b) -> (a, Scope) -> PrimExpr
 runExprArr'' expr (a, scope) = M.fromJust (Map.lookup b scope1)
-  where (Wire b, scope1, _) = runExprArr expr (a, scope, start)
+  where (Wire b, scope1, _) = runExprArrStart expr (a, scope)
 
 runExprArr' :: Expr (Wire a) -> PrimExpr
 runExprArr' = flip runExprArr'' ((), Map.empty)

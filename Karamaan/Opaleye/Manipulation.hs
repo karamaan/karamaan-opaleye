@@ -1,25 +1,27 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
 
 module Karamaan.Opaleye.Manipulation where
 
 import Karamaan.Opaleye.Wire (Wire(Wire))
-import Karamaan.Opaleye.ExprArr (Scope, ExprArr, runExprArr'', eq, scopeOfWire,
-                                plus)
+import Karamaan.Opaleye.ExprArr (Scope, ExprArr, Expr, runExprArr'',
+                                 runExprArrStartEmpty, eq, scopeOfWire, plus,
+                                 unsafeScopeLookup, constant)
 import Karamaan.Opaleye.QueryColspec
 import Database.HaskellDB.PrimQuery (PrimExpr)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
                                 ProductContravariant, point, (***<),
                                 defaultEmpty, defaultProfunctorProduct,
-                                defaultPoint, defaultContravariantProduct)
+                                defaultPoint, defaultContravariantProduct,
+                                PPOfContravariant(PPOfContravariant))
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Control.Applicative (Applicative, (<*>), pure)
 import Data.Monoid (Monoid, mempty, mappend, (<>))
-import Database.HaskellDB.Sql (SqlDelete)
-import Database.HaskellDB.Sql.Generate (sqlDelete)
+import Database.HaskellDB.Sql (SqlDelete, SqlInsert)
+import Database.HaskellDB.Sql.Generate (sqlDelete, sqlInsert)
 import Database.HaskellDB.Sql.Default (defaultSqlGenerator)
-import Database.HaskellDB.Sql.Print (ppDelete)
-import Control.Arrow ((&&&), (<<<), arr, first)
+import Database.HaskellDB.Sql.Print (ppDelete, ppInsert)
+import Control.Arrow ((&&&), (<<<), first, arr)
 import Karamaan.Opaleye.Default (Default, def)
 
 data Table a = Table String a
@@ -34,7 +36,7 @@ newtype TableMaybeWrapper a b = TableMaybeWrapper (a -> b)
 
 newtype MWriter2 m a = MWriter2 (a -> a -> m)
 
-newtype Assocer a = Assocer (MWriter2 [(String, PrimExpr)] a)
+newtype Assocer a = Assocer (MWriter2 (Scope -> [(String, PrimExpr)]) a)
 
 instance Functor (TableExprRunner a) where
   fmap f (TableExprRunner w ff) = TableExprRunner w (fmap f ff)
@@ -97,11 +99,47 @@ arrangeDelete (TableExprRunner (Writer makeScope) adaptCols)
   = sqlDelete defaultSqlGenerator tableName [condition]
   where condition = runExprArr'' conditionExpr ((adaptCols &&& makeScope) tableCols)
 
+arrangeInsert :: Assocer t' -> TableMaybeWrapper t t' -> Table t -> Expr t'
+                 -> SqlInsert
+arrangeInsert (Assocer (MWriter2 assocer))
+              (TableMaybeWrapper maybeWrapper)
+              (Table tableName tableCols)
+              insertExpr
+  = sqlInsert defaultSqlGenerator tableName assocs
+    where tableMaybeCols = maybeWrapper tableCols
+          (insertCols, scope, _) = runExprArrStartEmpty insertExpr ()
+          assocs = assocer tableMaybeCols insertCols scope
+
 instance Default TableExprRunner (Wire a) (Wire a) where
   def = TableExprRunner (Writer scopeOfWire) id
+
+instance Default TableMaybeWrapper (Wire a) (Maybe (Wire a)) where
+  def = TableMaybeWrapper Just
+
+instance Default (PPOfContravariant Assocer) (Maybe (Wire a)) (Maybe (Wire a)) where
+  def = PPOfContravariant (Assocer (MWriter2 assocer'))
+
+assocer' :: Maybe (Wire a) -> Maybe (Wire a) -> Scope -> [(String, PrimExpr)]
+assocer' Nothing _ _ = []
+assocer' _ Nothing _ = []
+assocer' (Just (Wire s)) (Just w) scope = [(s, unsafeScopeLookup w scope)]
 
 test :: String
 test = show (ppDelete sqlDelete')
   where table = Table "tablename" ((Wire "col1", Wire "col2"), Wire "col3") :: Table ((Wire Int, Wire Int), Wire Int)
         condExpr = eq <<< first plus :: ExprArr ((Wire Int, Wire Int), Wire Int) (Wire Bool)
         sqlDelete' = arrangeDelete def table condExpr
+
+unPP :: PPOfContravariant c a a -> c a
+unPP (PPOfContravariant pp) = pp
+
+testInsert :: String
+testInsert = show (ppInsert sqlInsert')
+  where table  = Table "tablename" ((Wire "col1", Wire "col2"), Wire "col3") :: Table ((Wire Int, Wire Int), Wire Int)
+        insertExpr :: Expr ((Maybe (Wire Int), Maybe (Wire Int)),
+                            Maybe (Wire Int))
+        insertExpr = ((arr Just <<< constant 1)
+                      &&& (arr (const Nothing)))
+                     &&& (arr Just <<< plus <<< (constant 5 &&& constant 6))
+        sqlInsert' = arrangeInsert def' def table insertExpr
+        def' = unPP def

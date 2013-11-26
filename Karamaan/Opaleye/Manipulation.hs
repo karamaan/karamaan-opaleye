@@ -141,13 +141,14 @@ instance Default TableMaybeWrapper (Wire a) (Maybe (Wire a)) where
   def = TableMaybeWrapper Just
 
 instance Default (PPOfContravariant Assocer) (Maybe (Wire a)) (Maybe (Wire a)) where
-  def = (PPOfContravariant . Assocer . MWriter2) assocerWire
+  def = (PPOfContravariant . Assocer . MWriter2) assocerWireMaybe
 
-assocerWire :: Maybe (Wire a) -> Maybe (Wire a) -> Scope -> [(String, PrimExpr)]
-assocerWire w w' = maybe [] return . liftA3 assocerWire' w w' . pure
+assocerWireMaybe :: Maybe (Wire a) -> Maybe (Wire a) -> Scope
+                 -> [(String, PrimExpr)]
+assocerWireMaybe w w' = maybe [] return . liftA3 assocerWire w w' . pure
 
-assocerWire' :: Wire a -> Wire a -> Scope -> (String, PrimExpr)
-assocerWire' (Wire s) w scope = (s, unsafeScopeLookup w scope)
+assocerWire :: Wire a -> Wire a -> Scope -> (String, PrimExpr)
+assocerWire (Wire s) w scope = (s, unsafeScopeLookup w scope)
 
 testDelete :: String
 testDelete = show (ppDelete sqlDelete')

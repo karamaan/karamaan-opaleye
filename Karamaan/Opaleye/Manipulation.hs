@@ -126,8 +126,10 @@ assocer' (Just (Wire s)) (Just w) scope = [(s, unsafeScopeLookup w scope)]
 
 test :: String
 test = show (ppDelete sqlDelete')
-  where table = Table "tablename" ((Wire "col1", Wire "col2"), Wire "col3") :: Table ((Wire Int, Wire Int), Wire Int)
-        condExpr = eq <<< first plus :: ExprArr ((Wire Int, Wire Int), Wire Int) (Wire Bool)
+  where table :: Table ((Wire Int, Wire Int), Wire Int)
+        table = Table "tablename" ((Wire "col1", Wire "col2"), Wire "col3")
+        condExpr :: ExprArr ((Wire Int, Wire Int), Wire Int) (Wire Bool)
+        condExpr = eq <<< first plus
         sqlDelete' = arrangeDelete def table condExpr
 
 unPP :: PPOfContravariant c a a -> c a

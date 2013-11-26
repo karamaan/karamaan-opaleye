@@ -1,7 +1,4 @@
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts,
-    ScopedTypeVariables #-}
--- TODO: ^^ get rid of these extensions when we move the default instance
--- somewhere more sensible
+{-# LANGUAGE FlexibleContexts #-}
 
 module Karamaan.Opaleye.SQL where
 
@@ -11,13 +8,10 @@ import Database.HaskellDB.Sql.Print (ppSql)
 import Database.HaskellDB.Sql.Default (defaultSqlGenerator)
 import Database.HaskellDB.PrimQuery (PrimQuery)
 import Karamaan.Opaleye.QueryArr (Query, runQueryArrPrim)
-import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
-import Karamaan.Opaleye.QueryColspec (writerWire)
+import Karamaan.Opaleye.Unpackspec (Unpackspec)
 import Karamaan.WhaleUtil ((.:))
+import Data.Profunctor.Product (PPOfContravariant, unPPOfContravariant)
 import Karamaan.Opaleye.Default (Default, def)
-import Data.Profunctor.Product (PPOfContravariant(PPOfContravariant),
-                                unPPOfContravariant)
-import Karamaan.Opaleye.Wire (Wire)
 
 {-# DEPRECATED showSqlForPostgreSQLSimple'
     "Use 'showSqlForPostgres' instead" #-}
@@ -43,14 +37,7 @@ formatAndShowSQL = show . ppSql . sqlQuery defaultSqlGenerator
 optimizeFormatAndShowSQL :: PrimQuery -> String
 optimizeFormatAndShowSQL = formatAndShowSQL . optimize
 
--- I don't really know why this is an orphan instance.
--- Oh, it's because Unpackspec is not defined here!
--- FIXME: move this
-instance Default (PPOfContravariant Unpackspec) (Wire a) (Wire a) where
-  def = PPOfContravariant (Unpackspec writerWire)
-
-showSqlForPostgresDefault :: forall a.
-                             Default (PPOfContravariant Unpackspec) a a
+showSqlForPostgresDefault :: Default (PPOfContravariant Unpackspec) a a
                              => Query a
                              -> String
 showSqlForPostgresDefault = showSqlForPostgres (unPPOfContravariant def)

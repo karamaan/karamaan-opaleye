@@ -1,12 +1,17 @@
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
+
 module Karamaan.Opaleye.Unpackspec where
 
-import Karamaan.Opaleye.QueryColspec (Writer)
+import Karamaan.Opaleye.QueryColspec (Writer, writerWire)
 import Data.Profunctor.Product.Tuples
 import Data.Profunctor.Product.Flatten
-import Data.Profunctor.Product ((***<), ProductContravariant, point)
+import Data.Profunctor.Product ((***<), ProductContravariant, point,
+                                PPOfContravariant(PPOfContravariant))
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Control.Arrow (second)
 import Karamaan.WhaleUtil ((.:))
+import Karamaan.Opaleye.Default (Default, def)
+import Karamaan.Opaleye.Wire (Wire)
 
 newtype Unpackspec a = Unpackspec (Writer a)
 
@@ -16,6 +21,9 @@ instance Contravariant Unpackspec where
 instance ProductContravariant Unpackspec where
   point = Unpackspec point
   (Unpackspec u) ***< (Unpackspec u') = Unpackspec (u ***< u')
+
+instance Default (PPOfContravariant Unpackspec) (Wire a) (Wire a) where
+  def = PPOfContravariant (Unpackspec writerWire)
 
 convert :: ProductContravariant f => (b -> a1) -> (a -> b1) -> (b1 -> f a1) -> a -> f b
 convert u u' c = contramap u . c . u'

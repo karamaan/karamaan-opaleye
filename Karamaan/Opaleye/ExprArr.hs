@@ -110,11 +110,14 @@ toQueryArr11 exprArr = QueryArr f
                 -- TODO: Is this w0 tagged?
                 -- Perhaps it is, as we assume it comes out of a query.
                 scope0 = scopeOfWire w0
-                expr = M.fromJust (Map.lookup w1 scope1)
+                expr = unsafeScopeLookup (Wire w1) scope1
                 primQ1 = extend [(w1, expr)] primQ0
 
 scopeOfWire :: Wire a -> Scope
 scopeOfWire (Wire s) = Map.singleton s (PQ.AttrExpr s)
+
+unsafeScopeLookup :: Wire a -> Scope -> PrimExpr
+unsafeScopeLookup (Wire w) s = M.fromJust (Map.lookup w s)
 
 equalsOneOfQ :: ShowConstant a => [a] -> QueryArr (Wire a) (Wire Bool)
 equalsOneOfQ = toQueryArr11 . equalsOneOf

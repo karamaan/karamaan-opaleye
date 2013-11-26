@@ -24,7 +24,6 @@ import Database.HaskellDB.Sql.Default (defaultSqlGenerator)
 import Database.HaskellDB.Sql.Print (ppDelete, ppInsert, ppUpdate)
 import Control.Arrow ((&&&), (<<<), first, arr)
 import Karamaan.Opaleye.Default (Default, def)
-import Karamaan.Opaleye.Values ((.:.))
 
 data Table a = Table String a
 
@@ -137,11 +136,7 @@ instance Default (PPOfContravariant Assocer) (Maybe (Wire a)) (Maybe (Wire a)) w
   def = (PPOfContravariant . Assocer . MWriter2) assocerWire
 
 assocerWire :: Maybe (Wire a) -> Maybe (Wire a) -> Scope -> [(String, PrimExpr)]
-assocerWire = maybe [] return .:. assocerWire''
-
-assocerWire'' :: Maybe (Wire a) -> Maybe (Wire a) -> Scope
-                 -> Maybe (String, PrimExpr)
-assocerWire'' w w' = liftA3 assocerWire' w w' . pure
+assocerWire w w' = maybe [] return . liftA3 assocerWire' w w' . pure
 
 assocerWire' :: Wire a -> Wire a -> Scope -> (String, PrimExpr)
 assocerWire' (Wire s) w scope = (s, unsafeScopeLookup w scope)

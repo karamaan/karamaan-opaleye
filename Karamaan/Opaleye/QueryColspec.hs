@@ -23,6 +23,7 @@ instance Contravariant (MWriter m) where
 
 instance Monoid m => Monoid (MWriter m a) where
   mempty = Writer (const mempty)
+  -- FIXME: can just do 'runWriter w <> runWriter w''?
   w `mappend` w' = Writer (uncurry (<>) . (runWriter w &&& runWriter w'))
 
 instance Monoid m => ProductContravariant (MWriter m) where

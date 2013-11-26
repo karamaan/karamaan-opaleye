@@ -99,6 +99,7 @@ arrangeDelete tableExprRunner
               conditionExpr
   = sqlDelete defaultSqlGenerator tableName [condition]
   where condition = runExprArr'' conditionExpr (colsAndScope' tableExprRunner tableCols)
+
 colsAndScope' :: TableExprRunner t u -> t -> (u, Scope)
 colsAndScope' (TableExprRunner (Writer makeScope) adaptCols)
   = adaptCols &&& makeScope

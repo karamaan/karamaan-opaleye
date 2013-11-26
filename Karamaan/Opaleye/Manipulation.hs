@@ -115,7 +115,7 @@ arrangeInsert assocer
           assocs = primExprsOfAssocer assocer tableMaybeCols
                                       (runExprArrStartEmpty insertExpr ())
 
-primExprsOfAssocer :: Assocer t -> t -> (t, Scope, t1) -> [(String, PrimExpr)]
+primExprsOfAssocer :: Assocer t -> t -> (t, Scope, z) -> [(String, PrimExpr)]
 primExprsOfAssocer (Assocer (MWriter2 assocer)) t (cols, scope, _)
   = assocer t cols scope
 

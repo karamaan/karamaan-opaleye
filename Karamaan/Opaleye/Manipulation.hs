@@ -135,7 +135,8 @@ unPP (PPOfContravariant pp) = pp
 
 testInsert :: String
 testInsert = show (ppInsert sqlInsert')
-  where table  = Table "tablename" ((Wire "col1", Wire "col2"), Wire "col3") :: Table ((Wire Int, Wire Int), Wire Int)
+  where table :: Table ((Wire Int, Wire Int), Wire Int)
+        table  = Table "tablename" ((Wire "col1", Wire "col2"), Wire "col3")
         insertExpr :: Expr ((Maybe (Wire Int), Maybe (Wire Int)),
                             Maybe (Wire Int))
         insertExpr = ((arr Just <<< constant 1)

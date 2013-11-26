@@ -13,7 +13,8 @@ import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
                                 ProductContravariant, point, (***<),
                                 defaultEmpty, defaultProfunctorProduct,
                                 defaultPoint, defaultContravariantProduct,
-                                PPOfContravariant(PPOfContravariant))
+                                PPOfContravariant(PPOfContravariant),
+                                unPPOfContravariant)
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Control.Applicative (Applicative, (<*>), pure)
 import Data.Monoid (Monoid, mempty, mappend, (<>))
@@ -132,9 +133,6 @@ test = show (ppDelete sqlDelete')
         condExpr = eq <<< first plus
         sqlDelete' = arrangeDelete def table condExpr
 
-unPP :: PPOfContravariant c a a -> c a
-unPP (PPOfContravariant pp) = pp
-
 testInsert :: String
 testInsert = show (ppInsert sqlInsert')
   where table :: Table ((Wire Int, Wire Int), Wire Int)
@@ -145,4 +143,4 @@ testInsert = show (ppInsert sqlInsert')
                       &&& (arr (const Nothing)))
                      &&& (arr Just <<< plus <<< (constant 5 &&& constant 6))
         sqlInsert' = arrangeInsert def' def table insertExpr
-        def' = unPP def
+        def' = unPPOfContravariant def

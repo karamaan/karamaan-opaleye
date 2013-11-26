@@ -15,7 +15,8 @@ import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
 import Karamaan.Opaleye.QueryColspec (writerWire)
 import Karamaan.WhaleUtil ((.:))
 import Karamaan.Opaleye.Default (Default, def)
-import Data.Profunctor.Product (PPOfContravariant(PPOfContravariant))
+import Data.Profunctor.Product (PPOfContravariant(PPOfContravariant),
+                                unPPOfContravariant)
 import Karamaan.Opaleye.Wire (Wire)
 
 {-# DEPRECATED showSqlForPostgreSQLSimple'
@@ -50,5 +51,4 @@ showSqlForPostgresDefault :: forall a.
                              Default (PPOfContravariant Unpackspec) a a
                              => Query a
                              -> String
-showSqlForPostgresDefault = showSqlForPostgres def'
-  where PPOfContravariant def' = def :: PPOfContravariant Unpackspec a a
+showSqlForPostgresDefault = showSqlForPostgres (unPPOfContravariant def)

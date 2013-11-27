@@ -3,11 +3,16 @@
 module Karamaan.Opaleye.TableColspec where
 
 import Karamaan.Opaleye.Wire (Wire(Wire))
+import Karamaan.Opaleye.QueryColspec (QueryColspec, runWriterOfQueryColspec,
+                                     runPackMapOfQueryColspec)
 import Control.Applicative (Applicative, pure, (<*>))
 import Data.Monoid (Monoid, mempty)
 
--- This seems to be basically a Colspec' with the column names already applied
 data TableColspec a = TableColspec [String] ((String -> String) -> a)
+
+tableColspecOfQueryColspec :: QueryColspec a b -> a -> TableColspec b
+tableColspecOfQueryColspec q a = TableColspec (runWriterOfQueryColspec q a)
+                                          (\b -> runPackMapOfQueryColspec q b a)
 
 instance Functor TableColspec where
   fmap f (TableColspec s m) = TableColspec s (f . m)

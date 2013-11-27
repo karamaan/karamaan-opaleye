@@ -3,7 +3,6 @@
 module Karamaan.Opaleye.QueryColspec where
 
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
-import Control.Arrow ((&&&))
 import Control.Applicative (Applicative, (<*>), pure)
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Data.Profunctor (Profunctor, dimap)
@@ -23,8 +22,7 @@ instance Contravariant (MWriter m) where
 
 instance Monoid m => Monoid (MWriter m a) where
   mempty = Writer (const mempty)
-  -- FIXME: can just do 'runWriter w <> runWriter w''?
-  w `mappend` w' = Writer (uncurry (<>) . (runWriter w &&& runWriter w'))
+  w `mappend` w' = Writer (runWriter w <> runWriter w')
 
 instance Monoid m => ProductContravariant (MWriter m) where
   point = defaultPoint

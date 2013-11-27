@@ -20,6 +20,9 @@ import Data.Profunctor.Product (ProductProfunctor, empty, (***!))
 -- implementation.
 newtype TableColspecP a b = TableColspecP (QueryColspec a b)
 
+-- TODO: we don't actually need TableColspec anymore.  It's just a partially
+-- applied TableColspecP.  We should unpick its usage from makeTable replacing
+-- it with TableColspecP, and then delete its definition.
 data TableColspec a = TableColspec [String] ((String -> String) -> a)
 
 tableColspecOfTableColspecP :: TableColspecP a b -> a -> TableColspec b

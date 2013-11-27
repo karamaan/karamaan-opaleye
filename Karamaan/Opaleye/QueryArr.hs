@@ -53,11 +53,6 @@ runQueryArrPrim (Unpackspec g) f
   where (a, primQuery, _) = runQueryArr f ((), Empty, start)
         cols = runWriter g a
 
-{-# DEPRECATED runQueryArrPrim' "Use unprimed version instead" #-}
--- Deprecated 2013-11-19
-runQueryArrPrim' :: Unpackspec b -> Query b -> PrimQuery
-runQueryArrPrim' = runQueryArrPrim
-
 first3 :: (a1 -> b) -> (a1, a2, a3) -> (b, a2, a3)
 first3 f (a1, a2, a3) = (f a1, a2, a3)
 

@@ -11,6 +11,8 @@ import Karamaan.Opaleye.QueryColspec (QueryColspec(QueryColspec),
 import Control.Applicative (Applicative, pure, (<*>))
 import Data.Monoid (Monoid, mempty)
 import Karamaan.Opaleye.Default (Default, def)
+import Data.Profunctor (Profunctor, dimap)
+import Data.Profunctor.Product (ProductProfunctor, empty, (***!))
 
 -- TODO: this happens to have the same implementation as QueryColspec, but I
 -- don't want to suggest that one derives from the other.  Perhaps make this
@@ -31,6 +33,13 @@ instance Functor TableColspec where
 instance Applicative TableColspec where
   pure = TableColspec mempty . pure
   TableColspec s mf <*> TableColspec s' m = TableColspec (s ++ s') (mf <*> m)
+
+instance Profunctor TableColspecP where
+  dimap f g (TableColspecP q) = TableColspecP (dimap f g q)
+
+instance ProductProfunctor TableColspecP where
+  empty = TableColspecP empty
+  TableColspecP q ***! TableColspecP q' = TableColspecP (q ***! q')
 
 instance Default TableColspecP String (Wire a) where
   def = TableColspecP (QueryColspec (Writer return) (PackMap (Wire .)))

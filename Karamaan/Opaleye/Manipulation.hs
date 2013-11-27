@@ -70,7 +70,7 @@ instance ProductProfunctor TableMaybeWrapper where
   (***!) = defaultProfunctorProduct
 
 instance Monoid m => Monoid (MWriter2 m a) where
-  mempty = MWriter2 (pure mempty)
+  mempty = MWriter2 mempty
   MWriter2 w `mappend` MWriter2 w' = MWriter2 (w <> w')
 
 instance Contravariant (MWriter2 m) where

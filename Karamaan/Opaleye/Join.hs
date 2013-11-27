@@ -1,6 +1,6 @@
 {-# LANGUAGE Arrows, FlexibleContexts #-}
 
-module Karamaan.Opaleye.Join (semijoin) where
+module Karamaan.Opaleye.Join (semijoin, unsafeCoerce) where
 
 import Karamaan.Opaleye.QueryArr (Query, QueryArr)
 import Karamaan.Opaleye.Wire (Wire)
@@ -12,7 +12,8 @@ import Karamaan.Opaleye.Operators2 (union, isNull, eq)
 import Control.Arrow (returnA, arr, first)
 import Control.Category ((<<<))
 
--- FIXME: duplication with Report.Position.Coercions.unsafeCoerce
+-- TODO: perhaps this belongs elsewhere, but we need to work out how to avoid
+-- circular dependencies
 unsafeCoerce :: QueryArr (Wire a) (Wire b)
 unsafeCoerce = arr Wire.unsafeCoerce
 

@@ -32,6 +32,7 @@ library
                    Karamaan.Opaleye.Join,
                    Karamaan.Opaleye.LeftJoin,
                    Karamaan.Opaleye.Manipulation,
+                   Karamaan.Opaleye.ManipulationExample,
                    Karamaan.Opaleye.Operators,
                    Karamaan.Opaleye.Operators2,
                    Karamaan.Opaleye.Operators.Numeric,

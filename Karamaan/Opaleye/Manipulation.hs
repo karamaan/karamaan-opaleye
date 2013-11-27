@@ -4,8 +4,8 @@ module Karamaan.Opaleye.Manipulation where
 
 import Karamaan.Opaleye.Wire (Wire(Wire))
 import Karamaan.Opaleye.ExprArr (Scope, ExprArr, Expr, runExprArr'',
-                                 runExprArrStartEmpty, eq, scopeOfWire, plus,
-                                 unsafeScopeLookup, constant, runExprArrStart)
+                                 runExprArrStartEmpty, scopeOfWire,
+                                 unsafeScopeLookup, runExprArrStart)
 import Karamaan.Opaleye.QueryColspec
 import Database.HaskellDB.PrimQuery (PrimExpr)
 import Data.Profunctor (Profunctor, dimap)
@@ -13,16 +13,14 @@ import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
                                 ProductContravariant, point, (***<),
                                 defaultEmpty, defaultProfunctorProduct,
                                 defaultPoint, defaultContravariantProduct,
-                                PPOfContravariant(PPOfContravariant),
-                                unPPOfContravariant)
+                                PPOfContravariant(PPOfContravariant))
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Control.Applicative (Applicative, (<*>), pure, liftA3)
 import Data.Monoid (Monoid, mempty, mappend, (<>))
 import Database.HaskellDB.Sql (SqlDelete, SqlInsert, SqlUpdate)
 import Database.HaskellDB.Sql.Generate (sqlDelete, sqlInsert, sqlUpdate)
 import Database.HaskellDB.Sql.Default (defaultSqlGenerator)
-import Database.HaskellDB.Sql.Print (ppDelete, ppInsert, ppUpdate)
-import Control.Arrow ((&&&), (<<<), first, arr)
+import Control.Arrow ((&&&))
 import Karamaan.Opaleye.Default (Default, def)
 
 data Table a = Table String a
@@ -149,39 +147,3 @@ assocerWireMaybe w w' = maybe [] return . liftA3 assocerWire w w' . pure
 
 assocerWire :: Wire a -> Wire a -> Scope -> (String, PrimExpr)
 assocerWire (Wire s) w scope = (s, unsafeScopeLookup w scope)
-
-testDelete :: String
-testDelete = show (ppDelete sqlDelete')
-  where table :: Table ((Wire Int, Wire Int), Wire Int)
-        table = Table "tablename" ((Wire "col1", Wire "col2"), Wire "col3")
-        condExpr :: ExprArr ((Wire Int, Wire Int), Wire Int) (Wire Bool)
-        condExpr = eq <<< first plus
-        sqlDelete' = arrangeDelete def table condExpr
-
-testInsert :: String
-testInsert = show (ppInsert sqlInsert')
-  where table :: Table ((Wire Int, Wire Int), Wire Int)
-        table  = Table "tablename" ((Wire "col1", Wire "col2"), Wire "col3")
-        insertExpr :: Expr ((Maybe (Wire Int), Maybe (Wire Int)),
-                            Maybe (Wire Int))
-        insertExpr = ((arr Just <<< constant 1)
-                      &&& (arr (const Nothing)))
-                     &&& (arr Just <<< plus <<< (constant 5 &&& constant 6))
-        sqlInsert' = arrangeInsert def' def table insertExpr
-        def' = unPPOfContravariant def
-
-testUpdate :: String
-testUpdate = show (ppUpdate sqlUpdate')
-  where table :: Table ((Wire Int, Wire Int), Wire Int)
-        table  = Table "tablename" ((Wire "col1", Wire "col2"), Wire "col3")
-        updateExpr :: ExprArr ((Wire Int, Wire Int),
-                               Wire Int)
-                              ((Maybe (Wire Int), Maybe (Wire Int)),
-                               Maybe (Wire Int))
-        updateExpr = (arr (const Nothing) &&& (arr Just <<< plus <<< arr fst))
-                     &&& arr (const Nothing)
-        condExpr :: ExprArr ((Wire Int, Wire Int), Wire Int) (Wire Bool)
-        condExpr = eq <<< arr ((fst . fst) &&& snd)
-
-        sqlUpdate' = arrangeUpdate def def' def table updateExpr condExpr
-        def' = unPPOfContravariant def

@@ -43,8 +43,7 @@ instance Functor (TableExprRunner a) where
   fmap f (TableExprRunner w ff) = TableExprRunner w (fmap f ff)
 
 instance Applicative (TableExprRunner a) where
-  -- TODO: Surely need a default way of doing 'contramap (const ()) point'
-  pure = TableExprRunner (contramap (const ()) point) . pure
+  pure = TableExprRunner mempty . pure
   TableExprRunner w ff <*> TableExprRunner w' ff' =
     TableExprRunner (w <> w') (ff <*> ff')
 

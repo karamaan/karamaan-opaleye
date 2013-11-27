@@ -6,19 +6,18 @@ import Karamaan.Opaleye.QueryArr (Query, next, tagWith, simpleQueryArr)
 import Database.HaskellDB.PrimQuery (PrimQuery(Project, BaseTable),
                                      PrimExpr(AttrExpr),
                                      Attribute, Assoc)
-import Karamaan.Opaleye.TableColspec (TableColspec, runWriterOfColspec,
-                                      runPackMapOfColspec,
-                                      tableColspecOfQueryColspec)
-import Karamaan.Opaleye.QueryColspec (QueryColspec)
+import Karamaan.Opaleye.TableColspec (TableColspec, TableColspecP,
+                                      runWriterOfColspec, runPackMapOfColspec,
+                                      tableColspecOfTableColspecP)
 import Karamaan.Opaleye.Default (Default, def)
 import Control.Arrow ((***))
 import Karamaan.WhaleUtil ((.:))
 
-makeTableDef :: Default QueryColspec a b => a -> String -> Query b
+makeTableDef :: Default TableColspecP a b => a -> String -> Query b
 makeTableDef = makeTableQueryColspec def
 
-makeTableQueryColspec :: QueryColspec a b -> a -> String -> Query b
-makeTableQueryColspec = makeTable .: tableColspecOfQueryColspec
+makeTableQueryColspec :: TableColspecP a b -> a -> String -> Query b
+makeTableQueryColspec = makeTable .: tableColspecOfTableColspecP
 
 makeTable :: TableColspec a -> String -> Query a
 makeTable colspec = makeTable' colspec (zip x x)

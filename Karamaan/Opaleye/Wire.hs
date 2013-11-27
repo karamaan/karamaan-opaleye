@@ -5,11 +5,6 @@ newtype Wire a = Wire String deriving Show
 unWire :: Wire a -> String
 unWire (Wire a) = a
 
--- TODO get rid of this soon
-{-# DEPRECATED unwire "Use 'unWire' instead" #-}
-unwire :: Wire a -> String
-unwire = unWire
-
 -- TODO: should this always be within a QueryArr?
 -- If so, replace Join.unsafeCoerce with it
 --

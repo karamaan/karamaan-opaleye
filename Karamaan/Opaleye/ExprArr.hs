@@ -45,8 +45,8 @@ runExprArrStartEmpty :: ExprArr a b -> a -> (b, Scope, Tag)
 runExprArrStartEmpty expr a = runExprArr expr (a, Map.empty, start)
 
 runExprArr'' :: ExprArr a (Wire b) -> (a, Scope) -> PrimExpr
-runExprArr'' expr (a, scope) = M.fromJust (Map.lookup b scope1)
-  where (Wire b, scope1, _) = runExprArrStart expr (a, scope)
+runExprArr'' expr (a, scope) = unsafeScopeLookup b scope1
+  where (b, scope1, _) = runExprArrStart expr (a, scope)
 
 runExprArr' :: Expr (Wire a) -> PrimExpr
 runExprArr' = flip runExprArr'' ((), Map.empty)
@@ -65,10 +65,9 @@ binOp op name = ExprArr g
           where ws = tagWith t0 (operatorName v name v')
                 w = Wire ws
                 (Wire v, Wire v') = (u, u')
-                -- Naughty fromJust!
-                lookupS = M.fromJust . flip Map.lookup scope
-                uExpr = lookupS v
-                u'Expr = lookupS v'
+                lookupS = flip unsafeScopeLookup scope
+                uExpr = lookupS u
+                u'Expr = lookupS u'
                 scope' = Map.singleton ws (PQ.BinExpr op uExpr u'Expr)
 
 plus :: ExprArr (Wire a, Wire a) (Wire a)

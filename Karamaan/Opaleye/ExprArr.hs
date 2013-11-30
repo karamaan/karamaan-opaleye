@@ -108,6 +108,9 @@ equalsOneOf :: ShowConstant a => [a] -> ExprArr (Wire a) (Wire Bool)
 equalsOneOf = foldrArr or false . map (opC eq . constant)
   where false = replaceWith (constant False)
 
+-- TODO: can make some ProductProfunctors for this:
+-- queryOfExprIn qIn eIn -> queryOfExprOut qOut eOut -> ExprArr eIn eOut
+--   -> QueryArr qIn qOut
 toQueryArr11 :: ExprArr (Wire a) (Wire b) -> QueryArr (Wire a) (Wire b)
 toQueryArr11 exprArr = QueryArr f
   where f (w0, primQ0, t0) = (Wire w1, primQ1, t1)

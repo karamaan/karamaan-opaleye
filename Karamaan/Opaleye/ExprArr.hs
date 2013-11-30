@@ -58,6 +58,12 @@ constant c = ExprArr g
                 w = Wire ws
                 scope = Map.singleton ws (PQ.ConstExpr (showConstant c))
 
+-- TODO: Could probably do something like
+-- makeOp :: opMaker a b -> (b -> PrimExpr) -> ExprArr a b -> Wire c
+-- where makeOp is a ProductProfunctor
+-- This would allow us to do constants (nullary operations), unary operations
+-- and binary operations uniformly, providing a bit more type safety due to
+-- parametricity.
 -- TODO: ExprArr (Wire a, Wire b) (Wire c)?
 binOp :: PQ.BinOp -> String -> ExprArr (Wire a, Wire a) (Wire b)
 binOp op name = ExprArr g

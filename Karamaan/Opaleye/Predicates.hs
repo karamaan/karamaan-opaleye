@@ -20,20 +20,11 @@ import qualified Karamaan.WhaleUtil.Arrow as UA
 
 -- We now have an alpha implementation of 'ExprArr' which essentially
 -- does all the PrimExpr plumbing with a safer API.  In the future
--- it's preferable to use 'ExprArr' to any of the combinators here.
+-- it's preferable to use 'ExprArr' to any of the combinators here
+-- (except restrict which is still needed).
 
--- We would have liked to deprecate this but it seems that it's a lot faster
--- than the one in Operators2, probably because it works entirely in terms of
--- PrimExpr.
--- (NB they generate the same (or very similar) queries, but for some reason
--- it seems much slower to go through QueryArr)
--- (NB It is *generating* the SQL string that is slow, not actually running
--- the thing.  I confirmed this by hacking Report.Trade.Opaleye to use both
--- versions and noticed that the version with Predicates.equalsOneOf generated
--- the SQL string instantly and the restrict <<< Operators2.equalsOneOf version
--- took about 4 seconds!)
--- {-# DEPRECATED equalsOneOf
---    "Use '\\xs -> (restrict <<<) . Operators2.equalsOneOf xs' instead" #-}
+{-# DEPRECATED equalsOneOf
+    "Use '(restrict <<<) . ExprArr.equalsOneOfQ' instead" #-}
 equalsOneOf :: ShowConstant a => [a] -> QueryArr (Wire a) ()
 equalsOneOf = restrictWith . flip wireIsOneOf . map showConstant
 

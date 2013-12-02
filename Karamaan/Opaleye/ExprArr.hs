@@ -126,6 +126,3 @@ scopeOfWire (Wire s) = Map.singleton s (PQ.AttrExpr s)
 
 unsafeScopeLookup :: Wire a -> Scope -> PrimExpr
 unsafeScopeLookup (Wire w) s = M.fromJust (Map.lookup w s)
-
-equalsOneOfQ :: ShowConstant a => [a] -> QueryArr (Wire a) (Wire Bool)
-equalsOneOfQ = toQueryArr11 . equalsOneOf

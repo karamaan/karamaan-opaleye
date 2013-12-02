@@ -24,7 +24,7 @@ import qualified Karamaan.WhaleUtil.Arrow as UA
 -- (except restrict which is still needed).
 
 {-# DEPRECATED equalsOneOf
-    "Use '(restrict <<<) . ExprArr.equalsOneOfQ' instead" #-}
+    "Use '(restrict <<<) . Operators2.equalsOneOf' instead" #-}
 equalsOneOf :: ShowConstant a => [a] -> QueryArr (Wire a) ()
 equalsOneOf = restrictWith . flip wireIsOneOf . map showConstant
 

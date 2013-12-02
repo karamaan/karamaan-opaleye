@@ -24,6 +24,7 @@ import qualified Karamaan.Opaleye.Values as Values
 import Karamaan.Opaleye.QueryColspec (QueryColspec, runWriterOfQueryColspec,
                                       runPackMapOfQueryColspec)
 import Karamaan.Opaleye.Default (Default, def)
+import qualified Karamaan.Opaleye.ExprArr as E
 import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr)
 import qualified Karamaan.WhaleUtil.Arrow as A
 import Karamaan.WhaleUtil.Arrow.ReaderCurry (readerCurry2)
@@ -66,9 +67,7 @@ doesntEqualAnyOf = foldrArr and true . map (opC notEq . constant)
   where true = replaceWith (constant True)
 
 equalsOneOf :: ShowConstant a => [a] -> QueryArr (Wire a) (Wire Bool)
--- TODO: Should this be foldl', since laziness gets us nothing here?
-equalsOneOf = foldrArr or false . map (opC eq . constant)
-  where false = replaceWith (constant False)
+equalsOneOf = E.toQueryArr11 . E.equalsOneOf
 
 -- TODO: HaskellDB's 'cat' or '.++.' is implemented as SQL's '+' even when
 -- using the PostgreSQL generator.  The correct fix is probably to fix

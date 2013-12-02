@@ -45,6 +45,7 @@ library
                    Karamaan.Opaleye.SQL,
                    Karamaan.Opaleye.Table,
                    Karamaan.Opaleye.TableColspec,
+                   Karamaan.Opaleye.Use,
                    Karamaan.Opaleye.Wire,
                    Karamaan.Opaleye.Unpackspec,
                    Karamaan.Opaleye.Values

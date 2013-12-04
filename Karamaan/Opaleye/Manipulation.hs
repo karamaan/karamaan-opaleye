@@ -25,6 +25,18 @@ import Control.Arrow ((&&&))
 import Karamaan.Opaleye.Table (Table(Table))
 import Karamaan.Opaleye.Default (Default, def)
 
+-- A 'TableExprRunner t e' is used to connect a 'Table t' to an
+-- 'ExprArr e o'.  In current usage 'o' is only ever 'Wire Bool' but I
+-- guess it could be anything.  This is used to essentially "apply an
+-- expression to a table".
+--
+-- TODO: could this actually be done in terms of
+--
+-- applyExprArrToTable :: TableExprRunner t e -> Table t -> ExprArr e o
+--                        -> Expr o
+--
+-- That would make things simpler.
+--
 -- TODO: The MWriter will insert every table column into the scope
 -- even if the projector components projects some columns away.  Is
 -- this what we want?  It will probably be hard to do something

@@ -4,7 +4,7 @@ import Prelude hiding ((.), id, or)
 import qualified Data.Map as Map
 import Data.Map (Map)
 import Database.HaskellDB.PrimQuery (PrimExpr, extend)
-import Control.Arrow (Arrow, arr, first, (&&&))
+import Control.Arrow (Arrow, arr, first, (&&&), (***))
 import Control.Category (Category, id, (.), (<<<))
 import Karamaan.Opaleye.QueryArr (Tag, first3, next, tagWith, start,
                                   QueryArr(QueryArr))
@@ -14,6 +14,8 @@ import qualified Database.HaskellDB.PrimQuery as PQ
 import qualified Data.Maybe as M
 import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr, opC)
 import Karamaan.Opaleye.Operators (operatorName)
+import Data.Profunctor (Profunctor, dimap)
+import Data.Profunctor.Product (ProductProfunctor, empty, (***!))
 
 -- This is a more type-safe way, and a nicer API, to doing the PrimExpr
 -- fiddling that Predicates.hs does.  When there's time we'll convert
@@ -34,6 +36,13 @@ instance Arrow ExprArr where
   first f = ExprArr g
     where g ((a, z), scope, t0) = ((b, z), scope' `Map.union` scope, t1)
             where (b, scope', t1) = runExprArr f (a, scope, t0)
+
+instance Profunctor ExprArr where
+  dimap f g a = arr g <<< a <<< arr f
+
+instance ProductProfunctor ExprArr where
+  empty = id
+  (***!) = (***)
 
 runExprArr :: ExprArr a b -> (a, Scope, Tag) -> (b, Scope, Tag)
 runExprArr (ExprArr f) = f

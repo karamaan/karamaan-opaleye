@@ -3,7 +3,7 @@ module Karamaan.Opaleye.ExprArr where
 import Prelude hiding ((.), id, or)
 import qualified Data.Map as Map
 import Data.Map (Map)
-import Database.HaskellDB.PrimQuery (PrimExpr, extend)
+import Database.HaskellDB.PrimQuery (PrimExpr, extend, Literal)
 import Control.Arrow (Arrow, arr, first, (&&&), (***))
 import Control.Category (Category, id, (.), (<<<))
 import Karamaan.Opaleye.QueryArr (Tag, first3, next, tagWith, start,
@@ -16,6 +16,8 @@ import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr, opC)
 import Karamaan.Opaleye.Operators (operatorName)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!))
+import Data.Time.Calendar (Day)
+import qualified Karamaan.Opaleye.Values as Values
 
 -- This is a more type-safe way, and a nicer API, to doing the PrimExpr
 -- fiddling that Predicates.hs does.  When there's time we'll convert
@@ -60,12 +62,21 @@ runExprArr'' expr (a, scope) = unsafeScopeLookup b scope1
 runExprArr' :: Expr (Wire a) -> PrimExpr
 runExprArr' = flip runExprArr'' ((), Map.empty)
 
-constant :: ShowConstant a => a -> Expr (Wire a)
-constant c = ExprArr g
+constantLit :: Literal -> Expr (Wire a)
+constantLit l = ExprArr g
   where g ((), _, t0) = (w, scope, next t0)
           where ws = tagWith t0 "constant"
                 w = Wire ws
-                scope = Map.singleton ws (PQ.ConstExpr (showConstant c))
+                scope = Map.singleton ws (PQ.ConstExpr l)
+
+constant :: ShowConstant a => a -> Expr (Wire a)
+constant = constantLit . showConstant
+
+constantDay :: Day -> Expr (Wire Day)
+constantDay = unsafeConstant . Values.dayToSQL
+
+unsafeConstant :: String -> Expr (Wire a)
+unsafeConstant = constantLit . PQ.OtherLit
 
 -- TODO: Could probably do something like
 -- makeOp :: opMaker a b -> (b -> PrimExpr) -> ExprArr a b -> Wire c

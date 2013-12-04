@@ -1,4 +1,4 @@
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts #-}
 
 module Karamaan.Opaleye.Manipulation where
 
@@ -13,7 +13,8 @@ import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
                                 ProductContravariant, point, (***<),
                                 defaultEmpty, defaultProfunctorProduct,
                                 defaultPoint, defaultContravariantProduct,
-                                PPOfContravariant(PPOfContravariant))
+                                PPOfContravariant(PPOfContravariant),
+                                unPPOfContravariant)
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Control.Applicative (Applicative, (<*>), pure, liftA3)
 import Data.Monoid (Monoid, mempty, mappend, (<>))
@@ -130,6 +131,24 @@ arrangeUpdate tableExprRunner
         assocs = primExprsOfAssocer assocer tableMaybeCols
                                     (runExprArrStart updateExpr colsAndScope')
         condition = runExprArr'' conditionExpr colsAndScope'
+
+arrangeDeleteDef :: Default TableExprRunner t a =>
+                    Table t -> ExprArr a (Wire Bool) -> SqlDelete
+arrangeDeleteDef = arrangeDelete def
+
+arrangeInsertDef :: (Default (PPOfContravariant Assocer) t' t',
+                     Default TableMaybeWrapper t t')
+                    => Table t -> Expr t' -> SqlInsert
+arrangeInsertDef = arrangeInsert def' def
+  where def' = unPPOfContravariant def
+
+arrangeUpdateDef :: (Default TableExprRunner t u,
+                     Default (PPOfContravariant Assocer) t' t',
+                     Default TableMaybeWrapper t t') =>
+                    Table t -> ExprArr u t' -> ExprArr u (Wire Bool)
+                    -> SqlUpdate
+arrangeUpdateDef = arrangeUpdate def def' def
+  where def' = unPPOfContravariant def
 
 instance Default TableExprRunner (Wire a) (Wire a) where
   def = TableExprRunner (Writer scopeOfWire) id

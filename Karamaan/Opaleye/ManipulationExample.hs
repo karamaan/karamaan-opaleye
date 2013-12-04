@@ -5,12 +5,10 @@ module Karamaan.Opaleye.ManipulationExample where
 import Prelude hiding (or)
 import Karamaan.Opaleye.Wire (Wire(Wire))
 import Karamaan.Opaleye.ExprArr (ExprArr, Expr, eq, plus, mul, constant, or)
-import Data.Profunctor.Product (unPPOfContravariant)
 import Database.HaskellDB.Sql.Print (ppDelete, ppInsert, ppUpdate)
 import Control.Arrow (returnA)
-import Karamaan.Opaleye.Default (Default, def)
-import Karamaan.Opaleye.Manipulation (arrangeDelete,
-                                      arrangeInsert, arrangeUpdate)
+import Karamaan.Opaleye.Manipulation (arrangeDeleteDef,
+                                      arrangeInsertDef, arrangeUpdateDef)
 import Karamaan.Opaleye.Table (Table(Table))
 
 table :: Table ((Wire Int, Wire Int), Wire Int)
@@ -24,7 +22,7 @@ testDelete = show (ppDelete sqlDelete')
           cond1 <- eq -< (x_plus_y, z)
           cond2 <- eq -< (x, z)
           or -< (cond1, cond2)
-        sqlDelete' = arrangeDelete def table condExpr
+        sqlDelete' = arrangeDeleteDef table condExpr
 
 testInsert :: String
 testInsert = show (ppInsert sqlInsert')
@@ -38,8 +36,7 @@ testInsert = show (ppInsert sqlInsert')
           five_plus_six <- plus -< (five, six)
 
           returnA -< ((Just one, Nothing), Just five_plus_six)
-        sqlInsert' = arrangeInsert def' def table insertExpr
-        def' = unPPOfContravariant def
+        sqlInsert' = arrangeInsertDef table insertExpr
 
 testUpdate :: String
 testUpdate = show (ppUpdate sqlUpdate')
@@ -53,8 +50,7 @@ testUpdate = show (ppUpdate sqlUpdate')
         condExpr :: ExprArr ((Wire Int, Wire Int), Wire Int) (Wire Bool)
         condExpr = proc ((x, _), z) -> do
           eq -< (x, z)
-        sqlUpdate' = arrangeUpdate def def' def table updateExpr condExpr
-        def' = unPPOfContravariant def
+        sqlUpdate' = arrangeUpdateDef table updateExpr condExpr
 
 testTable :: Table (Wire Int, Wire Int, Wire Int)
 testTable = Table "test_table" (Wire "id", Wire "col1", Wire "col2")
@@ -66,8 +62,7 @@ testTableInsert = show (ppInsert sqlInsert')
           five <- constant 5 -< ()
           six <- constant 6 -< ()
           returnA -< (Nothing, Just five, Just six)
-        sqlInsert' = arrangeInsert def' def testTable insertExpr
-        def' = unPPOfContravariant def
+        sqlInsert' = arrangeInsertDef testTable insertExpr
 
 testTableDelete :: String
 testTableDelete = show (ppDelete sqlDelete')
@@ -76,7 +71,7 @@ testTableDelete = show (ppDelete sqlDelete')
           two <- (constant 2 :: Expr (Wire Int)) -< ()
           x_mul_2 <- mul -< (x, two)
           eq -< (x_mul_2, z)
-        sqlDelete' = arrangeDelete def testTable condExpr
+        sqlDelete' = arrangeDeleteDef testTable condExpr
 
 testTableUpdate :: String
 testTableUpdate = show (ppUpdate sqlUpdate')
@@ -90,5 +85,4 @@ testTableUpdate = show (ppUpdate sqlUpdate')
         condExpr = proc (x, _, _) -> do
           five <- constant 5 -< ()
           eq -< (x, five)
-        sqlUpdate' = arrangeUpdate def def' def testTable updateExpr condExpr
-        def' = unPPOfContravariant def
+        sqlUpdate' = arrangeUpdateDef testTable updateExpr condExpr

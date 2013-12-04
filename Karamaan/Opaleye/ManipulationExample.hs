@@ -9,8 +9,9 @@ import Data.Profunctor.Product (unPPOfContravariant)
 import Database.HaskellDB.Sql.Print (ppDelete, ppInsert, ppUpdate)
 import Control.Arrow (returnA)
 import Karamaan.Opaleye.Default (Default, def)
-import Karamaan.Opaleye.Manipulation (Table(Table), arrangeDelete,
+import Karamaan.Opaleye.Manipulation (arrangeDelete,
                                       arrangeInsert, arrangeUpdate)
+import Karamaan.Opaleye.Table (Table(Table))
 
 table :: Table ((Wire Int, Wire Int), Wire Int)
 table = Table "tablename" ((Wire "col1", Wire "col2"), Wire "col3")

@@ -13,8 +13,16 @@ import Karamaan.Opaleye.Default (Default, def)
 import Control.Arrow ((***))
 import Karamaan.WhaleUtil ((.:))
 
+data Table a = Table String a
+
+makeTableTDef :: Default TableColspecP a b => Table a -> Query b
+makeTableTDef (Table name cols) = makeTableQueryColspec def cols name
+
+-- makeTableDef is informally deprecated.  Use makeTableTDef instead
+-- I would formally deprecate it with a pragma but we still have a lot
+-- of code that uses it.
 makeTableDef :: Default TableColspecP a b => a -> String -> Query b
-makeTableDef = makeTableQueryColspec def
+makeTableDef = makeTableTDef .: flip Table
 
 makeTableQueryColspec :: TableColspecP a b -> a -> String -> Query b
 makeTableQueryColspec = makeTable .: tableColspecOfTableColspecP

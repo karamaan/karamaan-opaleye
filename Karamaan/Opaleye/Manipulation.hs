@@ -21,9 +21,8 @@ import Database.HaskellDB.Sql (SqlDelete, SqlInsert, SqlUpdate)
 import Database.HaskellDB.Sql.Generate (sqlDelete, sqlInsert, sqlUpdate)
 import Database.HaskellDB.Sql.Default (defaultSqlGenerator)
 import Control.Arrow ((&&&))
+import Karamaan.Opaleye.Table (Table(Table))
 import Karamaan.Opaleye.Default (Default, def)
-
-data Table a = Table String a
 
 -- TODO: The MWriter will insert every table column into the scope
 -- even if the projector components projects some columns away.  Is

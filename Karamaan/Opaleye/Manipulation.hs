@@ -56,6 +56,15 @@ newtype MWriter2 m a = MWriter2 (a -> a -> m)
 -- insert into the 'Table'.
 newtype Assocer a = Assocer (MWriter2 (Scope -> [(String, PrimExpr)]) a)
 
+-- Very boring instance definitions.  In principle these could be
+-- derived in the same way as Functor, Foldable and Traversable, but
+-- neither Haskell in general nor GHC in particular support that
+-- currently.
+--
+-- There's no "choice" in these instances.  We have to provide the
+-- only thing that works, except for the Applicative instances where
+-- there are two ways of ordering the actions (although there's only
+-- really one /natural/ ordering).
 instance Functor (TableExprRunner a) where
   fmap f (TableExprRunner w ff) = TableExprRunner w (fmap f ff)
 
@@ -107,7 +116,9 @@ instance Contravariant Assocer where
 instance ProductContravariant Assocer where
   point = defaultPoint
   (***<) = defaultContravariantProduct
+-- End of very boring instance definitions
 
+-- arrange* do the meat of the computation
 arrangeDelete :: TableExprRunner t a -> Table t -> ExprArr a (Wire Bool)
                  -> SqlDelete
 arrangeDelete tableExprRunner
@@ -151,6 +162,8 @@ arrangeUpdate tableExprRunner
                                     (runExprArrStart updateExpr colsAndScope')
         condition = runExprArr'' conditionExpr colsAndScope'
 
+-- arrange*Def pass the default typeclass instances in automatically,
+-- to reduce boilerplate
 arrangeDeleteDef :: Default TableExprRunner t a =>
                     Table t -> ExprArr a (Wire Bool) -> SqlDelete
 arrangeDeleteDef = arrangeDelete def

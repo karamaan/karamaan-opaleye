@@ -51,6 +51,9 @@ newtype TableMaybeWrapper a b = TableMaybeWrapper (a -> b)
 
 newtype MWriter2 m a = MWriter2 (a -> a -> m)
 
+-- An 'Assocer' is used to associate the columns of a 'Table' with the
+-- columns in an 'ExprArr' so the 'ExprArr' can be used to update or
+-- insert into the 'Table'.
 newtype Assocer a = Assocer (MWriter2 (Scope -> [(String, PrimExpr)]) a)
 
 instance Functor (TableExprRunner a) where

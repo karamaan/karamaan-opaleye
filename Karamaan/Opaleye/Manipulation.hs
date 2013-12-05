@@ -43,6 +43,10 @@ import Karamaan.Opaleye.Default (Default, def)
 -- different without introducting another ProductProfunctor.
 data TableExprRunner t e = TableExprRunner (MWriter Scope t) (t -> e)
 
+-- A 'TableMaybeWrapper' is used to convert the 'Wire a's appearing in
+-- the columns of a 'Table' to 'Wire (Maybe a)'s, so that they can be
+-- matched with the 'Wire (Maybe a)'s occuring in the 'ExprArr' that is
+-- used to perform an update or an insert.
 newtype TableMaybeWrapper a b = TableMaybeWrapper (a -> b)
 
 newtype MWriter2 m a = MWriter2 (a -> a -> m)

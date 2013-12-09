@@ -9,6 +9,9 @@ import Karamaan.Opaleye.Operators2 (union)
 import Karamaan.Opaleye.QueryColspec (QueryColspec)
 import Karamaan.Opaleye.Default (Default)
 
+-- TODO: now that we have more experience with product profunctors we
+-- can probably use a ProductProfunctor to do generic DISTINCT!
+
 -- I realised you can implement distinct x = x `union` x!
 -- This may fail massively with large queries unless the optimiser realises
 -- that I'm taking the union of the same query twice.

@@ -16,7 +16,7 @@ import Karamaan.WhaleUtil ((.:))
 data Table a = Table String a
 
 makeTableTDef :: Default TableColspecP a b => Table a -> Query b
-makeTableTDef (Table name cols) = makeTableQueryColspec def cols name
+makeTableTDef = makeTableT def
 
 -- makeTableDef is informally deprecated.  Use makeTableTDef instead
 -- I would formally deprecate it with a pragma but we still have a lot
@@ -24,9 +24,13 @@ makeTableTDef (Table name cols) = makeTableQueryColspec def cols name
 makeTableDef :: Default TableColspecP a b => a -> String -> Query b
 makeTableDef = makeTableTDef .: flip Table
 
+makeTableT :: TableColspecP a b -> Table a -> Query b
+makeTableT colspec (Table name cols) = makeTableQueryColspec colspec cols name
+
 makeTableQueryColspec :: TableColspecP a b -> a -> String -> Query b
 makeTableQueryColspec = makeTable .: tableColspecOfTableColspecP
 
+{-# DEPRECATED makeTable "Use 'makeTableT' or 'makeTableTDef' instead" #-}
 makeTable :: TableColspec a -> String -> Query a
 makeTable colspec = makeTable' colspec (zip x x)
   where x = runWriterOfColspec colspec

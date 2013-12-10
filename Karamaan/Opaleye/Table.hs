@@ -48,7 +48,9 @@ makeTableT colspec (Table name cols) = makeTableQueryColspec colspec cols name
 makeTableQueryColspec :: TableColspecP a b -> a -> String -> Query b
 makeTableQueryColspec = makeTable .: tableColspecOfTableColspecP
 
-{-# DEPRECATED makeTable "Use 'makeTableT' or 'makeTableTDef' instead" #-}
+-- makeTable is informally deprecated, but Values.hs still uses it,
+-- so I don't want to deprecate it with a pragma yet.
+--{-# DEPRECATED makeTable "Use 'makeTableT' or 'makeTableTDef' instead" #-}
 makeTable :: TableColspec a -> String -> Query a
 makeTable colspec = makeTable' colspec (zip x x)
   where x = runWriterOfColspec colspec

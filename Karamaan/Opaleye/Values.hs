@@ -3,18 +3,20 @@ module Karamaan.Opaleye.Values where
 import Prelude hiding (Integer)
 import Karamaan.Opaleye.QueryArr (Query)
 import Karamaan.Opaleye.TableColspec (col, TableColspec)
+import Karamaan.Opaleye.QueryColspec (MWriter(Writer), Writer, runWriter)
 import Karamaan.Opaleye.Table (makeTable)
 import Data.List (intercalate)
 import Karamaan.Opaleye.Wire (Wire)
-import Control.Arrow ((***), first)
+import Control.Arrow (first)
 import Control.Monad.State (State, get, put, runState)
 import Control.Monad.Reader (ReaderT, runReaderT, ask)
 import qualified Karamaan.WhaleUtil.Date as UD
 import Data.Time.Calendar
 import Control.Applicative (liftA2, pure)
 import Data.Profunctor (Profunctor, dimap)
-import Data.Profunctor.Product (ProductProfunctor, empty, (***!))
-import Data.Monoid (mempty)
+import Data.Profunctor.Product (ProductProfunctor, empty, (***!), point, (***<))
+import Data.Functor.Contravariant (contramap)
+import Data.Monoid ((<>), mempty)
 
 type S a = ReaderT String (State Int) a
 
@@ -43,25 +45,19 @@ showSQLType = show
 -- Probably should make a type for it, in fact.
 -- data ConstLengthListMap a = C (a -> [String])
 -- and then only provide operators that preserve that condition.
-data ValuesMaker a b = ValuesMaker (a -> [String], S(TableColspec b), [SQLType])
+data ValuesMaker a b = ValuesMaker (Writer a, S(TableColspec b), [SQLType])
 
 instance Profunctor ValuesMaker where
   dimap f g (ValuesMaker (w, c, ts)) =
-    ValuesMaker ((w . f), ((fmap . fmap) g c), ts)
+    ValuesMaker (contramap f w, (fmap . fmap) g c, ts)
 
 instance ProductProfunctor ValuesMaker where
-  empty = ValuesMaker (pure mempty, pure (pure ()), [])
+  empty = ValuesMaker (point, pure (pure ()), mempty)
   ValuesMaker (w, c, ts) ***! ValuesMaker (w', c', ts') =
-    ValuesMaker (w'', c'', ts'')
-    where w'' = uncurry (++) . (w *** w')
-          c'' = (liftA2 . liftA2) (,) c c'
-          ts'' = ts ++ ts'
+    ValuesMaker (w ***< w', (liftA2 . liftA2) (,) c c', ts <> ts')
 
 (.:.) :: (r -> z) -> (a -> b -> c -> r) -> (a -> b -> c -> z)
 (f .:. g) x y z = f (g x y z)
-
-catResults :: (a -> [r]) -> (c -> [r]) -> (a, c) -> [r]
-catResults = uncurry (++) .:. (***)
 
 nextCol :: S Int
 nextCol = do { a <- get; put (a + 1); return a }
@@ -82,7 +78,7 @@ bool :: ValuesMaker Bool (Wire Bool)
 bool = valuesMakerMaker show Boolean
 
 valuesMakerMaker :: (a -> String) -> SQLType -> ValuesMaker a (Wire b)
-valuesMakerMaker f t = ValuesMaker ((:[]) . f, w, [t])
+valuesMakerMaker f t = ValuesMaker (Writer ((:[]) . f), w, [t])
   where w = do { n <- nextColName; return (col n) }
 
 -- TODO: this doesn't belong here
@@ -96,7 +92,7 @@ runValuesMaker (ValuesMaker (f, m, ts)) colPrefix a
   where startColNum = 1
         mapper = f
         (colspec, nextCol') = runS m colPrefix startColNum
-        stringRows = map mapper a
+        stringRows = map (runWriter mapper) a
 
 runS :: S a -> String -> Int -> (a, Int)
 runS m c = runState (runReaderT m c)

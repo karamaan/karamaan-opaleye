@@ -3,7 +3,7 @@
 module Karamaan.Opaleye.QueryColspec where
 
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
-import Control.Applicative (Applicative, (<*>), pure)
+import Control.Applicative (Applicative, (<*>), pure, liftA2)
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
@@ -37,14 +37,14 @@ runPackMap :: PackMap a b -> (String -> String) -> a -> b
 runPackMap (PackMap p) = p
 
 instance Profunctor PackMap where
-  dimap f g (PackMap p) = PackMap (\s -> g . p s . f)
+  dimap f g (PackMap p) = PackMap (fmap (dimap f g) p)
 
 instance Functor (PackMap a) where
-  fmap f (PackMap p) = PackMap (\s -> f . p s)
+  fmap f (PackMap p) = PackMap (fmap (fmap f) p)
 
 instance Applicative (PackMap a) where
   pure = PackMap . const . const
-  PackMap pf <*> PackMap px = PackMap (\ss a -> (pf ss a) (px ss a))
+  PackMap pf <*> PackMap px = PackMap (liftA2 (<*>) pf px)
 
 instance ProductProfunctor PackMap where
   empty = defaultEmpty

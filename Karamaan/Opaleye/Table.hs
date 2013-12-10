@@ -24,6 +24,9 @@ tableOfTableSpec :: WireMaker a b -> TableSpec a -> Table b
 tableOfTableSpec wireMaker (TableSpec cols name) = Table name wireCols
   where wireCols = runWireMaker wireMaker cols
 
+tableOfTableSpecDef :: Default WireMaker a b => TableSpec a -> Table b
+tableOfTableSpecDef = tableOfTableSpec def
+
 makeTableSpecDef :: (Default WireMaker a b, Default TableColspecP b b)
                     => TableSpec a -> Query b
 makeTableSpecDef (TableSpec cols name) = makeTableDef cols name

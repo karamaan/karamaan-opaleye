@@ -12,7 +12,8 @@ import Control.Applicative (Applicative, pure, (<*>))
 import Data.Monoid (Monoid, mempty)
 import Karamaan.Opaleye.Default (Default, def)
 import Data.Profunctor (Profunctor, dimap)
-import Data.Profunctor.Product (ProductProfunctor, empty, (***!))
+import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
+                                defaultEmpty, defaultProfunctorProduct)
 
 -- TODO: this happens to have the same implementation as QueryColspec, but I
 -- don't want to suggest that one derives from the other.  Perhaps make this
@@ -58,3 +59,25 @@ colspec = TableColspec
 
 col :: String -> TableColspec (Wire a)
 col s = colspec [s] (\f -> Wire (f s))
+
+newtype WireMaker a b = WireMaker (a -> b)
+
+runWireMaker :: WireMaker a b -> a -> b
+runWireMaker (WireMaker f) = f
+
+wireCol :: WireMaker String (Wire a)
+wireCol = WireMaker Wire
+
+instance Functor (WireMaker a) where
+  fmap f (WireMaker g) = WireMaker (fmap f g)
+
+instance Applicative (WireMaker a) where
+  pure = WireMaker . pure
+  WireMaker f <*> WireMaker x = WireMaker (f <*> x)
+
+instance Profunctor WireMaker where
+  dimap f g (WireMaker q) = WireMaker (dimap f g q)
+
+instance ProductProfunctor WireMaker where
+  empty = defaultEmpty
+  (***!) = defaultProfunctorProduct

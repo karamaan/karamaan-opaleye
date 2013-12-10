@@ -8,12 +8,21 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, BaseTable),
                                      Attribute, Assoc)
 import Karamaan.Opaleye.TableColspec (TableColspec, TableColspecP,
                                       runWriterOfColspec, runPackMapOfColspec,
-                                      tableColspecOfTableColspecP)
+                                      tableColspecOfTableColspecP,
+                                      WireMaker, runWireMaker)
 import Karamaan.Opaleye.Default (Default, def)
 import Control.Arrow ((***))
 import Karamaan.WhaleUtil ((.:))
 
+-- For specifying the columns as Strings
+data TableSpec a = TableSpec a String
+
+-- For specifying the columns as Wires
 data Table a = Table String a
+
+tableOfTableSpec :: WireMaker a b -> TableSpec a -> Table b
+tableOfTableSpec wireMaker (TableSpec cols name) = Table name wireCols
+  where wireCols = runWireMaker wireMaker cols
 
 makeTableTDef :: Default TableColspecP a b => Table a -> Query b
 makeTableTDef = makeTableT def

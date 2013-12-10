@@ -56,6 +56,7 @@ instance ProductProfunctor ValuesMaker where
   ValuesMaker (w, c, ts) ***! ValuesMaker (w', c', ts') =
     ValuesMaker (w ***< w', (liftA2 . liftA2) (,) c c', ts <> ts')
 
+-- TODO: vv move this to WhaleUtil?
 (.:.) :: (r -> z) -> (a -> b -> c -> r) -> (a -> b -> c -> z)
 (f .:. g) x y z = f (g x y z)
 

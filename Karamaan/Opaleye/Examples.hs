@@ -5,7 +5,7 @@
 module Karamaan.Opaleye.Examples where
 
 import Karamaan.Opaleye.Unpackspec (Unpackspec)
-import Karamaan.Opaleye.Table (makeTableSpecDef, TableSpec(TableSpec))
+import Karamaan.Opaleye.Table (makeTableDef)
 import Karamaan.Opaleye.QueryArr (Query, QueryArr)
 import qualified Karamaan.Opaleye.Operators2 as Op2
 import qualified Karamaan.Opaleye.Predicates as P
@@ -19,12 +19,10 @@ import Karamaan.Opaleye.Default (Default)
 import Data.Profunctor.Product (PPOfContravariant)
 
 personTable :: Query (Wire String, Wire Int, Wire String)
-personTable = makeTableSpecDef (TableSpec ("name", "age", "address")
-                                          "personTable")
+personTable = makeTableDef ("name", "age", "address") "personTable"
 
 birthdayTable :: Query (Wire String, Wire Day)
-birthdayTable = makeTableSpecDef (TableSpec ("name", "birthday" )
-                                            "birthdayTable")
+birthdayTable = makeTableDef ("name", "birthday") "birthdayTable"
 
 nameAge :: Query (Wire String, Wire Int)
 nameAge = arr (\(x, y, _) -> (x, y)) <<< personTable

@@ -2,7 +2,7 @@
 
 module Karamaan.Opaleye.Explore where
 
-import Karamaan.Opaleye.Table (makeTableSpecDef, TableSpec(TableSpec))
+import Karamaan.Opaleye.Table (makeTableDef)
 import Karamaan.Opaleye.QueryArr (Query)
 import Karamaan.Opaleye.SQL (showSqlForPostgres {-, showSqlUnopt-})
 import Karamaan.Opaleye.Predicates (equalsC, restrict)
@@ -14,7 +14,7 @@ import Karamaan.Opaleye.QueryColspec (writerWire)
 import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
 
 exampleTable :: Query (Wire Int)
-exampleTable = makeTableSpecDef (TableSpec "id" "exampleTable")
+exampleTable = makeTableDef "id" "exampleTable"
 
 -- Happily the optimised versions of these are equal.  This means that
 -- equals could be implemented in terms of constant and restrict << eq.

@@ -5,7 +5,7 @@ module Karamaan.Opaleye.QueryColspec where
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 import Control.Applicative (Applicative, (<*>), pure, liftA2)
 import Data.Functor.Contravariant (Contravariant, contramap)
-import Data.Profunctor (Profunctor, dimap)
+import Data.Profunctor (Profunctor, dimap, lmap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
                                 ProductContravariant, point, (***<),
                                 defaultEmpty, defaultProfunctorProduct,
@@ -18,7 +18,7 @@ import Karamaan.Opaleye.Default (Default, def)
 newtype MWriter m a = Writer (a -> m)
 
 instance Contravariant (MWriter m) where
-  contramap f (Writer w) = Writer (w . f)
+  contramap f (Writer w) = Writer (lmap f w)
 
 instance Monoid m => Monoid (MWriter m a) where
   mempty = Writer (const mempty)

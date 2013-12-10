@@ -21,9 +21,12 @@ import Data.Monoid (Monoid, mempty, mappend, (<>))
 import Database.HaskellDB.Sql (SqlDelete, SqlInsert, SqlUpdate)
 import Database.HaskellDB.Sql.Generate (sqlDelete, sqlInsert, sqlUpdate)
 import Database.HaskellDB.Sql.Default (defaultSqlGenerator)
+import Database.HaskellDB.Sql.Print (ppDelete, ppInsert, ppUpdate)
 import Control.Arrow ((&&&))
 import Karamaan.Opaleye.Table (Table(Table))
 import Karamaan.Opaleye.Default (Default, def)
+import Karamaan.WhaleUtil ((.:))
+import Karamaan.Opaleye.Values ((.:.))
 
 -- A 'TableExprRunner t e' is used to connect a 'Table t' to an
 -- 'ExprArr e o'.  In current usage 'o' is only ever 'Wire Bool' but I
@@ -197,3 +200,19 @@ assocerWireMaybe w w' = maybe [] return . liftA3 assocerWire w w' . pure
 
 assocerWire :: Wire a -> Wire a -> Scope -> (String, PrimExpr)
 assocerWire (Wire s) w scope = (s, unsafeScopeLookup w scope)
+
+arrangeDeleteSqlDef :: Default TableExprRunner t a =>
+                    Table t -> ExprArr a (Wire Bool) -> String
+arrangeDeleteSqlDef  = show . ppDelete .: arrangeDeleteDef
+
+arrangeInsertSqlDef :: (Default (PPOfContravariant Assocer) t' t',
+                     Default TableMaybeWrapper t t')
+                    => Table t -> Expr t' -> String
+arrangeInsertSqlDef = show . ppInsert .: arrangeInsertDef
+
+arrangeUpdateSqlDef :: (Default TableExprRunner t u,
+                     Default (PPOfContravariant Assocer) t' t',
+                     Default TableMaybeWrapper t t') =>
+                    Table t -> ExprArr u t' -> ExprArr u (Wire Bool)
+                    -> String
+arrangeUpdateSqlDef = (show . ppUpdate) .:. arrangeUpdateDef

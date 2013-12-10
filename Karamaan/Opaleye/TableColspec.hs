@@ -2,7 +2,7 @@
 
 module Karamaan.Opaleye.TableColspec where
 
-import Karamaan.Opaleye.Wire (Wire(Wire))
+import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 import Karamaan.Opaleye.QueryColspec (QueryColspec(QueryColspec),
                                       runWriterOfQueryColspec,
                                       runPackMapOfQueryColspec,
@@ -45,8 +45,9 @@ instance ProductProfunctor TableColspecP where
   empty = TableColspecP empty
   TableColspecP q ***! TableColspecP q' = TableColspecP (q ***! q')
 
-instance Default TableColspecP String (Wire a) where
-  def = TableColspecP (QueryColspec (Writer return) (PackMap (Wire .)))
+instance Default TableColspecP (Wire a) (Wire a) where
+  def = TableColspecP (QueryColspec (Writer (return . unWire))
+                                    (PackMap (\f -> Wire . f . unWire)))
 
 runWriterOfColspec :: TableColspec a -> [String]
 runWriterOfColspec (TableColspec s _) = s
@@ -81,3 +82,6 @@ instance Profunctor WireMaker where
 instance ProductProfunctor WireMaker where
   empty = defaultEmpty
   (***!) = defaultProfunctorProduct
+
+instance Default WireMaker String (Wire a) where
+  def = WireMaker Wire

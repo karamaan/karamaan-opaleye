@@ -27,19 +27,14 @@ tableOfTableSpec wireMaker (TableSpec cols name) = Table name wireCols
 tableOfTableSpecDef :: Default WireMaker a b => TableSpec a -> Table b
 tableOfTableSpecDef = tableOfTableSpec def
 
-makeTableSpecDef :: (Default WireMaker a b, Default TableColspecP b b)
-                    => TableSpec a -> Query b
-makeTableSpecDef (TableSpec cols name) = makeTableDef cols name
-
 -- For typeclass resolution it seems best to force the arguments to be
 -- the same.  Users can always use makeTableT to get more flexibility
 -- if they want.
 makeTableTDef :: Default TableColspecP a a => Table a -> Query a
 makeTableTDef = makeTableT def
 
--- makeTableDef is informally deprecated.  Use makeTableTDef instead
--- I would formally deprecate it with a pragma but we still have a lot
--- of code that uses it.
+-- I don't know if this should be deprecated or not.  Should we force
+-- everything to go through a Table?
 makeTableDef :: (Default WireMaker a b, Default TableColspecP b b)
                 => a -> String -> Query b
 makeTableDef = makeTableTDef . tableOfTableSpec def .: TableSpec

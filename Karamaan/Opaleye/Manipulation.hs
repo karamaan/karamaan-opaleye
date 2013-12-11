@@ -24,7 +24,7 @@ import Database.HaskellDB.Sql.Default (defaultSqlGenerator)
 import Database.HaskellDB.Sql.Print (ppDelete, ppInsert, ppUpdate)
 import Control.Arrow ((&&&))
 import Karamaan.Opaleye.Table (Table(Table))
-import Karamaan.Opaleye.Default (Default, def)
+import Data.Profunctor.Product.Default (Default, def)
 import Karamaan.WhaleUtil ((.:))
 import Karamaan.Opaleye.Values ((.:.))
 

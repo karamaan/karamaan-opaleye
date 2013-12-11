@@ -10,7 +10,7 @@ import Karamaan.Opaleye.TableColspec (TableColspec, TableColspecP,
                                       runWriterOfColspec, runPackMapOfColspec,
                                       tableColspecOfTableColspecP,
                                       WireMaker, runWireMaker)
-import Karamaan.Opaleye.Default (Default, def)
+import Data.Profunctor.Product.Default (Default, def)
 import Control.Arrow ((***))
 import Karamaan.WhaleUtil ((.:))
 

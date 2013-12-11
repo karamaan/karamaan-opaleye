@@ -23,7 +23,7 @@ import Data.Time.Calendar (Day)
 import qualified Karamaan.Opaleye.Values as Values
 import Karamaan.Opaleye.QueryColspec (QueryColspec, runWriterOfQueryColspec,
                                       runPackMapOfQueryColspec)
-import Karamaan.Opaleye.Default (Default, def)
+import Data.Profunctor.Product.Default (Default, def)
 import qualified Karamaan.Opaleye.ExprArr as E
 import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr)
 import qualified Karamaan.WhaleUtil.Arrow as A

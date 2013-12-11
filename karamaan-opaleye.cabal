@@ -33,7 +33,6 @@ library
                    Karamaan.Opaleye.Applicative,
                    Karamaan.Opaleye.Bend,
                    Karamaan.Opaleye.Distinct,
-                   Karamaan.Opaleye.Default,
                    Karamaan.Opaleye.Explore,
                    Karamaan.Opaleye.Examples,
                    Karamaan.Opaleye.ExprArr,

@@ -11,7 +11,7 @@ import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
                                 defaultEmpty, defaultProfunctorProduct,
                                 defaultPoint, defaultContravariantProduct)
 import Data.Monoid (Monoid, mempty, mappend, (<>))
-import Karamaan.Opaleye.Default (Default, def)
+import Data.Profunctor.Product.Default (Default, def)
 
 -- The constructor is called Writer as a historical accident.
 -- TODO: need to think about naming a lot in this library

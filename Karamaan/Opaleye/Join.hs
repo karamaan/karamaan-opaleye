@@ -5,7 +5,7 @@ module Karamaan.Opaleye.Join (semijoin, unsafeCoerce) where
 import Karamaan.Opaleye.QueryArr (Query, QueryArr)
 import Karamaan.Opaleye.Wire (Wire)
 import qualified Karamaan.Opaleye.Wire as Wire
-import Karamaan.Opaleye.Default (Default)
+import Data.Profunctor.Product.Default (Default)
 import Karamaan.Opaleye.QueryColspec (QueryColspec)
 import Karamaan.Opaleye.Predicates (restrict)
 import Karamaan.Opaleye.Operators2 (union, isNull, eq)

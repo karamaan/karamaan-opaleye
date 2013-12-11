@@ -10,7 +10,7 @@ import Data.Profunctor.Product ((***<), ProductContravariant, point,
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Control.Arrow (second)
 import Karamaan.WhaleUtil ((.:))
-import Karamaan.Opaleye.Default (Default, def)
+import Data.Profunctor.Product.Default (Default, def)
 import Karamaan.Opaleye.Wire (Wire)
 
 newtype Unpackspec a = Unpackspec (Writer a)

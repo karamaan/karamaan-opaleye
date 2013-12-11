@@ -11,7 +11,7 @@ import Karamaan.Opaleye.QueryArr (Query, runQueryArrPrim)
 import Karamaan.Opaleye.Unpackspec (Unpackspec)
 import Karamaan.WhaleUtil ((.:))
 import Data.Profunctor.Product (PPOfContravariant, unPPOfContravariant)
-import Karamaan.Opaleye.Default (Default, def)
+import Data.Profunctor.Product.Default (Default, def)
 
 {-# DEPRECATED showSqlForPostgreSQLSimple'
     "Use 'showSqlForPostgres' instead" #-}

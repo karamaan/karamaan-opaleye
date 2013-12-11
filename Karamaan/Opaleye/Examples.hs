@@ -15,7 +15,7 @@ import Karamaan.Opaleye.SQL (showSqlForPostgresDefault)
 import Control.Category ((<<<))
 import Control.Arrow (arr, (&&&), returnA, (***))
 import Data.Time.Calendar (Day)
-import Karamaan.Opaleye.Default (Default)
+import Data.Profunctor.Product.Default (Default)
 import Data.Profunctor.Product (PPOfContravariant)
 
 personTable :: Query (Wire String, Wire Int, Wire String)

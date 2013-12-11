@@ -13,7 +13,7 @@ import Data.Functor.Contravariant (Contravariant, contramap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
                                 point, (***<))
 import Control.Applicative (pure, liftA2)
-import Karamaan.Opaleye.Default (Default, def)
+import Data.Profunctor.Product.Default (Default, def)
 import Karamaan.Opaleye.QueryColspec (writerWire)
 import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
 import Karamaan.Opaleye.SQL (showSqlForPostgres)

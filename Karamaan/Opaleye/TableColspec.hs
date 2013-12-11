@@ -10,7 +10,7 @@ import Karamaan.Opaleye.QueryColspec (QueryColspec(QueryColspec),
                                       PackMap(PackMap))
 import Control.Applicative (Applicative, pure, (<*>))
 import Data.Monoid (Monoid, mempty)
-import Karamaan.Opaleye.Default (Default, def)
+import Data.Profunctor.Product.Default (Default, def)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
                                 defaultEmpty, defaultProfunctorProduct)

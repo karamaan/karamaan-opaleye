@@ -3,7 +3,7 @@
 
 module Karamaan.Opaleye.LeftJoin where
 
-import Karamaan.Opaleye.Default (Default, def)
+import Data.Profunctor.Product.Default (Default, def)
 import Karamaan.Opaleye.QueryColspec (QueryColspec)
 import Karamaan.Opaleye.QueryArr (Query)
 import Karamaan.Opaleye.Wire (Wire)

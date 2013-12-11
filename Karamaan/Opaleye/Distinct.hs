@@ -7,7 +7,7 @@ import Karamaan.Opaleye.Wire (Wire(Wire))
 import Database.HaskellDB.PrimQuery (PrimQuery(Group),PrimExpr(AttrExpr))
 import Karamaan.Opaleye.Operators2 (union)
 import Karamaan.Opaleye.QueryColspec (QueryColspec)
-import Karamaan.Opaleye.Default (Default)
+import Data.Profunctor.Product.Default (Default)
 
 -- TODO: now that we have more experience with product profunctors we
 -- can probably use a ProductProfunctor to do generic DISTINCT!

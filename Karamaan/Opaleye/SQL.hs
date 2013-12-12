@@ -37,6 +37,8 @@ formatAndShowSQL = show . ppSql . sqlQuery defaultSqlGenerator
 optimizeFormatAndShowSQL :: PrimQuery -> String
 optimizeFormatAndShowSQL = formatAndShowSQL . optimize
 
+-- TODO: the other "Default" functions are called "...Def".  I think we
+-- should standardize on the latter.
 showSqlForPostgresDefault :: Default (PPOfContravariant Unpackspec) a a
                              => Query a
                              -> String

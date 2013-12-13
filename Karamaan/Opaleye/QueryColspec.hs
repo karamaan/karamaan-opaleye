@@ -31,7 +31,7 @@ instance Monoid m => ProductContravariant (MWriter m) where
 type LWriter e = MWriter [e]
 type Writer = LWriter String
 
-data PackMap a b = PackMap ((String -> String) -> a -> b)
+newtype PackMap a b = PackMap ((String -> String) -> a -> b)
 
 runPackMap :: PackMap a b -> (String -> String) -> a -> b
 runPackMap (PackMap p) = p

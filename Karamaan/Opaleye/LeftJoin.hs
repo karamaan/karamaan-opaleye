@@ -42,7 +42,7 @@ instance Default NullMaker (Wire a) (Wire (Maybe a)) where
   def = NullMaker Wire.unsafeCoerce (Op2.constantLit PQ.NullLit)
 
 instance Profunctor NullMaker where
-  dimap f g nm = NullMaker (g . toNullable nm . f) (arr g <<< nulls nm)
+  dimap f g nm = NullMaker (dimap f g (toNullable nm)) (fmap g (nulls nm))
 
 instance ProductProfunctor NullMaker where
   empty = NullMaker id (arr id)

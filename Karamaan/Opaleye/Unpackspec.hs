@@ -6,21 +6,27 @@ import Karamaan.Opaleye.QueryColspec (Writer, writerWire)
 import Data.Profunctor.Product.Tuples
 import Data.Profunctor.Product.Flatten
 import Data.Profunctor.Product ((***<), ProductContravariant, point,
-                                PPOfContravariant(PPOfContravariant))
+                                PPOfContravariant(PPOfContravariant),
+                                defaultPoint, defaultContravariantProduct)
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Control.Arrow (second)
 import Karamaan.WhaleUtil ((.:))
 import Data.Profunctor.Product.Default (Default, def)
 import Karamaan.Opaleye.Wire (Wire)
+import Data.Monoid (Monoid, (<>), mappend, mempty)
 
 newtype Unpackspec a = Unpackspec (Writer a)
 
 instance Contravariant Unpackspec where
   contramap f (Unpackspec w) = Unpackspec (contramap f w)
 
+instance Monoid (Unpackspec a) where
+  mempty = Unpackspec mempty
+  Unpackspec w `mappend` Unpackspec w' = Unpackspec (w <> w')
+
 instance ProductContravariant Unpackspec where
-  point = Unpackspec point
-  (Unpackspec u) ***< (Unpackspec u') = Unpackspec (u ***< u')
+  point = defaultPoint
+  (***<) = defaultContravariantProduct
 
 instance Default (PPOfContravariant Unpackspec) (Wire a) (Wire a) where
   def = PPOfContravariant (Unpackspec writerWire)

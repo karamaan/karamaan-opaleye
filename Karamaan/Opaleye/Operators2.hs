@@ -208,12 +208,13 @@ binrel op colspec q1 q2 = simpleQueryArr f where
 
 type CaseArg a = ([(Wire Bool, a)], a)
 
+fmapCaseArg :: (a -> b) -> CaseArg a -> CaseArg b
+fmapCaseArg f = (map (second f) *** f)
+
 newtype CaseRunner a b = CaseRunner (QueryArr (CaseArg a) b)
 
 instance Profunctor CaseRunner where
-  dimap f g (CaseRunner q) = CaseRunner (arr g <<< q <<< arr (into f))
-    where into :: (a -> b) -> ([(z, a)], a) -> ([(z, b)], b)
-          into h = (map (second h) *** h)
+  dimap f g (CaseRunner q) = CaseRunner (dimap (fmapCaseArg f) g q)
 
 instance ProductProfunctor CaseRunner where
   empty = CaseRunner (arr (const ()))

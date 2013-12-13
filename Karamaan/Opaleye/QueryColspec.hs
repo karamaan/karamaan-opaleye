@@ -21,7 +21,7 @@ instance Contravariant (MWriter m) where
   contramap f (Writer w) = Writer (lmap f w)
 
 instance Monoid m => Monoid (MWriter m a) where
-  mempty = Writer (const mempty)
+  mempty = Writer mempty
   w `mappend` w' = Writer (runWriter w <> runWriter w')
 
 instance Monoid m => ProductContravariant (MWriter m) where

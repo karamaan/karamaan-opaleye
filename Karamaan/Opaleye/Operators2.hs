@@ -18,7 +18,8 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, Binary),
 import qualified Database.HaskellDB.PrimQuery as PrimQuery
 import Karamaan.Opaleye.Operators (binOp')
 import qualified Karamaan.Opaleye.Operators as Operators
-import Control.Arrow ((***), Arrow, (&&&), (<<<), arr, second, returnA)
+import Control.Arrow ((***), Arrow, (&&&), (<<<), second)
+import Control.Applicative (Applicative, pure, (<*>))
 import Data.Time.Calendar (Day)
 import qualified Karamaan.Opaleye.Values as Values
 import Karamaan.Opaleye.QueryColspec (QueryColspec, runWriterOfQueryColspec,
@@ -29,7 +30,8 @@ import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr)
 import qualified Karamaan.WhaleUtil.Arrow as A
 import Karamaan.WhaleUtil.Arrow.ReaderCurry (readerCurry2)
 import Data.Profunctor (Profunctor, dimap)
-import Data.Profunctor.Product (ProductProfunctor, (***!), empty)
+import Data.Profunctor.Product (ProductProfunctor, (***!), empty, defaultEmpty,
+                                defaultProfunctorProduct)
 
 
 -- The only reason this is called Operators2 rather than Operators is that
@@ -216,17 +218,16 @@ newtype CaseRunner a b = CaseRunner (QueryArr (CaseArg a) b)
 instance Profunctor CaseRunner where
   dimap f g (CaseRunner q) = CaseRunner (dimap (fmapCaseArg f) g q)
 
+instance Functor (CaseRunner a) where
+  fmap f (CaseRunner c) = CaseRunner (fmap f c)
+
+instance Applicative (CaseRunner a) where
+  pure = CaseRunner . pure
+  CaseRunner f <*> CaseRunner x = CaseRunner (f <*> x)
+
 instance ProductProfunctor CaseRunner where
-  empty = CaseRunner (arr (const ()))
-  CaseRunner q1 ***! CaseRunner q2 = CaseRunner $ proc (cases, else_) -> do
-    let cases1 = map (second fst) cases
-        cases2 = map (second snd) cases
-        (else1, else2) = else_
-
-    result1 <- q1 -< (cases1, else1)
-    result2 <- q2 -< (cases2, else2)
-
-    returnA -< (result1, result2)
+  empty = defaultEmpty
+  (***!) = defaultProfunctorProduct
 
 instance Default CaseRunner (Wire a) (Wire a) where
   def = CaseRunner case_

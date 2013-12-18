@@ -138,6 +138,11 @@ constantDay = unsafeConstant . Values.dayToSQL
 unsafeConstant :: String -> Query (Wire a)
 unsafeConstant = constantLit . OtherLit
 
+-- Note that the natural type for 'intersect' and 'union' would be
+-- ... => QueryArr (a, a) a.  However I am not sure what it means to
+-- implement such a signature in SQL.  I don't know if SQL is limited
+-- so that such a thing would not make sense, or whether my
+-- understanding of what is necessary is insufficient.
 intersect :: Default QueryColspec a a =>
              QueryArr () a -> QueryArr () a -> QueryArr () a
 intersect = intersect' def
@@ -159,10 +164,6 @@ union' = binrel Union
 difference' :: QueryColspec a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
 difference' = binrel Difference
 
--- I tried Query (a, a) a and couldn't get it to work.  Also
--- I guess this would lead to a loss of sharing and much bigger queries.
--- Maybe the optimiser will prune all the uncessary stuff though.
---
 binrel :: RelOp -> QueryColspec a b -> QueryArr () a -> QueryArr () a
           -> QueryArr () b
 binrel op colspec q1 q2 = simpleQueryArr f where

@@ -190,6 +190,12 @@ binrel op colspec q1 q2 = simpleQueryArr f where
           -- A solution would be to augment QueryColspec with a generalization
           -- of runPackMap that can tag with increasing tags, rather than
           -- just a fixed one.
+          --
+          -- Later note: I can no longer see why I thought it was
+          -- possible that two wires in w1 should be able to have the
+          -- same name.  A wire in w1 can have the same name as a wire
+          -- in w2, but that's not the same thing at all!  Is this
+          -- FIXME actually just not a problem?  Tom -- 2013-12-18
           new = map tag' (runWriter w1)
 
           assoc = zip new . map AttrExpr . runWriter

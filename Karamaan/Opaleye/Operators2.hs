@@ -58,6 +58,9 @@ and = opArr PrimQuery.OpAnd "and"
 or :: QueryArr (Wire Bool, Wire Bool) (Wire Bool)
 or = opArr PrimQuery.OpOr "or"
 
+not :: QueryArr (Wire Bool) (Wire Bool)
+not = unOpArr PrimQuery.OpNot "not"
+
 notEq :: QueryArr (Wire a, Wire a) (Wire Bool)
 notEq = opArr PrimQuery.OpNotEq "not_eq"
 
@@ -251,7 +254,7 @@ case_ = QueryArr f where
 
 ifThenElse :: Default CaseRunner a b
               => QueryArr (Wire Bool, a, a) b
-ifThenElse = proc (cond, ifTrue, ifFalse) -> do
+ifThenElse = proc (cond, ifTrue, ifFalse) ->
   caseDef -< ([(cond, ifTrue)], ifFalse)
 
 fromMaybe :: QueryArr (Wire a, Wire (Maybe a)) (Wire a)

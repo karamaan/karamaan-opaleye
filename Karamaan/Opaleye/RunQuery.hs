@@ -11,8 +11,9 @@ import Database.PostgreSQL.Simple.FromRow (FromRow, fromRow, fieldWith)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
-                                point, (***<))
-import Control.Applicative (pure, liftA2)
+                                defaultEmpty, defaultProfunctorProduct)
+import Control.Applicative (Applicative, (<*>), pure)
+import Data.Monoid ((<>), mempty)
 import Data.Profunctor.Product.Default (Default, def)
 import Karamaan.Opaleye.QueryColspec (writerWire)
 import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
@@ -41,10 +42,16 @@ data QueryRunner a b = QueryRunner (Unpackspec a) (RowParser b)
 instance Profunctor QueryRunner where
   dimap f g (QueryRunner u b) = QueryRunner (contramap f u) (fmap g b)
 
+instance Functor (QueryRunner a) where
+  fmap f (QueryRunner u r) = QueryRunner u (fmap f r)
+
+instance Applicative (QueryRunner a) where
+  pure = QueryRunner mempty . pure
+  QueryRunner u r <*> QueryRunner u' r' = QueryRunner (u <> u') (r <*> r')
+
 instance ProductProfunctor QueryRunner where
-  empty = QueryRunner point (pure ())
-  QueryRunner u b ***! QueryRunner u' b' =
-    QueryRunner (u ***< u') (liftA2 (,) b b')
+  empty = defaultEmpty
+  (***!) = defaultProfunctorProduct
 
 fieldQueryRunner :: FromField a => QueryRunner (Wire a) a
 fieldQueryRunner = fieldQueryRunnerF id

@@ -21,7 +21,7 @@ instance Contravariant (MWriter m) where
   contramap f (Writer w) = Writer (lmap f w)
 
 instance Monoid m => Monoid (MWriter m a) where
-  mempty = Writer (const mempty)
+  mempty = Writer mempty
   w `mappend` w' = Writer (runWriter w <> runWriter w')
 
 instance Monoid m => ProductContravariant (MWriter m) where
@@ -31,7 +31,7 @@ instance Monoid m => ProductContravariant (MWriter m) where
 type LWriter e = MWriter [e]
 type Writer = LWriter String
 
-data PackMap a b = PackMap ((String -> String) -> a -> b)
+newtype PackMap a b = PackMap ((String -> String) -> a -> b)
 
 runPackMap :: PackMap a b -> (String -> String) -> a -> b
 runPackMap (PackMap p) = p

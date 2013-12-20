@@ -18,7 +18,8 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project, Binary),
 import qualified Database.HaskellDB.PrimQuery as PrimQuery
 import Karamaan.Opaleye.Operators (binOp')
 import qualified Karamaan.Opaleye.Operators as Operators
-import Control.Arrow ((***), Arrow, (&&&), (<<<), arr, second, returnA)
+import Control.Arrow ((***), Arrow, (&&&), (<<<), second)
+import Control.Applicative (Applicative, pure, (<*>))
 import Data.Time.Calendar (Day)
 import qualified Karamaan.Opaleye.Values as Values
 import Karamaan.Opaleye.QueryColspec (QueryColspec, runWriterOfQueryColspec,
@@ -29,7 +30,8 @@ import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr)
 import qualified Karamaan.WhaleUtil.Arrow as A
 import Karamaan.WhaleUtil.Arrow.ReaderCurry (readerCurry2)
 import Data.Profunctor (Profunctor, dimap)
-import Data.Profunctor.Product (ProductProfunctor, (***!), empty)
+import Data.Profunctor.Product (ProductProfunctor, (***!), empty, defaultEmpty,
+                                defaultProfunctorProduct)
 
 
 -- The only reason this is called Operators2 rather than Operators is that
@@ -139,6 +141,11 @@ constantDay = unsafeConstant . Values.dayToSQL
 unsafeConstant :: String -> Query (Wire a)
 unsafeConstant = constantLit . OtherLit
 
+-- Note that the natural type for 'intersect' and 'union' would be
+-- ... => QueryArr (a, a) a.  However I am not sure what it means to
+-- implement such a signature in SQL.  I don't know if SQL is limited
+-- so that such a thing would not make sense, or whether my
+-- understanding of what is necessary is insufficient.
 intersect :: Default QueryColspec a a =>
              QueryArr () a -> QueryArr () a -> QueryArr () a
 intersect = intersect' def
@@ -160,10 +167,6 @@ union' = binrel Union
 difference' :: QueryColspec a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
 difference' = binrel Difference
 
--- I tried Query (a, a) a and couldn't get it to work.  Also
--- I guess this would lead to a loss of sharing and much bigger queries.
--- Maybe the optimiser will prune all the uncessary stuff though.
---
 binrel :: RelOp -> QueryColspec a b -> QueryArr () a -> QueryArr () a
           -> QueryArr () b
 binrel op colspec q1 q2 = simpleQueryArr f where
@@ -190,6 +193,12 @@ binrel op colspec q1 q2 = simpleQueryArr f where
           -- A solution would be to augment QueryColspec with a generalization
           -- of runPackMap that can tag with increasing tags, rather than
           -- just a fixed one.
+          --
+          -- Later note: I can no longer see why I thought it was
+          -- possible that two wires in w1 should be able to have the
+          -- same name.  A wire in w1 can have the same name as a wire
+          -- in w2, but that's not the same thing at all!  Is this
+          -- FIXME actually just not a problem?  Tom -- 2013-12-18
           new = map tag' (runWriter w1)
 
           assoc = zip new . map AttrExpr . runWriter
@@ -211,24 +220,24 @@ binrel op colspec q1 q2 = simpleQueryArr f where
 
 type CaseArg a = ([(Wire Bool, a)], a)
 
+fmapCaseArg :: (a -> b) -> CaseArg a -> CaseArg b
+fmapCaseArg f = (map (second f) *** f)
+
 newtype CaseRunner a b = CaseRunner (QueryArr (CaseArg a) b)
 
 instance Profunctor CaseRunner where
-  dimap f g (CaseRunner q) = CaseRunner (arr g <<< q <<< arr (into f))
-    where into :: (a -> b) -> ([(z, a)], a) -> ([(z, b)], b)
-          into h = (map (second h) *** h)
+  dimap f g (CaseRunner q) = CaseRunner (dimap (fmapCaseArg f) g q)
+
+instance Functor (CaseRunner a) where
+  fmap f (CaseRunner c) = CaseRunner (fmap f c)
+
+instance Applicative (CaseRunner a) where
+  pure = CaseRunner . pure
+  CaseRunner f <*> CaseRunner x = CaseRunner (f <*> x)
 
 instance ProductProfunctor CaseRunner where
-  empty = CaseRunner (arr (const ()))
-  CaseRunner q1 ***! CaseRunner q2 = CaseRunner $ proc (cases, else_) -> do
-    let cases1 = map (second fst) cases
-        cases2 = map (second snd) cases
-        (else1, else2) = else_
-
-    result1 <- q1 -< (cases1, else1)
-    result2 <- q2 -< (cases2, else2)
-
-    returnA -< (result1, result2)
+  empty = defaultEmpty
+  (***!) = defaultProfunctorProduct
 
 instance Default CaseRunner (Wire a) (Wire a) where
   def = CaseRunner case_

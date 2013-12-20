@@ -1,6 +1,8 @@
 {-# LANGUAGE Arrows, FlexibleContexts #-}
 -- ^^ Get rid of FlexibleContexts if we ever move the definition of s
 --    elsewhere.
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Karamaan.Opaleye.Examples where
 
@@ -18,17 +20,30 @@ import Data.Time.Calendar (Day)
 import Data.Profunctor.Product.Default (Default)
 import Data.Profunctor.Product (PPOfContravariant)
 
+import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
+import Data.Profunctor.Product (ProductProfunctor, p2)
+import Data.Profunctor (dimap)
+import Data.Profunctor.Product.Default (Default, def)
+
 personTable :: Query (Wire String, Wire Int, Wire String)
 personTable = makeTableDef ("name", "age", "address") "personTable"
 
-birthdayTable :: Query (Wire String, Wire Day)
-birthdayTable = makeTableDef ("name", "birthday") "birthdayTable"
+data Birthday' a b = Birthday { bdName :: a, bdDay :: b }
+type Birthday = Birthday' String Day
+type WireBirthday = Birthday' (Wire String) (Wire Day)
+
+$(makeAdaptorAndInstance "pBirthday" ''Birthday')
+
+birthdayTable :: Query WireBirthday
+birthdayTable = makeTableDef (Birthday { bdName = "name"
+                                       , bdDay = "birthday" })
+                    "birthdayTable"
 
 nameAge :: Query (Wire String, Wire Int)
 nameAge = arr (\(x, y, _) -> (x, y)) <<< personTable
 
 personBirthdayProduct :: Query ((Wire String, Wire Int, Wire String),
-                         (Wire String, Wire Day))
+                                WireBirthday)
 personBirthdayProduct = personTable &&& birthdayTable
 
 totalAge :: Query (Wire String, Wire String, Wire Int)
@@ -43,19 +58,19 @@ totalAge = proc () -> do
 personAndBirthday :: Query (Wire String, Wire Int, Wire String, Wire Day)
 personAndBirthday = proc () -> do
   (name, age, address) <- personTable -< ()
-  (name', birthday) <- birthdayTable -< ()
+  birthday <- birthdayTable -< ()
 
-  P.restrict <<< Op2.eq -< (name, name')
+  P.restrict <<< Op2.eq -< (name, bdName birthday)
 
-  returnA -< (name, age, address, birthday)
+  returnA -< (name, age, address, bdDay birthday)
 
 birthdayOfPerson :: QueryArr (Wire String) (Wire Day)
 birthdayOfPerson = proc name -> do
-  (name', birthday) <- birthdayTable -< ()
+  birthday <- birthdayTable -< ()
 
-  P.restrict <<< Op2.eq -< (name, name')
+  P.restrict <<< Op2.eq -< (name, bdName birthday)
 
-  returnA -< birthday
+  returnA -< bdDay birthday
 
 personAndBirthday' :: Query (Wire String, Wire Int, Wire String, Wire Day)
 personAndBirthday' = proc () -> do

@@ -1,6 +1,6 @@
 module Karamaan.Opaleye.Operators.Numeric where
 
-import Karamaan.Opaleye.Operators2 (unOp, opArr, NumBinOpG, NumBinOp2G, r)
+import Karamaan.Opaleye.Operators2 (unOp, unOpArr, opArr, NumBinOpG, NumBinOp2G, r)
 import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.QueryArr (QueryArr)
 import Database.HaskellDB.PrimQuery(BinOp(OpMul, OpDiv, OpPlus, OpMinus,
@@ -18,6 +18,8 @@ type NumBinOp a = Int -> QueryArr (Wire a) (Wire a)
 
 type NumBinOpH a b = QueryArr (Wire a, Wire a) (Wire b)
 
+type NumUnOp a = QueryArr (Wire a) (Wire a)
+
 timesC :: NumBinOp a
 timesC x = unOp OpMul "times" (show x) x
 
@@ -27,6 +29,9 @@ timesC x = unOp OpMul "times" (show x) x
 -- http://hackage.haskell.org/packages/archive/haskelldb/2.2.2/doc/html/src/Database-HaskellDB-Sql-PostgreSQL.html#generator
 modC :: NumBinOp a
 modC x = unOp (OpOther "%") "mod" (show x) x
+
+abs :: NumUnOp a
+abs = unOpArr (PrimQuery.UnOpOther "@") "abs"
 
 -- It's also unclear what types these operations should have
 -- Should there be a Num typeclass constraint or similar?

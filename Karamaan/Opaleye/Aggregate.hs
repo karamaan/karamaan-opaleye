@@ -5,7 +5,7 @@ import Karamaan.Opaleye.QueryArr (Query, runSimpleQueryArr,
                                   Tag, next, tagWith,
                                   simpleQueryArr)
 import Database.HaskellDB.PrimQuery (PrimQuery(Project),
-                                     AggrOp(AggrSum, AggrAvg, AggrMax,
+                                     AggrOp(AggrSum, AggrAvg, AggrMax, AggrMin,
                                             AggrCount),
                                      PrimExpr(AttrExpr,
                                               AggrExpr),
@@ -59,6 +59,9 @@ avg = aggregatorMaker AggrAvg
 
 max :: Aggregator (Wire a) (Wire a)
 max = aggregatorMaker AggrMax
+
+min :: Aggregator (Wire a) (Wire a)
+min = aggregatorMaker AggrMin
 
 groupBy :: Aggregator (Wire a) (Wire a)
 groupBy = aggregatorMaker' Nothing

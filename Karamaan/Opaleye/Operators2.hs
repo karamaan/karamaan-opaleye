@@ -71,6 +71,7 @@ cat3 = proc (s1, s2, s3) -> do
   s1s2 <- cat -< (s1, s2)
   cat -< (s1s2, s3)
 
+{-# DEPRECATED isNull "Use 'Karamaan.Opaleye.Nullable.isNull'" #-}
 isNull :: QueryArr (Wire (Maybe a)) (Wire Bool)
 isNull = unOpArr OpIsNull "is_null"
 

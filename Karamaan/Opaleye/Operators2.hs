@@ -225,11 +225,15 @@ ifThenElse :: Default CaseRunner a b
 ifThenElse = proc (cond, ifTrue, ifFalse) ->
   caseDef -< ([(cond, ifTrue)], ifFalse)
 
+{-# DEPRECATED fromMaybe "Use 'Karamaan.Opaleye.Nullable.fromNullable'\
+    \instead" #-}
 fromMaybe :: QueryArr (Wire a, Wire (Maybe a)) (Wire a)
 fromMaybe = proc (d, m) -> do
   isNull' <- isNull -< m
   ifThenElse -< (isNull', d, Wire.unsafeCoerce m)
 
+{-# DEPRECATED fromMaybe' "Use 'Karamaan.Opaleye.Nullable.fromNullable''\
+    \instead" #-}
 fromMaybe' :: Query (Wire a) -> QueryArr (Wire (Maybe a)) (Wire a)
 fromMaybe' d = proc m -> do
   d' <- d -< ()

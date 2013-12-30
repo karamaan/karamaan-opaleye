@@ -53,6 +53,10 @@ doesntEqualAnyOf = foldrArr and true . map (opC notEq . constant)
   where true = replaceWith (constant True)
 -- vv Want to do this, but you will not be surprised to hear that
 -- there is a bug in HaskellDB's query optimizer
+-- A patch has been sent upstream to HaskellDB
+-- (https://github.com/tomjaguarpaw/haskelldb/commit/1595d36364f6732271b44338b82a82bab5492d74)
+-- and I'd prefer to wait until that is merged before switching to this
+-- better implementation.
 -- doesntEqualAnyOf xs = Karamaan.Opaleye.Operators2.not <<< equalsOneOf xs
 
 {-# WARNING brokenHaskellDB "brokenHaskellDB: DO NOT USE.  This is only for\
@@ -60,6 +64,20 @@ doesntEqualAnyOf = foldrArr and true . map (opC notEq . constant)
 -- Try 'showSqlForPostgresDefault brokenHaskellDB' in GHCi
 brokenHaskellDB :: Query (Wire Bool)
 brokenHaskellDB = not <<< or <<< (constant False &&& constant False)
+
+{-
+Here's some more test code we can use to check we're happy with the
+bracketing patch when it's merged upstream.  This test code can be
+deleted once we're satisfied that the upstream patch works.
+
+divide :: QueryArr (Wire Double, Wire Double) (Wire Double)
+divide = opArr PrimQuery.OpDiv "div"
+
+brokenHaskellDB2 :: Query (Wire Double)
+brokenHaskellDB2 = divide
+                   <<< second divide
+                   <<< (constant 1 &&& (constant 1 &&& constant 2))
+-}
 
 equalsOneOf :: ShowConstant a => [a] -> QueryArr (Wire a) (Wire Bool)
 equalsOneOf = E.toQueryArr11 . E.equalsOneOf

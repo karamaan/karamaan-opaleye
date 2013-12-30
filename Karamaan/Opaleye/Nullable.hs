@@ -10,5 +10,8 @@ import Control.Arrow ((<<<))
 -- It's not actually used for values.
 data Nullable a = PhantomNullable
 
+-- In the ideal world we are creating, Op2.isNull goes away because it
+-- uses the old Maybe type constructor, and this is implemented
+-- directly.
 isNull :: QueryArr (Wire (Nullable a)) (Wire Bool)
 isNull = Join.unsafeCoerce <<< Op2.isNull <<< Join.unsafeCoerce

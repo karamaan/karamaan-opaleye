@@ -8,7 +8,10 @@ import Control.Arrow ((<<<), second)
 
 -- This is just used a phantom type in 'Wire's.
 -- It's not actually used for values.
-data Nullable a = PhantomNullable
+--data Nullable a = PhantomNullable
+
+-- For now just use a type synonym.  We will switch to a type later.
+type Nullable = Maybe
 
 -- In the ideal world we are creating the 'Maybe' functions in Op2 go
 -- away and these are implemented directly.

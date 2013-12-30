@@ -5,12 +5,10 @@ module Karamaan.Opaleye.Operators2 where
 import Prelude hiding (and, or)
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 import qualified Karamaan.Opaleye.Wire as Wire
-import Karamaan.Opaleye.OperatorsPrimatives (opArr, unOpArr)
-import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith,
-                                  simpleQueryArr, runSimpleQueryArr)
+import Karamaan.Opaleye.OperatorsPrimatives (opArr, unOpArr, binrel)
+import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
-import Database.HaskellDB.PrimQuery (PrimQuery(Project, Binary),
-                                     RelOp(Union, Intersect, Difference), extend,
+import Database.HaskellDB.PrimQuery (RelOp(Union, Intersect, Difference), extend,
                                      PrimExpr(AttrExpr, ConstExpr),
                                      UnOp(OpIsNull),
                                      Literal(OtherLit))
@@ -19,8 +17,7 @@ import Control.Arrow ((***), Arrow, (&&&), (<<<), second)
 import Control.Applicative (Applicative, pure, (<*>))
 import Data.Time.Calendar (Day)
 import qualified Karamaan.Opaleye.Values as Values
-import Karamaan.Opaleye.QueryColspec (QueryColspec, runWriterOfQueryColspec,
-                                      runPackMapOfQueryColspec)
+import Karamaan.Opaleye.QueryColspec (QueryColspec)
 import Data.Profunctor.Product.Default (Default, def)
 import qualified Karamaan.Opaleye.ExprArr as E
 import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr)
@@ -126,55 +123,6 @@ union' = binrel Union
 
 difference' :: QueryColspec a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
 difference' = binrel Difference
-
-binrel :: RelOp -> QueryColspec a b -> QueryArr () a -> QueryArr () a
-          -> QueryArr () b
-binrel op colspec q1 q2 = simpleQueryArr f where
-  f ((), t0) = (w_out, primQ, next t2)
-    where (w1, primQ1, t1) = runSimpleQueryArr q1 ((), t0)
-          (w2, primQ2, t2) = runSimpleQueryArr q2 ((), t1)
-
-          tag' :: String -> String
-          tag' = tagWith t2
-
-          w_out = runPackMap tag' w1
-          -- This used to be
-          -- new = unpack w_out
-          -- which wasn't well typed when changed to use the new QueryColspec
-          -- interface.  This implementation is equivalent, but somehow
-          -- seems less satisfying.  Should it?
-          --
-          -- FIXME: Note that there is a bug here.  If two of the wires in w1
-          -- have the same name then they will have the same name in new.
-          -- This leads to a select of the form
-          -- select w1name as w1nametag, w1name as w1nametag, ...
-          -- which is an error as w1nametag is ambiguous.
-          --
-          -- A solution would be to augment QueryColspec with a generalization
-          -- of runPackMap that can tag with increasing tags, rather than
-          -- just a fixed one.
-          --
-          -- Later note: I can no longer see why I thought it was
-          -- possible that two wires in w1 should be able to have the
-          -- same name.  A wire in w1 can have the same name as a wire
-          -- in w2, but that's not the same thing at all!  Is this
-          -- FIXME actually just not a problem?  Tom -- 2013-12-18
-          new = map tag' (runWriter w1)
-
-          assoc = zip new . map AttrExpr . runWriter
-
-          old1_assoc = assoc w1
-          old2_assoc = assoc w2
-
-          r1 :: PrimQuery
-          r1 = Project old1_assoc primQ1
-          r2 :: PrimQuery
-          r2 = Project old2_assoc primQ2
-
-          primQ = Binary op r1 r2
-
-          runPackMap = runPackMapOfQueryColspec colspec
-          runWriter = runWriterOfQueryColspec colspec
 
 -- Case stuff
 

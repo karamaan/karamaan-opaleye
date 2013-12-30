@@ -23,3 +23,6 @@ fromNullable = Op2.fromMaybe <<< second Join.unsafeCoerce
 
 fromNullable' :: Query (Wire a) -> QueryArr (Wire (Nullable a)) (Wire a)
 fromNullable' w = Op2.fromMaybe' w <<< Join.unsafeCoerce
+
+toNullable :: QueryArr (Wire a) (Wire (Nullable a))
+toNullable = Join.unsafeCoerce

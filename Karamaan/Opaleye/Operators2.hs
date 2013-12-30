@@ -2,7 +2,7 @@
 
 module Karamaan.Opaleye.Operators2 where
 
-import Prelude hiding (and, or)
+import Prelude hiding (and, or, not)
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 import qualified Karamaan.Opaleye.Wire as Wire
 import Karamaan.Opaleye.OperatorsPrimatives (opArr, unOpArr, binrel)
@@ -51,6 +51,15 @@ doesntEqualAnyOf :: ShowConstant a => [a] -> QueryArr (Wire a) (Wire Bool)
 -- TODO: Should this be foldl', since laziness gets us nothing here?
 doesntEqualAnyOf = foldrArr and true . map (opC notEq . constant)
   where true = replaceWith (constant True)
+-- vv Want to do this, but you will not be surprised to hear that
+-- there is a bug in HaskellDB's query optimizer
+-- doesntEqualAnyOf xs = Karamaan.Opaleye.Operators2.not <<< equalsOneOf xs
+
+{-# WARNING brokenHaskellDB "brokenHaskellDB: DO NOT USE.  This is only for\
+            \pointing out a HaskellDB brokenness" #-}
+-- Try 'showSqlForPostgresDefault brokenHaskellDB' in GHCi
+brokenHaskellDB :: Query (Wire Bool)
+brokenHaskellDB = not <<< or <<< (constant False &&& constant False)
 
 equalsOneOf :: ShowConstant a => [a] -> QueryArr (Wire a) (Wire Bool)
 equalsOneOf = E.toQueryArr11 . E.equalsOneOf

@@ -1,6 +1,7 @@
 module Karamaan.Opaleye.Operators.Numeric where
 
-import Karamaan.Opaleye.Operators2 (unOp, unOpArr, opArr, NumBinOpG, NumBinOp2G, r)
+import Karamaan.Opaleye.Operators2 (NumBinOpG, NumBinOp2G, r)
+import Karamaan.Opaleye.OperatorsPrimatives (unOp, unOpArr, opArr)
 import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.QueryArr (QueryArr)
 import Database.HaskellDB.PrimQuery(BinOp(OpMul, OpDiv, OpPlus, OpMinus,

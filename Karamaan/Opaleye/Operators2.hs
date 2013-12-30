@@ -5,19 +5,16 @@ module Karamaan.Opaleye.Operators2 where
 import Prelude hiding (and, or)
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 import qualified Karamaan.Opaleye.Wire as Wire
-import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith, Tag,
+import Karamaan.Opaleye.OperatorsPrimatives (opArr, unOpArr)
+import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith,
                                   simpleQueryArr, runSimpleQueryArr)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Database.HaskellDB.PrimQuery (PrimQuery(Project, Binary),
                                      RelOp(Union, Intersect, Difference), extend,
                                      PrimExpr(AttrExpr, ConstExpr),
-                                     BinOp,
                                      UnOp(OpIsNull),
-                                     Assoc,
                                      Literal(OtherLit))
 import qualified Database.HaskellDB.PrimQuery as PrimQuery
-import Karamaan.Opaleye.Operators (binOp')
-import qualified Karamaan.Opaleye.Operators as Operators
 import Control.Arrow ((***), Arrow, (&&&), (<<<), second)
 import Control.Applicative (Applicative, pure, (<*>))
 import Data.Time.Calendar (Day)
@@ -37,19 +34,6 @@ import Data.Profunctor.Product (ProductProfunctor, (***!), empty, defaultEmpty,
 -- The only reason this is called Operators2 rather than Operators is that
 -- I had to split the Operators module in two to avoid circular dependencies.
 -- At some point I should come up with a better naming system.
-
-unOp :: ShowConstant c => BinOp -> String -> String -> c
-        -> QueryArr (Wire a) (Wire a)
-unOp op opname constname constval = QueryArr f
-  where f (w, primQ, t0) = (w', primQ', next t0)
-          where s = unWire w
-                t_string = s
-                t'_string = constname
-                t = AttrExpr s
-                t' = Operators.constant constval
-                (assoc, w') = binOp' op opname t t_string t' t'_string
-                                     (tagWith t0)
-                primQ' = extend assoc primQ
 
 eq :: QueryArr (Wire a, Wire a) (Wire Bool)
 eq = opArr PrimQuery.OpEq "eq"
@@ -89,31 +73,6 @@ cat3 = proc (s1, s2, s3) -> do
 
 isNull :: QueryArr (Wire (Maybe a)) (Wire Bool)
 isNull = unOpArr OpIsNull "is_null"
-
-opArr :: BinOp -> String -> QueryArr (Wire a, Wire a) (Wire b)
-opArr op opname = QueryArr f
-  where f ((u, u'), primQ, t1) = (newWire, extend newAssoc primQ, next t1)
-          where (newAssoc, newWire) = wireBinOp op opname u u' t1
-
--- TODO: duplication with opArr?
-unOpArr :: UnOp -> String -> QueryArr (Wire a) (Wire b)
-unOpArr op opname = QueryArr f
-  where f (u, primQ, t1) = (newWire, extend newAssoc primQ, next t1)
-          where (newAssoc, newWire) = wireUnOp op opname u t1
-
--- FIXME: what's the right type signature for this?
--- TODO: there's some duplication between this, binOp' and wireOp
-wireBinOp :: BinOp -> String -> Wire a -> Wire a -> Tag -> (Assoc, Wire a2)
-wireBinOp op opname u u' t1 = binOp' op opname (AttrExpr w) w (AttrExpr w') w'
-                                     (tagWith t1)
-  where w = unWire u
-        w' = unWire u'
-
--- TODO: some duplication with wireBinOp?
-wireUnOp :: UnOp -> String -> Wire a -> Tag -> (Assoc, Wire a2)
-wireUnOp op opname u t1 = Operators.unOp op opname (AttrExpr w) w
-                                         (tagWith t1)
-  where w = unWire u
 
 constantLit :: Literal -> Query (Wire a)
 constantLit l = QueryArr f where

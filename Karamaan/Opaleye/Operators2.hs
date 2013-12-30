@@ -243,7 +243,7 @@ fromMaybe' d = proc m -> do
 wireToPrimExpr :: Wire a -> PrimExpr
 wireToPrimExpr = AttrExpr . unWire
 
--- {-# DEPRECATED opC "Use 'Karamaan.WhaleUtil.Arrow.opC' instead" #-}
+{-# DEPRECATED opC "Use 'Karamaan.WhaleUtil.Arrow.opC' instead" #-}
 opC :: Arrow arr => arr (a, b) c -> arr () b -> arr a c
 opC = A.opC
 

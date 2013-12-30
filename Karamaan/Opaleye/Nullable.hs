@@ -6,6 +6,10 @@ import qualified Karamaan.Opaleye.Operators2 as Op2
 import qualified Karamaan.Opaleye.Join as Join
 import Control.Arrow ((<<<), second)
 
+-- TODO: At the appropriate time we will replace the Nullable type
+-- synonym to Maybe with its own type, and then the transition to
+-- Nullable will be complete!
+
 -- This is just used a phantom type in 'Wire's.
 -- It's not actually used for values.
 --data Nullable a = PhantomNullable

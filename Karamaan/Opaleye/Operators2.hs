@@ -156,7 +156,7 @@ difference' = binrel Difference
 type CaseArg a = ([(Wire Bool, a)], a)
 
 fmapCaseArg :: (a -> b) -> CaseArg a -> CaseArg b
-fmapCaseArg f = (map (second f) *** f)
+fmapCaseArg f = map (second f) *** f
 
 newtype CaseRunner a b = CaseRunner (QueryArr (CaseArg a) b)
 

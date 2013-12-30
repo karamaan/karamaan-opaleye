@@ -27,6 +27,7 @@ import Karamaan.Opaleye.Table (Table(Table))
 import Data.Profunctor.Product.Default (Default, def)
 import Karamaan.WhaleUtil ((.:))
 import Karamaan.Opaleye.Values ((.:.))
+import Data.Function (on)
 
 -- A 'TableExprRunner t e' is used to connect a 'Table t' to an
 -- 'ExprArr e o'.  In current usage 'o' is only ever 'Wire Bool' but I
@@ -103,7 +104,7 @@ instance Monoid m => Monoid (MWriter2 m a) where
   MWriter2 w `mappend` MWriter2 w' = MWriter2 (w <> w')
 
 instance Contravariant (MWriter2 m) where
-  contramap f (MWriter2 w) = MWriter2 (\a b -> w (f a) (f b))
+  contramap f (MWriter2 w) = MWriter2 (w `on` f)
 
 instance Monoid m => ProductContravariant (MWriter2 m) where
   point = defaultPoint

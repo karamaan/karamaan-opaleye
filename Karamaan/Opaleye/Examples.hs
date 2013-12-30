@@ -17,11 +17,9 @@ import Karamaan.Opaleye.SQL (showSqlForPostgresDefault)
 import Control.Category ((<<<))
 import Control.Arrow (arr, (&&&), returnA, (***))
 import Data.Time.Calendar (Day)
-import Data.Profunctor.Product.Default (Default)
-import Data.Profunctor.Product (PPOfContravariant)
 
 import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
-import Data.Profunctor.Product (ProductProfunctor, p2)
+import Data.Profunctor.Product (PPOfContravariant, ProductProfunctor, p2)
 import Data.Profunctor (dimap)
 import Data.Profunctor.Product.Default (Default, def)
 

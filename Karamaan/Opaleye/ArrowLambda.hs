@@ -1,4 +1,4 @@
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts #-}
 
 module Karamaan.Opaleye.ArrowLambda where
 
@@ -17,6 +17,9 @@ newtype ArrowLambda arr a b c = ArrowLambda (arr a b -> c)
 
 runArrowLambda :: Cat.Category arr => ArrowLambda arr b b c -> (c -> r) -> r
 runArrowLambda (ArrowLambda g) f = (f . g) Cat.id
+
+runArrowLambdaQ :: ArrowLambda QueryArr b b b -> (b -> r) -> r
+runArrowLambdaQ = runArrowLambda
 
 instance Arrow arr => Profunctor (ArrowLambda arr a) where
   dimap f g (ArrowLambda h) = ArrowLambda (dimap (arr f <<<) g h)
@@ -42,6 +45,11 @@ var = ArrowLambda id
 
 instance Default (ArrowLambda QueryArr a) (Wire b) (QueryArr a (Wire b)) where
   def = var
+
+runArrowLambdaDef :: Default (ArrowLambda QueryArr c) c c
+                     => (c -> r)
+                     -> r
+runArrowLambdaDef = runArrowLambdaQ def
 
 example :: QueryArr (Wire b, Wire b, Wire c, Wire c) (Wire Bool)
 example = runArrowLambda p $ \(w, x, y, z) -> (w .==. x) .||. (y ./=. z)

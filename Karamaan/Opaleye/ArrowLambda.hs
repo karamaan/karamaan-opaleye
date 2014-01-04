@@ -9,6 +9,9 @@ import Data.Profunctor.Product.Default (Default, def)
 
 newtype ArrowLambda arr a b c = ArrowLambda (arr a b -> c)
 
+runArrowLambda :: ArrowLambda arr a b c -> (c -> r) -> arr a b -> r
+runArrowLambda (ArrowLambda g) f = f . g
+
 instance Arrow arr => Profunctor (ArrowLambda arr a) where
   dimap f g (ArrowLambda h) = ArrowLambda (dimap (arr f <<<) g h)
 
@@ -21,3 +24,4 @@ instance Arrow arr => Applicative (ArrowLambda arr a b) where
 
 instance Default (ArrowLambda arr a) b (arr a b) where
   def = ArrowLambda id
+

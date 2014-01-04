@@ -18,7 +18,8 @@ newtype ArrowLambda arr a b c = ArrowLambda (arr a b -> c)
 runArrowLambda :: Cat.Category arr => ArrowLambda arr b b c -> (c -> r) -> r
 runArrowLambda (ArrowLambda g) f = (f . g) Cat.id
 
-runArrowLambdaQ :: ArrowLambda QueryArr b b b -> (b -> r) -> r
+runArrowLambdaQ :: ArrowLambda QueryArr b b c -> (c -> QueryArr b q)
+                   -> QueryArr b q
 runArrowLambdaQ = runArrowLambda
 
 instance Arrow arr => Profunctor (ArrowLambda arr a) where
@@ -46,9 +47,9 @@ var = ArrowLambda id
 instance Default (ArrowLambda QueryArr a) (Wire b) (QueryArr a (Wire b)) where
   def = var
 
-runArrowLambdaDef :: Default (ArrowLambda QueryArr c) c c
-                     => (c -> r)
-                     -> r
+runArrowLambdaDef :: Default (ArrowLambda QueryArr b) b c
+                     => (c -> QueryArr b q)
+                     -> QueryArr b q
 runArrowLambdaDef = runArrowLambdaQ def
 
 example :: QueryArr (Wire b, Wire b, Wire c, Wire c) (Wire Bool)

@@ -1,4 +1,5 @@
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts #-}
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts,
+    ScopedTypeVariables #-}
 
 module Karamaan.Opaleye.ArrowLambda where
 
@@ -13,6 +14,8 @@ import Karamaan.Opaleye.QueryArr (QueryArr)
 import Karamaan.Opaleye.Wire (Wire)
 import qualified Control.Category as Cat
 
+import Data.Profunctor.Product (p4)
+
 newtype ArrowLambda arr a b c = ArrowLambda (arr a b -> c)
 
 runArrowLambda :: Cat.Category arr => ArrowLambda arr b b c -> (c -> r) -> r
@@ -21,6 +24,17 @@ runArrowLambda (ArrowLambda g) f = (f . g) Cat.id
 runArrowLambdaQ :: ArrowLambda QueryArr b b c -> (c -> QueryArr b q)
                    -> QueryArr b q
 runArrowLambdaQ = runArrowLambda
+
+runArrowLambdaP :: Proxy c
+                   -> ArrowLambda QueryArr b b c
+                   -> (c -> QueryArr b q)
+                   -> QueryArr b q
+runArrowLambdaP _ = runArrowLambdaQ
+
+data Proxy a = Proxy
+
+runArrowLambdaQ' :: Cat.Category arr => ArrowLambda arr a b c -> arr a b -> c
+runArrowLambdaQ' (ArrowLambda g) = g
 
 instance Arrow arr => Profunctor (ArrowLambda arr a) where
   dimap f g (ArrowLambda h) = ArrowLambda (dimap (arr f <<<) g h)
@@ -39,22 +53,41 @@ instance Arrow arr => ProductProfunctor (ArrowLambda arr a) where
 var :: ArrowLambda arr a b (arr a b)
 var = ArrowLambda id
 
--- Would like to do this but it seems to get us into trouble with
--- incoherent instances
---instance Default (ArrowLambda arr a) b (arr a b) where
---  def = var
-
-instance Default (ArrowLambda QueryArr a) (Wire b) (QueryArr a (Wire b)) where
+instance Default (ArrowLambda arr a) b (arr a b) where
   def = var
 
-runArrowLambdaDef :: Default (ArrowLambda QueryArr b) b c
-                     => (c -> QueryArr b q)
-                     -> QueryArr b q
-runArrowLambdaDef = runArrowLambdaQ def
+{-
 
-example :: QueryArr (Wire b, Wire b, Wire c, Wire c) (Wire Bool)
-example = runArrowLambda p $ \(w, x, y, z) -> (w .==. x) .||. (y ./=. z)
+So basically the problem is that the lambda expression is too
+polymorphic and the type class solver doesn't know that if it is
+looking for an instance like
 
-p :: ArrowLambda QueryArr a (Wire b1, Wire b2, Wire b3, Wire b4)
-       (QueryArr a (Wire b1), QueryArr a (Wire b2), QueryArr a (Wire b3), QueryArr a (Wire b4))
-p = def
+    Default (ArrowLambda arr a) b (arr a c)
+
+then 'b' must equal 'c'.
+
+It's possible we could use functional dependencies for that, but then
+that would take us out of the nice automatic tupling arrangement that
+Default gives us, and we would have to write it all by hand again, I
+think.
+
+There are two interim solutions:
+
+  * Use a Proxy.  Unfortunately this makes you write out a messy type and
+    requires ScopedTypeVariables.
+  * Use your adaptor and var.  This is less typing, but still annoying.
+
+I think the latter is neater.
+
+-}
+
+example :: forall b c. QueryArr (Wire b, Wire b, Wire c, Wire c) (Wire Bool)
+example = runArrowLambdaP
+              (Proxy :: Proxy (QueryArr a (Wire b), QueryArr a (Wire b),
+                               QueryArr a (Wire c), QueryArr a (Wire c)))
+              def
+              (\(w, x, y, z) -> (w .==. x) .||. (y ./=. z))
+
+example' :: forall b c. QueryArr (Wire b, Wire b, Wire c, Wire c) (Wire Bool)
+example' = runArrowLambdaQ (p4 (var, var, var, var))
+              (\(w, x, y, z) -> (w .==. x) .||. (y ./=. z))

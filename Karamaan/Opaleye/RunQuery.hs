@@ -26,8 +26,6 @@ import Data.Proxy (Proxy(Proxy))
 
 import Data.Time.Calendar (Day)
 
-import qualified Karamaan.WhaleUtil.Database as UD
-
 -- How to define new 'QueryRunner's for your own datatypes:
 --
 -- You should probably just do (if you're wrapping an Int with MyType say)
@@ -105,9 +103,6 @@ runQuery :: QueryRunner a b -> Query a -> SQL.Connection -> IO [b]
 runQuery (QueryRunner u rowParser) q conn = query_ rowParser conn sql
   where sql :: SQL.Query
         sql = fromString (showSqlForPostgres u q)
-
-runQueryDefault :: Default QueryRunner a b => Query a -> IO [b]
-runQueryDefault = runQueryDefaultConnectInfo UD.connectInfo
 
 runQueryDefaultConnectInfo :: Default QueryRunner a b
                               => SQL.ConnectInfo -> Query a -> IO [b]

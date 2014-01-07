@@ -105,6 +105,9 @@ mul = binOp PQ.OpMul "mul"
 or :: ExprArr (Wire Bool, Wire Bool) (Wire Bool)
 or = binOp PQ.OpOr "or"
 
+and :: ExprArr (Wire Bool, Wire Bool) (Wire Bool)
+and = binOp PQ.OpAnd "and"
+
 eq :: ExprArr (Wire a, Wire a) (Wire Bool)
 eq = binOp PQ.OpEq "eq"
 

@@ -107,8 +107,12 @@ runQuery (QueryRunner u rowParser) q conn = query_ rowParser conn sql
         sql = fromString (showSqlForPostgres u q)
 
 runQueryDefault :: Default QueryRunner a b => Query a -> IO [b]
-runQueryDefault q = do
-  conn <- SQL.connect UD.connectInfo
+runQueryDefault = runQueryDefaultConnectInfo UD.connectInfo
+
+runQueryDefaultConnectInfo :: Default QueryRunner a b
+                              => SQL.ConnectInfo -> Query a -> IO [b]
+runQueryDefaultConnectInfo connectInfo q = do
+  conn <- SQL.connect connectInfo
   runQuery def q conn
 
 -- SQL.query_ with explicit RowParser

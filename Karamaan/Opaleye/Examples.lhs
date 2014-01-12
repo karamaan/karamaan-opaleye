@@ -27,6 +27,16 @@
 > import Karamaan.Opaleye.RunQuery as RQ
 
 
+Introduction
+============
+
+In this example file I'll give you a brief introduction to the Opaleye
+relational query EDSL.  I'll show you how to define tables in Opaleye;
+use them to generate selects, joins and filters; use the API of
+Opaleye to make your queries more composable; and finally run the
+queries on Postgres.
+
+
 Schema
 ======
 

@@ -9,6 +9,7 @@
 > import Karamaan.Opaleye.Unpackspec (Unpackspec)
 > import Karamaan.Opaleye.Table (makeTableDef)
 > import Karamaan.Opaleye.QueryArr (Query, QueryArr)
+> import Karamaan.Opaleye.Nullable (Nullable)
 > import qualified Karamaan.Opaleye.Operators2 as Op2
 > import qualified Karamaan.Opaleye.Predicates as P
 > import qualified Karamaan.Opaleye.Operators.Numeric as N
@@ -22,6 +23,9 @@
 > import Data.Profunctor.Product (PPOfContravariant, ProductProfunctor, p2)
 > import Data.Profunctor (dimap)
 > import Data.Profunctor.Product.Default (Default, def)
+> import qualified Database.PostgreSQL.Simple as SQL
+> import Karamaan.Opaleye.RunQuery as RQ
+
 
 Schema
 ======
@@ -371,3 +375,34 @@ The generated SQL is again exactly the same as before.
 >       => Query a -> IO ()
 > sh = putStrLn . showSqlForPostgresDefault
 
+Running queries on Postgres
+===========================
+
+Opaleye provides simple facilities for running queries on Postgres.
+Other DBMSes are not forbidden, but have just not been tried!
+
+For example we can run the 'notTwentiesAtAddress' query as below.
+Note that this particular formulation uses typeclasses so please put
+type signatures on everything in sight to minimize the number of
+confusing error messages!
+
+> notTwentiesQuery :: SQL.ConnectInfo -> IO [(String, Int, String)]
+> notTwentiesQuery connectInfo = RQ.runQueryDefaultConnectInfo connectInfo
+>                                                 notTwentiesAtAddress
+
+Note that nullable columns are indicated with the Nullable type
+constructor, and these are converted to Maybe when executed.  If we
+have a table with a nullable column like the following
+
+> widgets :: Query (Wire String, Wire (Nullable Int))
+> widgets = makeTableDef ("widget_location", "widget_quantity") "widgets_table"
+
+then when we run it the nullable columns turns into a column of Maybes
+
+> widgetsQuery :: SQL.ConnectInfo -> IO [(String, Maybe Int)]
+> widgetsQuery connectInfo = RQ.runQueryDefaultConnectInfo connectInfo widgets
+
+Conclusion
+==========
+
+There ends the Opaleye introductions module.  Please send me your questions!

@@ -39,7 +39,7 @@ appendShow :: Show a => a -> String -> String
 appendShow = flip (++) . show
 
 tagWith :: Tag -> (String -> String)
-tagWith = appendShow . unsafeUnTag
+tagWith t = appendShow (unsafeUnTag t) . (++ "_")
 
 runQueryArr :: QueryArr a b -> (a, PrimQuery, Tag) -> (b, PrimQuery, Tag)
 runQueryArr (QueryArr f) = f

@@ -16,6 +16,9 @@ import qualified Control.Category as Cat
 
 import Data.Profunctor.Product (p4)
 
+-- This is work in progress.  It's inadvisable to use it in your own
+-- code currently!
+
 newtype ArrowLambda arr a b c = ArrowLambda (arr a b -> c)
 
 runArrowLambda :: Cat.Category arr => ArrowLambda arr b b c -> (c -> r) -> r

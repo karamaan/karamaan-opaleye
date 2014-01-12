@@ -15,6 +15,7 @@ import Control.Arrow ((<<<), second)
 --data Nullable a = PhantomNullable
 
 -- For now just use a type synonym.  We will switch to a type later.
+-- Don't use Maybe in Wires in new code!
 type Nullable = Maybe
 
 -- In the ideal world we are creating the 'Maybe' functions in Op2 go

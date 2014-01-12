@@ -10,7 +10,7 @@ import Karamaan.Opaleye.Wire (Wire)
 import Control.Arrow (first)
 import Control.Monad.State (State, get, put, runState)
 import Control.Monad.Reader (ReaderT, runReaderT, ask)
-import qualified Karamaan.WhaleUtil.Date as UD
+import qualified Karamaan.Plankton.Date as UD
 import Data.Time.Calendar
 import Control.Applicative (liftA2, pure)
 import Data.Profunctor (Profunctor, dimap)
@@ -56,7 +56,7 @@ instance ProductProfunctor ValuesMaker where
   ValuesMaker (w, c, ts) ***! ValuesMaker (w', c', ts') =
     ValuesMaker (w ***< w', (liftA2 . liftA2) (,) c c', ts <> ts')
 
--- TODO: vv move this to WhaleUtil?
+-- TODO: vv move this to Plankton?
 (.:.) :: (r -> z) -> (a -> b -> c -> r) -> (a -> b -> c -> z)
 (f .:. g) x y z = f (g x y z)
 

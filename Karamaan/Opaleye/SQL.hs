@@ -9,7 +9,7 @@ import Database.HaskellDB.Sql.Default (defaultSqlGenerator)
 import Database.HaskellDB.PrimQuery (PrimQuery)
 import Karamaan.Opaleye.QueryArr (Query, runQueryArrPrim)
 import Karamaan.Opaleye.Unpackspec (Unpackspec)
-import Karamaan.WhaleUtil ((.:))
+import Karamaan.Plankton ((.:))
 import Data.Profunctor.Product (PPOfContravariant, unPPOfContravariant)
 import Data.Profunctor.Product.Default (Default, def)
 

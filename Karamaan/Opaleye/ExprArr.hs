@@ -12,7 +12,7 @@ import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Karamaan.Opaleye.Wire (Wire(Wire))
 import qualified Database.HaskellDB.PrimQuery as PQ
 import qualified Data.Maybe as M
-import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr, opC)
+import Karamaan.Plankton.Arrow (replaceWith, foldrArr, opC)
 import Karamaan.Opaleye.Operators (operatorName)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!))

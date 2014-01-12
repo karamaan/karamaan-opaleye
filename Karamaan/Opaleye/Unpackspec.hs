@@ -10,7 +10,7 @@ import Data.Profunctor.Product ((***<), ProductContravariant, point,
                                 defaultPoint, defaultContravariantProduct)
 import Data.Functor.Contravariant (Contravariant, contramap)
 import Control.Arrow (second)
-import Karamaan.WhaleUtil ((.:))
+import Karamaan.Plankton ((.:))
 import Data.Profunctor.Product.Default (Default, def)
 import Karamaan.Opaleye.Wire (Wire)
 import Data.Monoid (Monoid, (<>), mappend, mempty)

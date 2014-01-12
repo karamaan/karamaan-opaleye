@@ -20,9 +20,9 @@ import qualified Karamaan.Opaleye.Values as Values
 import Karamaan.Opaleye.QueryColspec (QueryColspec)
 import Data.Profunctor.Product.Default (Default, def)
 import qualified Karamaan.Opaleye.ExprArr as E
-import Karamaan.WhaleUtil.Arrow (replaceWith, foldrArr)
-import qualified Karamaan.WhaleUtil.Arrow as A
-import Karamaan.WhaleUtil.Arrow.ReaderCurry (readerCurry2)
+import Karamaan.Plankton.Arrow (replaceWith, foldrArr)
+import qualified Karamaan.Plankton.Arrow as A
+import Karamaan.Plankton.Arrow.ReaderCurry (readerCurry2)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, (***!), empty, defaultEmpty,
                                 defaultProfunctorProduct)
@@ -218,7 +218,7 @@ fromMaybe' d = proc m -> do
 wireToPrimExpr :: Wire a -> PrimExpr
 wireToPrimExpr = AttrExpr . unWire
 
-{-# DEPRECATED opC "Use 'Karamaan.WhaleUtil.Arrow.opC' instead" #-}
+{-# DEPRECATED opC "Use 'Karamaan.Plankton.Arrow.opC' instead" #-}
 opC :: Arrow arr => arr (a, b) c -> arr () b -> arr a c
 opC = A.opC
 

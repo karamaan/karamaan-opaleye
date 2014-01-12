@@ -7,7 +7,7 @@ import Control.Arrow ((<<<), arr, returnA)
 import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.Operators2 (eq)
 import Karamaan.Opaleye.Predicates (restrict)
-import qualified Karamaan.WhaleUtil.Arrow as UA
+import qualified Karamaan.Plankton.Arrow as UA
 
 bend :: (b -> Wire x) -> QueryArr a b -> QueryArr (Wire x, a) b
 bend f q = proc (x, rest) -> do

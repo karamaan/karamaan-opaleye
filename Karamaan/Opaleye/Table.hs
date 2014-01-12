@@ -12,7 +12,7 @@ import Karamaan.Opaleye.TableColspec (TableColspec, TableColspecP,
                                       WireMaker, runWireMaker)
 import Data.Profunctor.Product.Default (Default, def)
 import Control.Arrow ((***))
-import Karamaan.WhaleUtil ((.:))
+import Karamaan.Plankton ((.:))
 
 -- For specifying the columns as Strings
 data TableSpec a = TableSpec a String

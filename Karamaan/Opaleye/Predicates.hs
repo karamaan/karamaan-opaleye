@@ -12,7 +12,7 @@ import Database.HaskellDB.PrimQuery (PrimExpr(AttrExpr, UnExpr, ConstExpr,
                                      UnOp(OpIsNull), Literal(OtherLit))
 import Data.Time.Calendar (Day)
 import Control.Arrow (arr, Arrow, first, (<<<))
-import qualified Karamaan.WhaleUtil.Arrow as UA
+import qualified Karamaan.Plankton.Arrow as UA
 
 -- The combinators are to be in Operators2 are to be preferred to the ones here.
 -- Predicates contains code from an earlier time when I didn't understand the
@@ -82,7 +82,7 @@ wireIs = wireOp OpEq
 wireIsNot :: Wire a -> Literal -> PrimExpr
 wireIsNot = wireOp OpNotEq
 
-{-# DEPRECATED noOp "Use 'Karamaan.WhaleUtil.Arrow.noOp' instead" #-}
+{-# DEPRECATED noOp "Use 'Karamaan.Plankton.Arrow.noOp' instead" #-}
 noOp :: Arrow arr => arr a ()
 noOp = UA.noOp
 

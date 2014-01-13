@@ -13,16 +13,6 @@ import Karamaan.Plankton ((.:))
 import Data.Profunctor.Product (PPOfContravariant, unPPOfContravariant)
 import Data.Profunctor.Product.Default (Default, def)
 
-{-# DEPRECATED showSqlForPostgreSQLSimple'
-    "Use 'showSqlForPostgres' instead" #-}
-showSqlForPostgreSQLSimple' :: Unpackspec a -> Query a -> String
-showSqlForPostgreSQLSimple' = showSqlForPostgres
-
-{-# DEPRECATED showSqlForPostgreSQLSimple
-    "Use 'showSqlForPostgres' instead" #-}
-showSqlForPostgreSQLSimple :: Unpackspec a -> Query a -> String
-showSqlForPostgreSQLSimple = showSqlForPostgres
-
 -- Currently we only support SQL generation for Postgres because,
 -- for example, 'cat' is implemented as '||' and the hackery we do
 -- in, for example, Values.hs, may be Postgres specific.

@@ -14,14 +14,14 @@ import Karamaan.Opaleye.QueryArr (Query, QueryArr)
 import Karamaan.Opaleye.Wire (Wire)
 -- vv We would like to export 'isNull' here, but it currently conflicts with
 -- 'Operators2.isNull'.  The latter is going away soon.
-import Karamaan.Opaleye.Nullable (Nullable, fromNullable, fromNullable')
-import Karamaan.Opaleye.Operators2 (eq, and, or, notEq, cat, cat3, isNull,
+import Karamaan.Opaleye.Nullable (Nullable, fromNullable, fromNullable', isNull)
+import Karamaan.Opaleye.Operators2 (eq, and, or, notEq, cat,
                                     constant, constantString, constantDay,
                                     intersect, union, difference, case_,
-                                    ifThenElse, fromMaybe, fromMaybe')
+                                    ifThenElse)
 import Karamaan.Opaleye.Operators.Numeric (plus, divide, times, minus, gt, gte,
                                            lt, lte)
 import Karamaan.Opaleye.Predicates (restrict)
 import Karamaan.Opaleye.Aggregate (sum, avg, max, groupBy, count, aggregate)
 import Karamaan.Opaleye.RunQuery (runQuery, runQueryDefaultConnectInfo)
-import Karamaan.Opaleye.SQL (showSqlForPostgreSQLSimple)
+import Karamaan.Opaleye.SQL (showSqlForPostgres)

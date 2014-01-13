@@ -4,14 +4,12 @@ module Karamaan.Opaleye.Operators2 where
 
 import Prelude hiding (and, or, not)
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
-import qualified Karamaan.Opaleye.Wire as Wire
 import Karamaan.Opaleye.OperatorsPrimatives (opArr, unOpArr, binrel)
 import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Database.HaskellDB.PrimQuery (RelOp(Union, Intersect, Difference, UnionAll),
                                      extend,
                                      PrimExpr(AttrExpr, ConstExpr),
-                                     UnOp(OpIsNull),
                                      Literal(OtherLit))
 import qualified Database.HaskellDB.PrimQuery as PrimQuery
 import Control.Arrow ((***), Arrow, (&&&), (<<<), second)
@@ -50,7 +48,7 @@ notEq = opArr PrimQuery.OpNotEq "not_eq"
 
 doesntEqualAnyOf :: ShowConstant a => [a] -> QueryArr (Wire a) (Wire Bool)
 -- TODO: Should this be foldl', since laziness gets us nothing here?
-doesntEqualAnyOf = foldrArr and true . map (opC notEq . constant)
+doesntEqualAnyOf = foldrArr and true . map (A.opC notEq . constant)
   where true = replaceWith (constant True)
 -- vv Want to do this, but you will not be surprised to hear that
 -- there is a bug in HaskellDB's query optimizer
@@ -88,17 +86,6 @@ equalsOneOf = E.toQueryArr11 . E.equalsOneOf
 -- the PostgreSQL generator (Database.HaskellDB.Sql.PostgreSQL).
 cat :: QueryArr (Wire String, Wire String) (Wire String)
 cat = opArr (PrimQuery.OpOther "||") "cat"
-
-{-# DEPRECATED cat3 "Better to use ReaderCurried operations" #-}
-cat3 :: QueryArr (Wire String, Wire String, Wire String) (Wire String)
-cat3 = proc (s1, s2, s3) -> do
-  -- TODO: there must be a nicer way of doing this
-  s1s2 <- cat -< (s1, s2)
-  cat -< (s1s2, s3)
-
-{-# DEPRECATED isNull "Use 'Karamaan.Opaleye.Nullable.isNull'" #-}
-isNull :: QueryArr (Wire (Maybe a)) (Wire Bool)
-isNull = unOpArr OpIsNull "is_null"
 
 constantLit :: Literal -> Query (Wire a)
 constantLit l = QueryArr f where
@@ -209,26 +196,8 @@ ifThenElse :: Default CaseRunner a b
 ifThenElse = proc (cond, ifTrue, ifFalse) ->
   caseDef -< ([(cond, ifTrue)], ifFalse)
 
-{-# DEPRECATED fromMaybe "Use 'Karamaan.Opaleye.Nullable.fromNullable'\
-    \instead" #-}
-fromMaybe :: QueryArr (Wire a, Wire (Maybe a)) (Wire a)
-fromMaybe = proc (d, m) -> do
-  isNull' <- isNull -< m
-  ifThenElse -< (isNull', d, Wire.unsafeCoerce m)
-
-{-# DEPRECATED fromMaybe' "Use 'Karamaan.Opaleye.Nullable.fromNullable''\
-    \instead" #-}
-fromMaybe' :: Query (Wire a) -> QueryArr (Wire (Maybe a)) (Wire a)
-fromMaybe' d = proc m -> do
-  d' <- d -< ()
-  fromMaybe -< (d', m)
-
 wireToPrimExpr :: Wire a -> PrimExpr
 wireToPrimExpr = AttrExpr . unWire
-
-{-# DEPRECATED opC "Use 'Karamaan.Plankton.Arrow.opC' instead" #-}
-opC :: Arrow arr => arr (a, b) c -> arr () b -> arr a c
-opC = A.opC
 
 -- ReaderCurried versions
 

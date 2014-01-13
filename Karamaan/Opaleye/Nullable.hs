@@ -1,10 +1,14 @@
+{-# LANGUAGE Arrows #-}
+
 module Karamaan.Opaleye.Nullable where
 
 import Karamaan.Opaleye.QueryArr (QueryArr, Query)
 import Karamaan.Opaleye.Wire (Wire)
+import Karamaan.Opaleye.OperatorsPrimatives (unOpArr)
+import qualified Karamaan.Opaleye.Wire as Wire
 import qualified Karamaan.Opaleye.Operators2 as Op2
-import qualified Karamaan.Opaleye.Join as Join
-import Control.Arrow ((<<<), second)
+import Control.Arrow (arr)
+import Database.HaskellDB.PrimQuery (UnOp(OpIsNull))
 
 -- TODO: At the appropriate time we will replace the Nullable type
 -- synonym to Maybe with its own type, and then the transition to
@@ -18,16 +22,25 @@ import Control.Arrow ((<<<), second)
 -- Don't use Maybe in Wires in new code!
 type Nullable = Maybe
 
+-- TODO: perhaps this belongs elsewhere, but we need to work out how to avoid
+-- circular dependencies
+unsafeCoerce :: QueryArr (Wire a) (Wire b)
+unsafeCoerce = arr Wire.unsafeCoerce
+
 -- In the ideal world we are creating the 'Maybe' functions in Op2 go
 -- away and these are implemented directly.
 isNull :: QueryArr (Wire (Nullable a)) (Wire Bool)
-isNull = Join.unsafeCoerce <<< Op2.isNull <<< Join.unsafeCoerce
+isNull = unOpArr OpIsNull "is_null"
 
 fromNullable :: QueryArr (Wire a, Wire (Maybe a)) (Wire a)
-fromNullable = Op2.fromMaybe <<< second Join.unsafeCoerce
+fromNullable = proc (d, m) -> do
+  isNull' <- isNull -< m
+  Op2.ifThenElse -< (isNull', d, Wire.unsafeCoerce m)
 
 fromNullable' :: Query (Wire a) -> QueryArr (Wire (Nullable a)) (Wire a)
-fromNullable' w = Op2.fromMaybe' w <<< Join.unsafeCoerce
+fromNullable' d = proc m -> do
+  d' <- d -< ()
+  fromNullable -< (d', m)
 
 toNullable :: QueryArr (Wire a) (Wire (Nullable a))
-toNullable = Join.unsafeCoerce
+toNullable = unsafeCoerce

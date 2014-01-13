@@ -4,18 +4,18 @@ module Karamaan.Opaleye.Join (semijoin, unsafeCoerce) where
 
 import Karamaan.Opaleye.QueryArr (Query, QueryArr)
 import Karamaan.Opaleye.Wire (Wire)
-import qualified Karamaan.Opaleye.Wire as Wire
 import Data.Profunctor.Product.Default (Default)
 import Karamaan.Opaleye.QueryColspec (QueryColspec)
 import Karamaan.Opaleye.Predicates (restrict)
-import Karamaan.Opaleye.Operators2 (union, isNull, eq)
-import Control.Arrow (returnA, arr, first)
+import Karamaan.Opaleye.Operators2 (union, eq)
+import qualified Karamaan.Opaleye.Nullable as Nullable
+import Control.Arrow (returnA, first)
 import Control.Category ((<<<))
 
 -- TODO: perhaps this belongs elsewhere, but we need to work out how to avoid
 -- circular dependencies
 unsafeCoerce :: QueryArr (Wire a) (Wire b)
-unsafeCoerce = arr Wire.unsafeCoerce
+unsafeCoerce = Nullable.unsafeCoerce
 
 -- This is slightly subtle.  The eq *can* return Unknown
 -- (see http://en.wikipedia.org/wiki/Null_%28SQL%29#Comparisons_with_NULL_and_the_three-valued_logic_.283VL.29)
@@ -40,7 +40,7 @@ joinWithNull :: Query (a, Wire (Maybe b))
              -> Query (a, c)
 joinWithNull q1 q2 = proc () -> do
   (a, mb) <- q1 -< ()
-  restrict <<< isNull -< mb
+  restrict <<< Nullable.isNull -< mb
   replacement <- q2 -< ()
   returnA -< (a, replacement)
 

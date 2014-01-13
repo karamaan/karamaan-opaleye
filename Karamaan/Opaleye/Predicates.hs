@@ -12,7 +12,6 @@ import Database.HaskellDB.PrimQuery (PrimExpr(AttrExpr, UnExpr, ConstExpr,
                                      UnOp(OpIsNull), Literal(OtherLit))
 import Data.Time.Calendar (Day)
 import Control.Arrow (arr, Arrow, first, (<<<))
-import qualified Karamaan.Plankton.Arrow as UA
 
 -- The combinators are to be in Operators2 are to be preferred to the ones here.
 -- Predicates contains code from an earlier time when I didn't understand the
@@ -22,16 +21,6 @@ import qualified Karamaan.Plankton.Arrow as UA
 -- does all the PrimExpr plumbing with a safer API.  In the future
 -- it's preferable to use 'ExprArr' to any of the combinators here
 -- (except restrict which is still needed).
-
-{-# DEPRECATED equalsOneOf
-    "Use '(restrict <<<) . Operators2.equalsOneOf' instead" #-}
-equalsOneOf :: ShowConstant a => [a] -> QueryArr (Wire a) ()
-equalsOneOf = restrictWith . flip wireIsOneOf . map showConstant
-
-{-# DEPRECATED doesntEqualAnyOf
-    "Use '\\xs -> (restrict <<<) . Operators2.doesntEqualAnyOf xs' instead" #-}
-doesntEqualAnyOf :: ShowConstant a => [a] -> QueryArr (Wire a) ()
-doesntEqualAnyOf = UA.all_ . map notEqualC
 
 notEqualC :: ShowConstant a => a -> QueryArr (Wire a) ()
 notEqualC = restrictWith . flip wireIsNot . showConstant
@@ -52,18 +41,6 @@ equalsDay day = restrict
                 <<< first (constantDay day)
                 <<< arr (\d -> ((), d))
 
--- FIXME: Should be (Wire (Maybe a))?
--- 'Predicates.isNull' existed before 'Operators2.isNull', and the following
--- condition is supposed to hold:
---
--- Predicates.isNull = restrict <<< Operators2.isNull
---
--- Prefer the right hand side in new code.  Predicates.isNull should probably
--- be removed.
-{-# DEPRECATED isNull "Use 'restrict <<< Operators2.isNull' instead" #-}
-isNull :: QueryArr (Wire a) ()
-isNull = restrictWith null'
-
 null' :: Wire a -> PrimExpr
 null' = UnExpr OpIsNull . AttrExpr . unWire
 
@@ -81,10 +58,6 @@ wireIs = wireOp OpEq
 
 wireIsNot :: Wire a -> Literal -> PrimExpr
 wireIsNot = wireOp OpNotEq
-
-{-# DEPRECATED noOp "Use 'Karamaan.Plankton.Arrow.noOp' instead" #-}
-noOp :: Arrow arr => arr a ()
-noOp = UA.noOp
 
 wireTrue :: Wire a -> PrimExpr
 wireTrue = AttrExpr . unWire

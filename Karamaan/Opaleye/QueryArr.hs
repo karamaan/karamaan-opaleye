@@ -2,15 +2,12 @@ module Karamaan.Opaleye.QueryArr where
 
 import Prelude hiding ((.), id)
 import Database.HaskellDB.PrimQuery (PrimQuery(Empty, Restrict, Project),
-                                     PrimExpr(AttrExpr, BinExpr),
-                                     BinOp(OpEq), times)
-import Karamaan.Opaleye.Wire (Wire, unWire)
+                                     PrimExpr(AttrExpr), times)
 import Control.Arrow (Arrow, arr, first, (&&&), (***))
 import Control.Category (Category, id, (.), (<<<))
 import Control.Applicative (Applicative, pure, (<*>))
 import Karamaan.Opaleye.QueryColspec (runWriter)
 import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
-import Data.Function (on)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!))
 
@@ -97,12 +94,3 @@ simpleQueryArr f = QueryArr g
 restrictWith :: (a -> PrimExpr) -> QueryArr a ()
 restrictWith predicate = QueryArr f where
   f (ws, primQ, t0) = ((), Restrict (predicate ws) primQ, t0)
-
--- FIXME: can I get rid of this
-{-# DEPRECATED equals "Use 'Predicates.restrict <<< Operators2.eq' instead" #-}
-equals :: QueryArr (Wire a, Wire a) ()
-equals = restrictWith (uncurry equalsWire)
-
-{-# DEPRECATED equalsWire "Do not use equalsWire" #-}
-equalsWire :: Wire a -> Wire a -> PrimExpr
-equalsWire = BinExpr OpEq `on` (AttrExpr . unWire)

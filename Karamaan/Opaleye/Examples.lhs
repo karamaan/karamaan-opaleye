@@ -36,6 +36,9 @@ use them to generate selects, joins and filters; use the API of
 Opaleye to make your queries more composable; and finally run the
 queries on Postgres.
 
+Opaleye uses HaskellDB's SQL generator.  You should really use the
+latest version from https://github.com/m4dc4p/haskelldb because it
+patches some important bugs present in 2.2.2.
 
 Schema
 ======
@@ -47,7 +50,7 @@ column of type X".
 
 There is some typeclass magic which matches the names of the columns
 with a field in the query result type.  In Opaleye you never *have* to
-use typeclasses.  All the magic that typeclasses do it also available
+use typeclasses.  All the magic that typeclasses do is also available
 by explicitly passing in the "typeclass dictionary".  However, for
 this example file we will always use the typeclass versions because
 they are simpler to read.
@@ -88,7 +91,8 @@ Then we can use 'makeTableDef' to make a table that returns our record
 type in exactly the same way as before.  This usage makes it clear why
 the fields should be polymorphic.  The argument to 'makeTableDef' has
 type 'Birthday' String String', whilst in the return value it is
-'Birthday' (Wire String) (Wire Day)'.
+'Birthday' (Wire String) (Wire Day)'.  In practice you don't need to
+worry about this, just make all your fields polymorphic!
 
 > birthdayTable :: Query WireBirthday
 > birthdayTable = makeTableDef (Birthday { bdName = "name"
@@ -113,7 +117,7 @@ and a combinator
 
     <<< :: QueryArr b c -> QueryArr a b -> QueryArr a c
 
-that allows us to use a function of type 'a -> b' to project columns
+This allows us to use a function of type 'a -> b' to project columns
 of type 'b' from a 'Query a'.  For example, if we want just the first
 and second columns of 'personTable'
 
@@ -154,17 +158,12 @@ FROM (SELECT name as name_1,
              birthday as birthday_2
       FROM birthdayTable as T1) as T2
 
-At this point the generated SQL starts to become very big.  This is a
-weakness of the HaskellDB SQL generator that Opaleye uses as a
-backend.  It could be improved dramatically with a bit of work, but
-nobody has put that effort in yet.  (Volunteers very welcome!)
-
 Note that in 'personBirthdayProduct' we end up with a nested tuple.
-One way of flattening the tuple would be with the technique we learned
-above in "Projection".  Note that in practice, however, you probably
-won't end up writing queries in this more "low level" and somewhat
-fiddly way, but use higher level combinators.  Still, this is a useful
-example.
+If you prefer to have a flattened tuple, one way of flattening it
+would be with the technique we learned above in "Projection".  Note
+that in practice, however, you probably won't end up writing queries
+in this more "low level" way which is somewhat fiddly, but use higher
+level combinators.  Still, this is a useful example.
 
 > personBirthdayProduct' :: Query (Wire String, Wire Int, Wire String,
 >                                 WireBirthday)

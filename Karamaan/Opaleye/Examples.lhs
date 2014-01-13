@@ -6,10 +6,12 @@
 > 
 > module Karamaan.Opaleye.Examples where
 > 
+> import Prelude hiding (sum)
 > import Karamaan.Opaleye.Unpackspec (Unpackspec)
 > import Karamaan.Opaleye.Table (makeTableDef)
 > import Karamaan.Opaleye.QueryArr (Query, QueryArr)
 > import Karamaan.Opaleye.Nullable (Nullable)
+> import Karamaan.Opaleye.Aggregate (aggregate, groupBy, sum, avg, count)
 > import qualified Karamaan.Opaleye.Operators2 as Op2
 > import qualified Karamaan.Opaleye.Predicates as P
 > import qualified Karamaan.Opaleye.Operators.Numeric as N
@@ -20,7 +22,7 @@
 > import Data.Time.Calendar (Day)
 > 
 > import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
-> import Data.Profunctor.Product (PPOfContravariant, ProductProfunctor, p2)
+> import Data.Profunctor.Product (PPOfContravariant, ProductProfunctor, p2, p5)
 > import Data.Profunctor (dimap)
 > import Data.Profunctor.Product.Default (Default, def)
 > import qualified Database.PostgreSQL.Simple as SQL
@@ -383,6 +385,71 @@ The generated SQL is again exactly the same as before.
 > sh :: Default (PPOfContravariant Unpackspec) a a
 >       => Query a -> IO ()
 > sh = putStrLn . showSqlForPostgresDefault
+
+Aggregation
+===========
+
+Type safe aggregation is the jewel in the crown of Opaleye.  Both
+HaskellDB and Esqueleto have aggregation implementations that allow
+the application programmer to produce an invalid SQL query.  By
+contrast, every Opaleye expression you can write generates well formed
+SQL.  Of course there may be bugs in the implemenation, but the idea
+is that there are no bugs in the API!
+
+By way of example, suppose we have a widget table which contains the
+style, color, location, quantity and radius of widgets.  We can model
+this information with the following datatype.
+
+> data Widget a b c d e = Widget' { style    :: a
+>                                 , color    :: b
+>                                 , location :: c
+>                                 , quantity :: d
+>                                 , radius   :: e }
+
+For the purposes of this example the style, color and location will be
+strings, but in practice you'll probably want to use an abstract data
+type for them.
+
+> widgetTable :: Query (Widget (Wire String) (Wire String) (Wire String)
+>                              (Wire Int) (Wire Double))
+> widgetTable = makeTableDef (Widget' { style    = "style"
+>                                     , color    = "color"
+>                                     , location = "location"
+>                                     , quantity = "quantity"
+>                                     , radius   = "radius" })
+>                            "widgetTable"
+>
+> $(makeAdaptorAndInstance "pWidget" ''Widget)
+
+Here we see the first explict use of our Template Haskell derived
+code.  We use the 'pWidget' "adaptor" to specify how columns are
+aggregated.  Note that this is yet another example of avoiding a
+headache by keeping your datatype fully polymorphic.
+
+'aggregateWidgets' groups by the style and color of widgets,
+calculating how many (possibly duplicated) locations there are, the
+total number of such widgets and their average radius.
+
+> aggregateWidgets :: Query (Widget (Wire String) (Wire String) (Wire Int)
+>                              (Wire Int) (Wire Double))
+> aggregateWidgets = aggregate (pWidget (Widget' { style    = groupBy
+>                                                , color    = groupBy
+>                                                , location = count
+>                                                , quantity = sum
+>                                                , radius   = avg }))
+>                              widgetTable
+
+The Opaleye corresponds closely to the generated SQL.
+
+ghci> sh widgetTable
+SELECT style as style_1_2,
+       color as color_1_2,
+       COUNT(location) as location_1_2,
+       SUM(quantity) as quantity_1_2,
+       AVG(radius) as radius_1_2
+FROM widgetTable as T1
+GROUP BY style,
+         color
 
 Running queries on Postgres
 ===========================

@@ -8,7 +8,8 @@ import qualified Karamaan.Opaleye.Wire as Wire
 import Karamaan.Opaleye.OperatorsPrimatives (opArr, unOpArr, binrel)
 import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
-import Database.HaskellDB.PrimQuery (RelOp(Union, Intersect, Difference), extend,
+import Database.HaskellDB.PrimQuery (RelOp(Union, Intersect, Difference, UnionAll),
+                                     extend,
                                      PrimExpr(AttrExpr, ConstExpr),
                                      UnOp(OpIsNull),
                                      Literal(OtherLit))
@@ -138,6 +139,10 @@ union :: Default QueryColspec a a
          => QueryArr () a -> QueryArr () a -> QueryArr () a
 union = union' def
 
+unionAll :: Default QueryColspec a a
+            => QueryArr () a -> QueryArr () a -> QueryArr () a
+unionAll = unionAll' def
+
 difference :: Default QueryColspec a a =>
               QueryArr () a -> QueryArr () a -> QueryArr () a
 difference = difference' def
@@ -147,6 +152,9 @@ intersect' = binrel Intersect
 
 union' :: QueryColspec a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
 union' = binrel Union
+
+unionAll' :: QueryColspec a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
+unionAll' = binrel UnionAll
 
 difference' :: QueryColspec a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
 difference' = binrel Difference

@@ -424,7 +424,8 @@ type for them.
 Here we see the first explict use of our Template Haskell derived
 code.  We use the 'pWidget' "adaptor" to specify how columns are
 aggregated.  Note that this is yet another example of avoiding a
-headache by keeping your datatype fully polymorphic.
+headache by keeping your datatype fully polymorphic, because the
+'count' aggregator changes a 'Wire String' into a 'Wire Int'.
 
 'aggregateWidgets' groups by the style and color of widgets,
 calculating how many (possibly duplicated) locations there are, the

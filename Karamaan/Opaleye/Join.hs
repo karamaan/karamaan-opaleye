@@ -1,6 +1,6 @@
 {-# LANGUAGE Arrows, FlexibleContexts #-}
 
-module Karamaan.Opaleye.Join (semijoin, unsafeCoerce) where
+module Karamaan.Opaleye.Join (semijoin) where
 
 import Karamaan.Opaleye.QueryArr (Query, QueryArr)
 import Karamaan.Opaleye.Wire (Wire)
@@ -12,17 +12,12 @@ import qualified Karamaan.Opaleye.Nullable as Nullable
 import Control.Arrow (returnA, first)
 import Control.Category ((<<<))
 
--- TODO: perhaps this belongs elsewhere, but we need to work out how to avoid
--- circular dependencies
-unsafeCoerce :: QueryArr (Wire a) (Wire b)
-unsafeCoerce = Nullable.unsafeCoerce
-
 -- This is slightly subtle.  The eq *can* return Unknown
 -- (see http://en.wikipedia.org/wiki/Null_%28SQL%29#Comparisons_with_NULL_and_the_three-valued_logic_.283VL.29)
 -- but since we restrict immediately the Unknown is not distinguised
 -- from false in the overall result.
 restrictMaybeEq :: QueryArr (Wire (Maybe a), Wire a) ()
-restrictMaybeEq = restrict <<< eq <<< first unsafeCoerce
+restrictMaybeEq = restrict <<< eq <<< first Nullable.unsafeCoerce
 
 joinWithoutNull :: Query (a, Wire (Maybe b))
                 -> Query (Wire b, c)

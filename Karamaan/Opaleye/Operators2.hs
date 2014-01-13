@@ -88,32 +88,31 @@ unsafeConstant = constantLit . OtherLit
 -- implement such a signature in SQL.  I don't know if SQL is limited
 -- so that such a thing would not make sense, or whether my
 -- understanding of what is necessary is insufficient.
-intersect :: Default QueryColspec a a =>
-             QueryArr () a -> QueryArr () a -> QueryArr () a
+
+type RelOpT a b = QueryArr () a -> QueryArr () a -> QueryArr () b
+
+intersect :: Default QueryColspec a a => RelOpT a a
 intersect = intersect' def
 
-union :: Default QueryColspec a a
-         => QueryArr () a -> QueryArr () a -> QueryArr () a
+union :: Default QueryColspec a a => RelOpT a a
 union = union' def
 
-unionAll :: Default QueryColspec a a
-            => QueryArr () a -> QueryArr () a -> QueryArr () a
+unionAll :: Default QueryColspec a a => RelOpT a a
 unionAll = unionAll' def
 
-difference :: Default QueryColspec a a =>
-              QueryArr () a -> QueryArr () a -> QueryArr () a
+difference :: Default QueryColspec a a => RelOpT a a
 difference = difference' def
 
-intersect' :: QueryColspec a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
+intersect' :: QueryColspec a b -> RelOpT a b
 intersect' = binrel Intersect
 
-union' :: QueryColspec a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
+union' :: QueryColspec a b -> RelOpT a b
 union' = binrel Union
 
-unionAll' :: QueryColspec a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
+unionAll' :: QueryColspec a b -> RelOpT a b
 unionAll' = binrel UnionAll
 
-difference' :: QueryColspec a b -> QueryArr () a -> QueryArr () a -> QueryArr () b
+difference' :: QueryColspec a b -> RelOpT a b
 difference' = binrel Difference
 
 -- Case stuff

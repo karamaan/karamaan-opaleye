@@ -28,6 +28,9 @@ import Data.Profunctor.Product.Default (Default, def)
 import Karamaan.Plankton ((.:))
 import Karamaan.Opaleye.Values ((.:.))
 import Data.Function (on)
+import qualified Database.PostgreSQL.Simple as SQL
+import Data.String (fromString)
+import Data.Int (Int64)
 
 -- A 'TableExprRunner t e' is used to connect a 'Table t' to an
 -- 'ExprArr e o'.  In current usage 'o' is only ever 'Wire Bool' but I
@@ -217,3 +220,48 @@ arrangeUpdateSqlDef :: (Default TableExprRunner t u,
                     Table t -> ExprArr u t' -> ExprArr u (Wire Bool)
                     -> String
 arrangeUpdateSqlDef = (show . ppUpdate) .:. arrangeUpdateDef
+
+executeDeleteConnDef :: Default TableExprRunner t a =>
+                    SQL.Connection ->
+                    Table t -> ExprArr a (Wire Bool) -> IO Int64
+executeDeleteConnDef conn =
+  SQL.execute_ conn . fromString .: arrangeDeleteSqlDef
+
+executeInsertConnDef :: (Default (PPOfContravariant Assocer) t' t',
+                     Default TableMaybeWrapper t t')
+                    => SQL.Connection -> Table t -> Expr t' -> IO Int64
+executeInsertConnDef conn =
+  SQL.execute_ conn . fromString .: arrangeInsertSqlDef
+
+executeUpdateConnDef :: (Default TableExprRunner t u,
+                     Default (PPOfContravariant Assocer) t' t',
+                     Default TableMaybeWrapper t t') =>
+                    SQL.Connection ->
+                    Table t -> ExprArr u t' -> ExprArr u (Wire Bool)
+                    -> IO Int64
+executeUpdateConnDef conn =
+  SQL.execute_ conn . fromString .:. arrangeUpdateSqlDef
+
+executeDeleteDef :: Default TableExprRunner t a =>
+                    SQL.ConnectInfo ->
+                    Table t -> ExprArr a (Wire Bool) -> IO Int64
+executeDeleteDef connectInfo t e = do
+  conn <- SQL.connect connectInfo
+  executeDeleteConnDef conn t e
+
+executeInsertDef :: (Default (PPOfContravariant Assocer) t' t',
+                     Default TableMaybeWrapper t t')
+                    => SQL.ConnectInfo -> Table t -> Expr t' -> IO Int64
+executeInsertDef connectInfo t e = do
+  conn <- SQL.connect connectInfo
+  executeInsertConnDef conn t e
+
+executeUpdateDef :: (Default TableExprRunner t u,
+                     Default (PPOfContravariant Assocer) t' t',
+                     Default TableMaybeWrapper t t') =>
+                    SQL.ConnectInfo ->
+                    Table t -> ExprArr u t' -> ExprArr u (Wire Bool)
+                    -> IO Int64
+executeUpdateDef connectInfo t e e' = do
+  conn <- SQL.connect connectInfo
+  executeUpdateConnDef conn t e e'

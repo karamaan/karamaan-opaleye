@@ -17,7 +17,7 @@ import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.Nullable (Nullable, fromNullable, fromNullable')
 import Karamaan.Opaleye.Operators2 (eq, and, or, notEq, cat, cat3, isNull,
                                     constant, constantString, constantDay,
-                                    intersect, union, unionAll, difference, case_,
+                                    intersect, union, difference, case_,
                                     ifThenElse, fromMaybe, fromMaybe')
 import Karamaan.Opaleye.Operators.Numeric (plus, divide, times, minus, gt, gte,
                                            lt, lte)

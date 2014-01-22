@@ -170,6 +170,8 @@ wireToPrimExpr = AttrExpr . unWire
 
 -- ReaderCurried versions
 
+-- TODO: What is the right way to be polymorphic over SQL's numeric types?
+-- Num is not really appropriate (though it's what HaskellDB chose)
 type NumBinOpG a b = NumBinOp2G a b b
 type NumBinOp2G a b c = QueryArr a (Wire b) -> QueryArr a (Wire b)
                         -> QueryArr a (Wire c)

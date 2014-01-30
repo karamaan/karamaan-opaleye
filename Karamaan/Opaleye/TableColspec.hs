@@ -2,16 +2,15 @@
 
 module Karamaan.Opaleye.TableColspec where
 
-import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
+import Karamaan.Opaleye.Wire (Wire(Wire))
 import Karamaan.Opaleye.QueryColspec (QueryColspec(QueryColspec),
                                       runWriterOfQueryColspec,
                                       runPackMapOfQueryColspec,
                                       MWriter(Writer),
                                       PackMap(PackMap))
 import Control.Applicative (Applicative, pure, (<*>))
-import Data.Monoid (Monoid, mempty)
 import Data.Profunctor.Product.Default (Default, def)
-import Data.Profunctor (Profunctor, dimap)
+import Data.Profunctor (Profunctor, dimap, lmap, rmap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
                                 defaultEmpty, defaultProfunctorProduct)
 
@@ -24,39 +23,48 @@ newtype TableColspecP a b = TableColspecP (QueryColspec a b)
 -- TODO: we don't actually need TableColspec anymore.  It's just a partially
 -- applied TableColspecP.  We should unpick its usage from makeTable replacing
 -- it with TableColspecP, and then delete its definition.
-data TableColspec a = TableColspec [String] ((String -> String) -> a)
+newtype TableColspec b = TableColspec (TableColspecP () b)
 
 tableColspecOfTableColspecP :: TableColspecP a b -> a -> TableColspec b
-tableColspecOfTableColspecP (TableColspecP q) a =
-  TableColspec (runWriterOfQueryColspec q a)
-               (\b -> runPackMapOfQueryColspec q b a)
+tableColspecOfTableColspecP q a = TableColspec (lmap (const a) q)
+
+instance Functor (TableColspecP a) where
+  fmap f (TableColspecP c) = TableColspecP (fmap f c)
+
+instance Applicative (TableColspecP a) where
+  pure = TableColspecP . pure
+  TableColspecP f <*> TableColspecP x = TableColspecP (f <*> x)
 
 instance Functor TableColspec where
-  fmap f (TableColspec s m) = TableColspec s (f . m)
+  fmap f (TableColspec c) = TableColspec (rmap f c)
 
 instance Applicative TableColspec where
-  pure = TableColspec mempty . pure
-  TableColspec s mf <*> TableColspec s' m = TableColspec (s ++ s') (mf <*> m)
+  pure = TableColspec . pure
+  TableColspec f <*> TableColspec x = TableColspec (f <*> x)
 
 instance Profunctor TableColspecP where
   dimap f g (TableColspecP q) = TableColspecP (dimap f g q)
 
 instance ProductProfunctor TableColspecP where
-  empty = TableColspecP empty
-  TableColspecP q ***! TableColspecP q' = TableColspecP (q ***! q')
+  empty = defaultEmpty
+  (***!) = defaultProfunctorProduct
 
 instance Default TableColspecP (Wire a) (Wire a) where
-  def = TableColspecP (QueryColspec (Writer (return . unWire))
-                                    (PackMap (\f -> Wire . f . unWire)))
+  def = TableColspecP def
 
 runWriterOfColspec :: TableColspec a -> [String]
-runWriterOfColspec (TableColspec s _) = s
+runWriterOfColspec (TableColspec (TableColspecP c)) =
+  runWriterOfQueryColspec c ()
 
 runPackMapOfColspec :: TableColspec a -> (String -> String) -> a
-runPackMapOfColspec (TableColspec _ m) = m
+runPackMapOfColspec (TableColspec (TableColspecP c)) f =
+  runPackMapOfQueryColspec c f ()
 
+-- TODO: this implementation is verbose
 colspec :: [String] -> ((String -> String) -> a) -> TableColspec a
-colspec = TableColspec
+colspec w p = TableColspec
+              (TableColspecP
+               (QueryColspec (Writer (const w)) (PackMap (\f () -> p f))))
 
 col :: String -> TableColspec (Wire a)
 col s = colspec [s] (\f -> Wire (f s))

@@ -67,6 +67,13 @@ writerWire = Writer (return . unWire)
 
 data QueryColspec a b = QueryColspec (Writer a) (PackMap a b)
 
+instance Functor (QueryColspec a) where
+  fmap f (QueryColspec w p) = QueryColspec w (fmap f p)
+
+instance Applicative (QueryColspec a) where
+  pure = QueryColspec mempty . pure
+  QueryColspec w pf <*> QueryColspec w' px = QueryColspec (w <> w') (pf <*> px)
+
 instance Profunctor QueryColspec where
   dimap f g (QueryColspec w p) = QueryColspec (contramap f w) (dimap f g p)
 

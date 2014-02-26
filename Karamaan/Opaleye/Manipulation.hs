@@ -198,6 +198,9 @@ instance Default TableMaybeWrapper (Wire a) (Maybe (Wire a)) where
 instance Default (PPOfContravariant Assocer) (Maybe (Wire a)) (Maybe (Wire a)) where
   def = (PPOfContravariant . Assocer . MWriter2) assocerWireMaybe
 
+-- 'Nothing' entries correspond to supplying no value in the SQL, so
+-- for INSERTs the default value will be used, and for UPDATEs the
+-- field will be left unaltered.
 assocerWireMaybe :: Maybe (Wire a) -> Maybe (Wire a) -> Scope
                  -> [(String, PrimExpr)]
 assocerWireMaybe w w' = maybe [] return . liftA3 assocerWire w w' . pure

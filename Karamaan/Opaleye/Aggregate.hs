@@ -1,6 +1,7 @@
 module Karamaan.Opaleye.Aggregate where
 
 import Prelude hiding (sum)
+import Karamaan.Opaleye.Nullable (Nullable)
 import Karamaan.Opaleye.QueryArr (Query, runSimpleQueryArr,
                                   Tag, next, tagWith,
                                   simpleQueryArr)
@@ -62,6 +63,9 @@ avg = aggregatorMaker AggrAvg
 
 max :: Aggregator (Wire a) (Wire a)
 max = aggregatorMaker AggrMax
+
+nullableMax :: Aggregator (Wire a) (Wire (Nullable a))
+nullableMax = aggregatorMaker AggrMax
 
 min :: Aggregator (Wire a) (Wire a)
 min = aggregatorMaker AggrMin

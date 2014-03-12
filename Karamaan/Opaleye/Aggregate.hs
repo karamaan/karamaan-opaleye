@@ -51,6 +51,9 @@ aggregatorMaker' :: Maybe AggrOp -> Aggregator (Wire a) (Wire b)
 aggregatorMaker' op = Aggregator (writer (const [op])) writerWire packMapWire
 
 -- TODO: the numeric ones should have some num constraint
+-- TODO: actually Postgres returns NULL for the sum of an empty column!
+--       We should make sure to postcompose with a fromNullable to set it to
+--       zero
 sum :: Aggregator (Wire a) (Wire a)
 sum = aggregatorMaker AggrSum
 

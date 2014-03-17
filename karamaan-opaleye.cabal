@@ -33,6 +33,7 @@ library
                    Karamaan.Opaleye.Applicative,
                    Karamaan.Opaleye.ArrowLambda,
                    Karamaan.Opaleye.Bend,
+                   Karamaan.Opaleye.Difference,
                    Karamaan.Opaleye.Distinct,
                    Karamaan.Opaleye.Explore,
                    Karamaan.Opaleye.Examples,

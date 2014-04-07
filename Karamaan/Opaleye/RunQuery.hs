@@ -111,7 +111,7 @@ runQueryDefaultConnectInfo :: Default QueryRunner a b
                               => SQL.ConnectInfo -> Query a -> IO [b]
 runQueryDefaultConnectInfo connectInfo q = do
   conn <- SQL.connect connectInfo
-  runQuery def q conn
+  runQueryDefault q conn
 
 -- SQL.query_ with explicit RowParser
 --

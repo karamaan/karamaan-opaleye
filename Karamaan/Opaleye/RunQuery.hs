@@ -104,6 +104,9 @@ runQuery (QueryRunner u rowParser) q conn = query_ rowParser conn sql
   where sql :: SQL.Query
         sql = fromString (showSqlForPostgres u q)
 
+runQueryDefault :: Default QueryRunner a b => Query a -> SQL.Connection -> IO [b]
+runQueryDefault = runQuery def
+
 runQueryDefaultConnectInfo :: Default QueryRunner a b
                               => SQL.ConnectInfo -> Query a -> IO [b]
 runQueryDefaultConnectInfo connectInfo q = do

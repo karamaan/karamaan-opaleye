@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module Karamaan.Opaleye.ExprArr where
 
 import Prelude hiding ((.), id, or)
@@ -18,6 +20,10 @@ import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!))
 import Data.Time.Calendar (Day)
 import qualified Karamaan.Opaleye.Values as Values
+import qualified Karamaan.Opaleye.Unpackspec as U
+import qualified Data.Profunctor.Product as P
+import qualified Data.Profunctor.Product.Default as D
+import qualified Data.List as List
 
 -- This is a more type-safe way, and a nicer API, to doing the PrimExpr
 -- fiddling that Predicates.hs does.  When there's time we'll convert
@@ -143,6 +149,23 @@ toQueryArr11 exprArr = QueryArr f
                 scope0 = scopeOfWire w0
                 expr = unsafeScopeLookup (Wire w1) scope1
                 primQ1 = extend [(w1, expr)] primQ0
+
+toQueryArr :: U.Unpackspec a -> U.Unpackspec b -> ExprArr a b -> QueryArr a b
+toQueryArr writera writerb exprArr = QueryArr f
+  where f (w0, primQ0, t0) = (w1, primQ1, t1)
+          where scope0 = (List.foldl' Map.union Map.empty
+                          . map (scopeOfWire . Wire)
+                          . U.runUnpackspec writera) w0
+                (w1, scope1, t1) = runExprArr exprArr (w0, scope0, t0)
+                exprs = (map (\w -> (w, unsafeScopeLookup (Wire w) scope1))
+                         . U.runUnpackspec writerb) w1
+                primQ1 = extend exprs primQ0
+
+toQueryArrDef :: (D.Default (P.PPOfContravariant U.Unpackspec) a a,
+                  D.Default (P.PPOfContravariant U.Unpackspec) b b)
+                 => ExprArr a b -> QueryArr a b
+toQueryArrDef = toQueryArr (P.unPPOfContravariant D.def)
+                           (P.unPPOfContravariant D.def)
 
 scopeOfWire :: Wire a -> Scope
 scopeOfWire (Wire s) = Map.singleton s (PQ.AttrExpr s)

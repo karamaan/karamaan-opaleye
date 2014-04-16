@@ -6,7 +6,8 @@ import Karamaan.Opaleye.Wire (Wire(Wire))
 import Karamaan.Opaleye.ExprArr (Scope, ExprArr, Expr, runExprArr'',
                                  runExprArrStartEmpty, scopeOfWire,
                                  unsafeScopeLookup, runExprArrStart)
-import Karamaan.Opaleye.QueryColspec
+import Karamaan.Opaleye.QueryColspec (MWriter(Writer))
+import qualified Karamaan.Opaleye.HaskellDB as H
 import Database.HaskellDB.PrimQuery (PrimExpr)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
@@ -20,8 +21,10 @@ import Control.Applicative (Applicative, (<*>), pure, liftA3)
 import Data.Monoid (Monoid, mempty, mappend, (<>))
 import Database.HaskellDB.Sql (SqlDelete, SqlInsert, SqlUpdate)
 import Database.HaskellDB.Sql.Generate (sqlDelete, sqlInsert, sqlUpdate)
+import qualified Database.HaskellDB.Sql.Generate as G
 import Database.HaskellDB.Sql.Default (defaultSqlGenerator)
 import Database.HaskellDB.Sql.Print (ppDelete, ppInsert, ppUpdate)
+import qualified Database.HaskellDB.Sql as S
 import Control.Arrow ((&&&))
 import Karamaan.Opaleye.Table (Table(Table))
 import Data.Profunctor.Product.Default (Default, def)
@@ -62,6 +65,9 @@ newtype MWriter2 m a = MWriter2 (a -> a -> m)
 -- columns in an 'ExprArr' so the 'ExprArr' can be used to update or
 -- insert into the 'Table'.
 newtype Assocer a = Assocer (MWriter2 (Scope -> [(String, PrimExpr)]) a)
+
+-- Like Assocer but just used to get the 'PrimExpr's out of an 'Expr'.
+newtype AssocerE a = AssocerE (MWriter (Scope -> [PrimExpr]) a)
 
 -- Very boring instance definitions.  In principle these could be
 -- derived in the same way as Functor, Foldable and Traversable, but
@@ -123,6 +129,17 @@ instance Contravariant Assocer where
 instance ProductContravariant Assocer where
   point = defaultPoint
   (***<) = defaultContravariantProduct
+
+instance Monoid (AssocerE a) where
+  mempty = AssocerE mempty
+  AssocerE w `mappend` AssocerE w' = AssocerE (w <> w')
+
+instance Contravariant AssocerE where
+  contramap f (AssocerE w) = AssocerE (contramap f w)
+
+instance ProductContravariant AssocerE where
+  point = defaultPoint
+  (***<) = defaultContravariantProduct
 -- End of very boring instance definitions
 
 -- arrange* do the meat of the computation
@@ -150,9 +167,27 @@ arrangeInsert assocer
           assocs = primExprsOfAssocer assocer tableMaybeCols
                                       (runExprArrStartEmpty insertExpr ())
 
+arrangeInsertReturning :: Assocer t' -> TableMaybeWrapper t t'
+                       -> TableExprRunner t u -> AssocerE r
+                       -> Table t -> Expr t' -> ExprArr u r
+                       -> H.SqlInsertReturning
+arrangeInsertReturning ass tmr ter assr table e ea =
+  H.SqlInsertReturning (arrangeInsert ass tmr table e) returnSqlExprs
+  where colsAndScope' = colsAndScope ter tableCols
+        Table _ tableCols = table
+        returnPrimExprs :: [PrimExpr]
+        returnPrimExprs = primExprsOfAssocerE assr
+                                          (runExprArrStart ea colsAndScope')
+        returnSqlExprs :: [S.SqlExpr]
+        returnSqlExprs = map (G.sqlExpr defaultSqlGenerator) returnPrimExprs
+
 primExprsOfAssocer :: Assocer t -> t -> (t, Scope, z) -> [(String, PrimExpr)]
 primExprsOfAssocer (Assocer (MWriter2 assocer)) t (cols, scope, _)
   = assocer t cols scope
+
+primExprsOfAssocerE :: AssocerE t -> (t, Scope, z) -> [PrimExpr]
+primExprsOfAssocerE (AssocerE (Writer assocerE)) (cols, scope, _)
+  = assocerE cols scope
 
 arrangeUpdate :: TableExprRunner t u -> Assocer t' -> TableMaybeWrapper t t'
               -> Table t -> ExprArr u t' -> ExprArr u (Wire Bool) -> SqlUpdate
@@ -181,6 +216,16 @@ arrangeInsertDef :: (Default (PPOfContravariant Assocer) t' t',
 arrangeInsertDef = arrangeInsert def' def
   where def' = unPPOfContravariant def
 
+arrangeInsertReturningDef :: (Default (PPOfContravariant Assocer) t' t',
+                     Default TableMaybeWrapper t t',
+                     Default TableExprRunner t u,
+                     Default (PPOfContravariant AssocerE) r r)
+                    => Table t -> Expr t' -> ExprArr u r -> H.SqlInsertReturning
+arrangeInsertReturningDef = arrangeInsertReturning def' def def def''
+  where def' = unPPOfContravariant def
+        def'' = unPPOfContravariant def
+        -- ^^ TODO: really need a typeclass polymorphic version of these!
+
 arrangeUpdateDef :: (Default TableExprRunner t u,
                      Default (PPOfContravariant Assocer) t' t',
                      Default TableMaybeWrapper t t') =>
@@ -198,6 +243,9 @@ instance Default TableMaybeWrapper (Wire a) (Maybe (Wire a)) where
 instance Default (PPOfContravariant Assocer) (Maybe (Wire a)) (Maybe (Wire a)) where
   def = (PPOfContravariant . Assocer . MWriter2) assocerWireMaybe
 
+instance Default (PPOfContravariant AssocerE) (Wire a) (Wire a) where
+  def = (PPOfContravariant . AssocerE . Writer) assocerEWire
+
 -- 'Nothing' entries correspond to supplying no value in the SQL, so
 -- for INSERTs the default value will be used, and for UPDATEs the
 -- field will be left unaltered.
@@ -208,6 +256,9 @@ assocerWireMaybe w w' = maybe [] return . liftA3 assocerWire w w' . pure
 assocerWire :: Wire a -> Wire a -> Scope -> (String, PrimExpr)
 assocerWire (Wire s) w scope = (s, unsafeScopeLookup w scope)
 
+assocerEWire :: Wire a -> Scope -> [PrimExpr]
+assocerEWire = return .: unsafeScopeLookup
+
 arrangeDeleteSqlDef :: Default TableExprRunner t a =>
                     Table t -> ExprArr a (Wire Bool) -> String
 arrangeDeleteSqlDef  = show . ppDelete .: arrangeDeleteDef
@@ -216,6 +267,14 @@ arrangeInsertSqlDef :: (Default (PPOfContravariant Assocer) t' t',
                      Default TableMaybeWrapper t t')
                     => Table t -> Expr t' -> String
 arrangeInsertSqlDef = show . ppInsert .: arrangeInsertDef
+
+arrangeInsertReturningSqlDef :: (Default (PPOfContravariant Assocer) t' t',
+                     Default TableMaybeWrapper t t',
+                     Default TableExprRunner t u,
+                     Default (PPOfContravariant AssocerE) r r)
+                    => Table t -> Expr t' -> ExprArr u r -> String
+arrangeInsertReturningSqlDef = show . H.ppInsertReturning
+                               .:. arrangeInsertReturningDef
 
 arrangeUpdateSqlDef :: (Default TableExprRunner t u,
                      Default (PPOfContravariant Assocer) t' t',

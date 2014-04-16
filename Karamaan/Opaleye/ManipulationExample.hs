@@ -8,6 +8,7 @@ import Karamaan.Opaleye.ExprArr (ExprArr, Expr, eq, plus, mul, constant, or)
 import Control.Arrow (returnA)
 import Karamaan.Opaleye.Manipulation (arrangeDeleteSqlDef,
                                       arrangeInsertSqlDef, arrangeUpdateSqlDef)
+import qualified Karamaan.Opaleye.Manipulation as M
 import Karamaan.Opaleye.Table (Table(Table))
 
 table :: Table ((Wire Int, Wire Int), Wire Int)
@@ -58,6 +59,21 @@ testTableInsert = arrangeInsertSqlDef testTable insertExpr
           five <- constant 5 -< ()
           six <- constant 6 -< ()
           returnA -< (Nothing, Just five, Just six)
+
+testTableInsertReturning :: String
+testTableInsertReturning = M.arrangeInsertReturningSqlDef testTable insertExpr
+                                                          returnExpr
+  where insertExpr :: Expr (Maybe (Wire Int), Maybe (Wire Int),  Maybe (Wire Int))
+        insertExpr = proc () -> do
+          five <- constant 5 -< ()
+          six <- constant 6 -< ()
+          returnA -< (Nothing, Just five, Just six)
+        returnExpr :: ExprArr (Wire Int, Wire Int,  Wire Int)
+                              (Wire Bool, Wire Int)
+        returnExpr = proc (a, b, c) -> do
+          eq'  <- eq   -< (a, b)
+          sum' <- plus -< (b, c)
+          returnA -< (eq', sum')
 
 testTableDelete :: String
 testTableDelete = arrangeDeleteSqlDef testTable condExpr

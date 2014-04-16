@@ -22,6 +22,7 @@ library
       -- vv This is just for RunQuery.  If we ever move
       -- RunQuery elsewhere we should remove this dependency.
     , postgresql-simple   >= 0.3 && < 0.4
+    , pretty              >= 1.0 && < 1.2
     , product-profunctors >= 0.4 && < 0.5
     , profunctors         >= 4.0 && < 4.1
       -- Just needed for the FromRow reification stuff
@@ -38,6 +39,7 @@ library
                    Karamaan.Opaleye.Explore,
                    Karamaan.Opaleye.Examples,
                    Karamaan.Opaleye.ExprArr,
+                   Karamaan.Opaleye.HaskellDB,
                    Karamaan.Opaleye.Join,
                    Karamaan.Opaleye.LeftJoin,
                    Karamaan.Opaleye.Manipulation,

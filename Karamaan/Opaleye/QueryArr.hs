@@ -6,8 +6,7 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Empty, Restrict, Project),
 import Control.Arrow (Arrow, arr, first, (&&&), (***))
 import Control.Category (Category, id, (.), (<<<))
 import Control.Applicative (Applicative, pure, (<*>))
-import Karamaan.Opaleye.QueryColspec (runWriter)
-import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
+import Karamaan.Opaleye.Unpackspec (Unpackspec, runUnpackspec)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!))
 
@@ -46,10 +45,10 @@ runSimpleQueryArr :: QueryArr a b -> (a, Tag) -> (b, PrimQuery, Tag)
 runSimpleQueryArr f (a, t) = runQueryArr f (a, Empty, t)
 
 runQueryArrPrim :: Unpackspec b -> Query b -> PrimQuery
-runQueryArrPrim (Unpackspec g) f
+runQueryArrPrim unpackspec f
   =  Project (map (id &&& AttrExpr) cols) primQuery
   where (a, primQuery, _) = runQueryArr f ((), Empty, start)
-        cols = runWriter g a
+        cols = runUnpackspec unpackspec a
 
 first3 :: (a1 -> b) -> (a1, a2, a3) -> (b, a2, a3)
 first3 f (a1, a2, a3) = (f a1, a2, a3)

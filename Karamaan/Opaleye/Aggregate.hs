@@ -1,6 +1,7 @@
 module Karamaan.Opaleye.Aggregate where
 
 import Prelude hiding (sum)
+import Karamaan.Opaleye.Nullable (Nullable)
 import Karamaan.Opaleye.QueryArr (Query, runSimpleQueryArr,
                                   Tag, next, tagWith,
                                   simpleQueryArr)
@@ -51,6 +52,9 @@ aggregatorMaker' :: Maybe AggrOp -> Aggregator (Wire a) (Wire b)
 aggregatorMaker' op = Aggregator (writer (const [op])) writerWire packMapWire
 
 -- TODO: the numeric ones should have some num constraint
+-- TODO: actually Postgres returns NULL for the sum of an empty column!
+--       We should make sure to postcompose with a fromNullable to set it to
+--       zero
 sum :: Aggregator (Wire a) (Wire a)
 sum = aggregatorMaker AggrSum
 
@@ -59,6 +63,9 @@ avg = aggregatorMaker AggrAvg
 
 max :: Aggregator (Wire a) (Wire a)
 max = aggregatorMaker AggrMax
+
+nullableMax :: Aggregator (Wire a) (Wire (Nullable a))
+nullableMax = aggregatorMaker AggrMax
 
 min :: Aggregator (Wire a) (Wire a)
 min = aggregatorMaker AggrMin

@@ -104,11 +104,14 @@ runQuery (QueryRunner u rowParser) q conn = query_ rowParser conn sql
   where sql :: SQL.Query
         sql = fromString (showSqlForPostgres u q)
 
+runQueryDefault :: Default QueryRunner a b => Query a -> SQL.Connection -> IO [b]
+runQueryDefault = runQuery def
+
 runQueryDefaultConnectInfo :: Default QueryRunner a b
                               => SQL.ConnectInfo -> Query a -> IO [b]
 runQueryDefaultConnectInfo connectInfo q = do
   conn <- SQL.connect connectInfo
-  runQuery def q conn
+  runQueryDefault q conn
 
 -- SQL.query_ with explicit RowParser
 --
@@ -116,6 +119,12 @@ runQueryDefaultConnectInfo connectInfo q = do
 -- CAREFUL!  Data.Reflection ought to be a known Haskell quantity, albeit
 -- a powerful one, however no one really seems to understand this well
 -- apart from Oleg and Edward Kmett.
+--
+-- Wanted to use a "manual dictionary" or "free instance" along the
+-- lines of "But what about manual dictionaries?" in
+-- https://www.fpcomplete.com/user/thoughtpolice/using-reflection but
+-- I couldn't see how to get it to work.  It seems we need to come up
+-- with a value of type 'RowParser (RowParser c -> c)'.
 query_ :: RowParser c -> SQL.Connection -> SQL.Query -> IO [c]
 query_ rowParser conn sql = reify rowParser (fmap (map runFR)
                                             . asProxyOf3 (SQL.query_ conn sql))

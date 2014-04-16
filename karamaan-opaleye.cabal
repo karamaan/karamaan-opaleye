@@ -1,5 +1,5 @@
 name:     karamaan-opaleye
-version:  0.21
+version:  0.21.1
 synopsis: A relational query language for Haskell
 author:   Purely Agile
 build-type: Simple
@@ -32,6 +32,7 @@ library
                    Karamaan.Opaleye.Applicative,
                    Karamaan.Opaleye.ArrowLambda,
                    Karamaan.Opaleye.Bend,
+                   Karamaan.Opaleye.Difference,
                    Karamaan.Opaleye.Distinct,
                    Karamaan.Opaleye.Explore,
                    Karamaan.Opaleye.Examples,

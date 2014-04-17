@@ -31,11 +31,6 @@ unOp op opname constname constval = QueryArr f
                                      (tagWith t0)
                 primQ' = extend assoc primQ
 
-unOpArr :: UnOp -> String -> QueryArr (Wire a) (Wire b)
-unOpArr op opname = QueryArr f
-  where f (u, primQ, t1) = (newWire, extend newAssoc primQ, next t1)
-          where (newAssoc, newWire) = wireUnOp op opname u t1
-
 wireUnOp :: UnOp -> String -> Wire a -> Tag -> (Assoc, Wire a2)
 wireUnOp op opname u t1 = Operators.unOp op opname (AttrExpr w) w
                                          (tagWith t1)

@@ -102,6 +102,16 @@ binOp op name = ExprArr g
                 u'Expr = lookupS u'
                 scope' = Map.singleton ws (PQ.BinExpr op uExpr u'Expr)
 
+unOp :: PQ.UnOp -> String -> ExprArr (Wire a) (Wire b)
+unOp op name = ExprArr g
+  where g (u, scope, t0) = (w, scope', next t0)
+          where ws = tagWith t0 (name ++ "_" ++ take 5 v)
+                w = Wire ws
+                Wire v = u
+                lookupS = flip unsafeScopeLookup scope
+                uExpr = lookupS u
+                scope' = Map.singleton ws (PQ.UnExpr op uExpr)
+
 plus :: ExprArr (Wire a, Wire a) (Wire a)
 plus = binOp PQ.OpPlus "plus"
 

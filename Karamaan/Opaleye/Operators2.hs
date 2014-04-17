@@ -31,19 +31,19 @@ import Data.Profunctor.Product (ProductProfunctor, (***!), empty, defaultEmpty,
 -- At some point I should come up with a better naming system.
 
 eq :: QueryArr (Wire a, Wire a) (Wire Bool)
-eq = opArr PrimQuery.OpEq "eq"
+eq = E.toQueryArrDef E.eq
 
 and :: QueryArr (Wire Bool, Wire Bool) (Wire Bool)
-and = opArr PrimQuery.OpAnd "and"
+and = E.toQueryArrDef E.and
 
 or :: QueryArr (Wire Bool, Wire Bool) (Wire Bool)
-or = opArr PrimQuery.OpOr "or"
+or = E.toQueryArrDef E.or
 
 not :: QueryArr (Wire Bool) (Wire Bool)
 not = unOpArr PrimQuery.OpNot "not"
 
 notEq :: QueryArr (Wire a, Wire a) (Wire Bool)
-notEq = opArr PrimQuery.OpNotEq "not_eq"
+notEq = E.toQueryArrDef E.notEq
 
 doesntEqualAnyOf :: ShowConstant a => [a] -> QueryArr (Wire a) (Wire Bool)
 doesntEqualAnyOf xs = not <<< equalsOneOf xs

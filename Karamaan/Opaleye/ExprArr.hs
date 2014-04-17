@@ -117,6 +117,9 @@ and = binOp PQ.OpAnd "and"
 eq :: ExprArr (Wire a, Wire a) (Wire Bool)
 eq = binOp PQ.OpEq "eq"
 
+notEq :: ExprArr (Wire a, Wire a) (Wire Bool)
+notEq = binOp PQ.OpNotEq "noteq"
+
 one :: Expr (Wire Int)
 one = constant 1
 

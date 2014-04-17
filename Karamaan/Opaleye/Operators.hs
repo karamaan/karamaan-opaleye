@@ -1,18 +1,9 @@
 module Karamaan.Opaleye.Operators where
 
 import Database.HaskellDB.Query (ShowConstant, showConstant)
-import Database.HaskellDB.PrimQuery (PrimExpr(BinExpr, UnExpr,
-                                              ConstExpr),
-                                     BinOp, UnOp, Assoc)
+import Database.HaskellDB.PrimQuery (PrimExpr(BinExpr, ConstExpr),
+                                     BinOp, Assoc)
 import Karamaan.Opaleye.Wire (Wire(Wire))
-
-unOp :: UnOp -> String -> PrimExpr -> String
-          -> (String -> String)
-          -> (Assoc, Wire a)
-unOp op opname t t_string tag' =
-  let newWireName = (tag' . concat) [opname, "_", t_string]
-      newAssoc = [(newWireName, UnExpr op t)]
-  in (newAssoc, Wire newWireName)
 
 -- TODO vv I put this take 5 in here because the query strings were getting
 -- too long and postgres was complaining that it was truncating them.

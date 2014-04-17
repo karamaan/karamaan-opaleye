@@ -153,13 +153,16 @@ toQueryArr11 exprArr = QueryArr f
 toQueryArr :: U.Unpackspec a -> U.Unpackspec b -> ExprArr a b -> QueryArr a b
 toQueryArr writera writerb exprArr = QueryArr f
   where f (w0, primQ0, t0) = (w1, primQ1, t1)
-          where scope0 = (List.foldl' Map.union Map.empty
+          where scope0 = (mapUnion
                           . map (scopeOfWire . Wire)
                           . U.runUnpackspec writera) w0
                 (w1, scope1, t1) = runExprArr exprArr (w0, scope0, t0)
                 exprs = (map (\w -> (w, unsafeScopeLookup (Wire w) scope1))
                          . U.runUnpackspec writerb) w1
                 primQ1 = extend exprs primQ0
+
+mapUnion :: Ord k => [Map k v] -> Map k v
+mapUnion = List.foldl' Map.union Map.empty
 
 toQueryArrDef :: (D.Default (P.PPOfContravariant U.Unpackspec) a a,
                   D.Default (P.PPOfContravariant U.Unpackspec) b b)

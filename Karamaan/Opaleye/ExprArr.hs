@@ -142,6 +142,9 @@ eq = binOp PQ.OpEq "eq"
 notEq :: ExprArr (Wire a, Wire a) (Wire Bool)
 notEq = binOp PQ.OpNotEq "noteq"
 
+cat :: ExprArr (Wire String, Wire String) (Wire String)
+cat = binOp (PQ.OpOther "||") "cat"
+
 one :: Expr (Wire Int)
 one = constant 1
 

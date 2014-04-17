@@ -4,7 +4,7 @@ module Karamaan.Opaleye.Operators2 where
 
 import Prelude hiding (and, or, not)
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
-import Karamaan.Opaleye.OperatorsPrimatives (opArr, unOpArr, binrel)
+import Karamaan.Opaleye.OperatorsPrimatives (unOpArr, binrel)
 import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Database.HaskellDB.PrimQuery (RelOp(Union, Intersect, Difference, UnionAll),
@@ -55,7 +55,7 @@ equalsOneOf = E.toQueryArrDef . E.equalsOneOf
 -- using the PostgreSQL generator.  The correct fix is probably to fix
 -- the PostgreSQL generator (Database.HaskellDB.Sql.PostgreSQL).
 cat :: QueryArr (Wire String, Wire String) (Wire String)
-cat = opArr (PrimQuery.OpOther "||") "cat"
+cat = E.toQueryArrDef E.cat
 
 constantLit :: Literal -> Query (Wire a)
 constantLit l = QueryArr f where

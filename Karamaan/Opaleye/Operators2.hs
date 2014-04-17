@@ -49,7 +49,7 @@ doesntEqualAnyOf :: ShowConstant a => [a] -> QueryArr (Wire a) (Wire Bool)
 doesntEqualAnyOf xs = not <<< equalsOneOf xs
 
 equalsOneOf :: ShowConstant a => [a] -> QueryArr (Wire a) (Wire Bool)
-equalsOneOf = E.toQueryArr11 . E.equalsOneOf
+equalsOneOf = E.toQueryArrDef . E.equalsOneOf
 
 -- TODO: HaskellDB's 'cat' or '.++.' is implemented as SQL's '+' even when
 -- using the PostgreSQL generator.  The correct fix is probably to fix

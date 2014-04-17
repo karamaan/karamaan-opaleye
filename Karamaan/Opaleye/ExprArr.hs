@@ -137,19 +137,6 @@ equalsOneOf :: ShowConstant a => [a] -> ExprArr (Wire a) (Wire Bool)
 equalsOneOf = foldrArr or false . map (opC eq . constant)
   where false = replaceWith (constant False)
 
--- TODO: can make some ProductProfunctors for this:
--- queryOfExprIn qIn eIn -> queryOfExprOut qOut eOut -> ExprArr eIn eOut
---   -> QueryArr qIn qOut
-toQueryArr11 :: ExprArr (Wire a) (Wire b) -> QueryArr (Wire a) (Wire b)
-toQueryArr11 exprArr = QueryArr f
-  where f (w0, primQ0, t0) = (Wire w1, primQ1, t1)
-          where -- TODO: Is this w0 tagged?
-                -- Perhaps it is, as we assume it comes out of a query.
-                (Wire w1, scope1, t1) = runExprArr exprArr (w0, scope0, t0)
-                scope0 = scopeOfWire w0
-                expr = unsafeScopeLookup (Wire w1) scope1
-                primQ1 = extend [(w1, expr)] primQ0
-
 toQueryArr :: U.Unpackspec a -> U.Unpackspec b -> ExprArr a b -> QueryArr a b
 toQueryArr writera writerb exprArr = QueryArr f
   where f (w0, primQ0, t0) = (w1, primQ1, t1)

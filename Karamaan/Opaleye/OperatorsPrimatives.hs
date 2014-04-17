@@ -31,7 +31,6 @@ unOp op opname constname constval = QueryArr f
                                      (tagWith t0)
                 primQ' = extend assoc primQ
 
--- TODO: duplication with opArr?
 unOpArr :: UnOp -> String -> QueryArr (Wire a) (Wire b)
 unOpArr op opname = QueryArr f
   where f (u, primQ, t1) = (newWire, extend newAssoc primQ, next t1)

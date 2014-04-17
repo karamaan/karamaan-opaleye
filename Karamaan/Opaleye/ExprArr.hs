@@ -112,6 +112,9 @@ unOp op name = ExprArr g
                 uExpr = lookupS u
                 scope' = Map.singleton ws (PQ.UnExpr op uExpr)
 
+abs :: ExprArr (Wire a) (Wire a)
+abs = unOp (PQ.UnOpOther "@") "abs"
+
 plus :: ExprArr (Wire a, Wire a) (Wire a)
 plus = binOp PQ.OpPlus "plus"
 
@@ -145,6 +148,9 @@ or = binOp PQ.OpOr "or"
 
 and :: ExprArr (Wire Bool, Wire Bool) (Wire Bool)
 and = binOp PQ.OpAnd "and"
+
+not :: ExprArr (Wire Bool) (Wire Bool)
+not = unOp PQ.OpNot "not"
 
 eq :: ExprArr (Wire a, Wire a) (Wire Bool)
 eq = binOp PQ.OpEq "eq"

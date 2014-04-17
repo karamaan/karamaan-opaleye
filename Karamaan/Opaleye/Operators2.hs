@@ -4,7 +4,7 @@ module Karamaan.Opaleye.Operators2 where
 
 import Prelude hiding (and, or, not)
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
-import Karamaan.Opaleye.OperatorsPrimatives (unOpArr, binrel)
+import Karamaan.Opaleye.OperatorsPrimatives (binrel)
 import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Database.HaskellDB.PrimQuery (RelOp(Union, Intersect, Difference, UnionAll),
@@ -40,7 +40,7 @@ or :: QueryArr (Wire Bool, Wire Bool) (Wire Bool)
 or = E.toQueryArrDef E.or
 
 not :: QueryArr (Wire Bool) (Wire Bool)
-not = unOpArr PrimQuery.OpNot "not"
+not = E.toQueryArrDef E.not
 
 notEq :: QueryArr (Wire a, Wire a) (Wire Bool)
 notEq = E.toQueryArrDef E.notEq

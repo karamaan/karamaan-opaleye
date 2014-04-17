@@ -4,7 +4,7 @@ module Karamaan.Opaleye.Nullable where
 
 import Karamaan.Opaleye.QueryArr (QueryArr, Query)
 import Karamaan.Opaleye.Wire (Wire)
-import Karamaan.Opaleye.OperatorsPrimatives (unOpArr)
+import qualified Karamaan.Opaleye.ExprArr as E
 import qualified Karamaan.Opaleye.Wire as Wire
 import qualified Karamaan.Opaleye.Operators2 as Op2
 import Control.Arrow (arr)
@@ -27,10 +27,11 @@ type Nullable = Maybe
 unsafeCoerce :: QueryArr (Wire a) (Wire b)
 unsafeCoerce = arr Wire.unsafeCoerce
 
--- In the ideal world we are creating the 'Maybe' functions in Op2 go
--- away and these are implemented directly.
+isNullExpr :: E.ExprArr (Wire (Nullable a)) (Wire Bool)
+isNullExpr = E.unOp OpIsNull "is_null"
+
 isNull :: QueryArr (Wire (Nullable a)) (Wire Bool)
-isNull = unOpArr OpIsNull "is_null"
+isNull = E.toQueryArrDef isNullExpr
 
 fromNullable :: QueryArr (Wire a, Wire (Maybe a)) (Wire a)
 fromNullable = proc (d, m) -> do

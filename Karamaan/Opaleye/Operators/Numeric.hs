@@ -2,12 +2,10 @@ module Karamaan.Opaleye.Operators.Numeric where
 
 import qualified Karamaan.Opaleye.ExprArr as E
 import Karamaan.Opaleye.Operators2 (NumBinOpG, NumBinOp2G, r)
-import Karamaan.Opaleye.OperatorsPrimatives (unOp, unOpArr)
+import Karamaan.Opaleye.OperatorsPrimatives (unOp)
 import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.QueryArr (QueryArr)
 import Database.HaskellDB.PrimQuery(BinOp(OpMul, OpOther))
-
-import qualified Database.HaskellDB.PrimQuery as PrimQuery
 
 -- FIXME: the type signatures are odd here.  We pass in an Int for the sake of
 -- avoiding an ambiguous type variable, but then we return Wire a when perhaps
@@ -32,7 +30,7 @@ modC :: NumBinOp a
 modC x = unOp (OpOther "%") "mod" (show x) x
 
 abs :: NumUnOp a
-abs = unOpArr (PrimQuery.UnOpOther "@") "abs"
+abs = E.toQueryArrDef E.abs
 
 -- It's also unclear what types these operations should have
 -- Should there be a Num typeclass constraint or similar?

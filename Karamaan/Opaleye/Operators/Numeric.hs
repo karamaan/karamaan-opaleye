@@ -1,11 +1,11 @@
 module Karamaan.Opaleye.Operators.Numeric where
 
+import qualified Karamaan.Opaleye.ExprArr as E
 import Karamaan.Opaleye.Operators2 (NumBinOpG, NumBinOp2G, r)
-import Karamaan.Opaleye.OperatorsPrimatives (unOp, unOpArr, opArr)
+import Karamaan.Opaleye.OperatorsPrimatives (unOp, unOpArr)
 import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.QueryArr (QueryArr)
-import Database.HaskellDB.PrimQuery(BinOp(OpMul, OpDiv, OpPlus, OpMinus,
-                                          OpOther))
+import Database.HaskellDB.PrimQuery(BinOp(OpMul, OpOther))
 
 import qualified Database.HaskellDB.PrimQuery as PrimQuery
 
@@ -37,28 +37,28 @@ abs = unOpArr (PrimQuery.UnOpOther "@") "abs"
 -- It's also unclear what types these operations should have
 -- Should there be a Num typeclass constraint or similar?
 plus :: NumBinOpH a a
-plus = opArr OpPlus "plus"
+plus = E.toQueryArrDef E.plus
 
 divide :: NumBinOpH a a
-divide = opArr OpDiv "div"
+divide = E.toQueryArrDef E.divide
 
 times :: NumBinOpH a a
-times = opArr OpMul "times"
+times = E.toQueryArrDef E.times
 
 minus :: NumBinOpH a a
-minus = opArr OpMinus "minus"
+minus = E.toQueryArrDef E.minus
 
 gt :: NumBinOpH a Bool
-gt = opArr PrimQuery.OpGt "gt"
+gt = E.toQueryArrDef E.gt
 
 gte :: NumBinOpH a Bool
-gte = opArr PrimQuery.OpGtEq "gte"
+gte = E.toQueryArrDef E.gte
 
 lt :: NumBinOpH a Bool
-lt = opArr PrimQuery.OpLt "lt"
+lt = E.toQueryArrDef E.lt
 
 lte :: NumBinOpH a Bool
-lte = opArr PrimQuery.OpLtEq "lte"
+lte = E.toQueryArrDef E.lte
 
 (.+.) :: NumBinOpG a b
 (.+.) = r plus

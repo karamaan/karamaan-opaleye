@@ -105,8 +105,30 @@ binOp op name = ExprArr g
 plus :: ExprArr (Wire a, Wire a) (Wire a)
 plus = binOp PQ.OpPlus "plus"
 
+minus :: ExprArr (Wire a, Wire a) (Wire a)
+minus = binOp PQ.OpMinus "minus"
+
+-- TODO: deprecate this one
 mul :: ExprArr (Wire a, Wire a) (Wire a)
 mul = binOp PQ.OpMul "mul"
+
+times :: ExprArr (Wire a, Wire a) (Wire a)
+times = binOp PQ.OpMul "times"
+
+divide :: ExprArr (Wire a, Wire a) (Wire a)
+divide = binOp PQ.OpDiv "div"
+
+gt :: ExprArr (Wire a, Wire a) (Wire Bool)
+gt = binOp PQ.OpGt "gt"
+
+gte :: ExprArr (Wire a, Wire a) (Wire Bool)
+gte = binOp PQ.OpGtEq "gte"
+
+lt :: ExprArr (Wire a, Wire a) (Wire Bool)
+lt = binOp PQ.OpLt "lt"
+
+lte :: ExprArr (Wire a, Wire a) (Wire Bool)
+lte = binOp PQ.OpLtEq "lte"
 
 or :: ExprArr (Wire Bool, Wire Bool) (Wire Bool)
 or = binOp PQ.OpOr "or"

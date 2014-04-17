@@ -1,14 +1,12 @@
 module Karamaan.Opaleye.OperatorsPrimatives where
 
 import Karamaan.Opaleye.Wire (Wire, unWire)
-import Karamaan.Opaleye.QueryArr (QueryArr(QueryArr), next, tagWith, Tag,
+import Karamaan.Opaleye.QueryArr (QueryArr(QueryArr), next, tagWith,
                                   simpleQueryArr, runSimpleQueryArr)
 import Database.HaskellDB.Query (ShowConstant)
 import Database.HaskellDB.PrimQuery (extend,
                                      PrimExpr(AttrExpr),
-                                     UnOp,
                                      BinOp,
-                                     Assoc,
                                      PrimQuery(Project, Binary), RelOp)
 import qualified Karamaan.Opaleye.Operators as Operators
 import Karamaan.Opaleye.Operators (binOp')
@@ -30,11 +28,6 @@ unOp op opname constname constval = QueryArr f
                 (assoc, w') = binOp' op opname t t_string t' t'_string
                                      (tagWith t0)
                 primQ' = extend assoc primQ
-
-wireUnOp :: UnOp -> String -> Wire a -> Tag -> (Assoc, Wire a2)
-wireUnOp op opname u t1 = Operators.unOp op opname (AttrExpr w) w
-                                         (tagWith t1)
-  where w = unWire u
 
 binrel :: RelOp -> QueryColspec a b -> QueryArr () a -> QueryArr () a
           -> QueryArr () b

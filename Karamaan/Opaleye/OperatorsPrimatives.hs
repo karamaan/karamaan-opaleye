@@ -37,15 +37,6 @@ unOpArr op opname = QueryArr f
   where f (u, primQ, t1) = (newWire, extend newAssoc primQ, next t1)
           where (newAssoc, newWire) = wireUnOp op opname u t1
 
--- FIXME: what's the right type signature for this?
--- TODO: there's some duplication between this, binOp' and wireOp
-wireBinOp :: BinOp -> String -> Wire a -> Wire a -> Tag -> (Assoc, Wire a2)
-wireBinOp op opname u u' t1 = binOp' op opname (AttrExpr w) w (AttrExpr w') w'
-                                     (tagWith t1)
-  where w = unWire u
-        w' = unWire u'
-
--- TODO: some duplication with wireBinOp?
 wireUnOp :: UnOp -> String -> Wire a -> Tag -> (Assoc, Wire a2)
 wireUnOp op opname u t1 = Operators.unOp op opname (AttrExpr w) w
                                          (tagWith t1)

@@ -31,11 +31,6 @@ unOp op opname constname constval = QueryArr f
                                      (tagWith t0)
                 primQ' = extend assoc primQ
 
-opArr :: BinOp -> String -> QueryArr (Wire a, Wire a) (Wire b)
-opArr op opname = QueryArr f
-  where f ((u, u'), primQ, t1) = (newWire, extend newAssoc primQ, next t1)
-          where (newAssoc, newWire) = wireBinOp op opname u u' t1
-
 -- TODO: duplication with opArr?
 unOpArr :: UnOp -> String -> QueryArr (Wire a) (Wire b)
 unOpArr op opname = QueryArr f

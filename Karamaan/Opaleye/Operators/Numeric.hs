@@ -1,33 +1,38 @@
+{-# LANGUAGE Arrows #-}
+
 module Karamaan.Opaleye.Operators.Numeric where
 
 import qualified Karamaan.Opaleye.ExprArr as E
 import Karamaan.Opaleye.Operators2 (NumBinOpG, NumBinOp2G, r)
-import Karamaan.Opaleye.OperatorsPrimatives (unOp)
+import qualified Karamaan.Opaleye.Operators2 as O2
 import Karamaan.Opaleye.Wire (Wire)
+import qualified Karamaan.Opaleye.Nullable as N
 import Karamaan.Opaleye.QueryArr (QueryArr)
-import Database.HaskellDB.PrimQuery(BinOp(OpMul, OpOther))
+import Control.Arrow ((<<<))
 
--- FIXME: the type signatures are odd here.  We pass in an Int for the sake of
--- avoiding an ambiguous type variable, but then we return Wire a when perhaps
--- it should be Num a => ... Wire a.  I guess the timesArrC should take a Double,
--- and return Num a whereas the mod should take only an Int and return Ints.
---
--- Think about this some more ...
 type NumBinOp a = Int -> QueryArr (Wire a) (Wire a)
 
 type NumBinOpH a b = QueryArr (Wire a, Wire a) (Wire b)
 
 type NumUnOp a = QueryArr (Wire a) (Wire a)
 
+-- {
+-- FIXME: the type signatures are odd here.  We pass in an Int for the sake of
+-- avoiding an ambiguous type variable, but then we return Wire a when perhaps
+-- it should be Num a => ... Wire a.  I guess the timesArrC should take a Double,
+-- and return Num a whereas the mod should take only an Int and return Ints.
+--
+-- timesC and modC are just weird anyway and should probably be deprecated.
 timesC :: NumBinOp a
-timesC x = unOp OpMul "times" (show x) x
+timesC x = proc y -> do
+  x' <- N.unsafeCoerce <<< O2.constant x -< ()
+  times -< (y, x')
 
--- HaskellDB's OpMod comes out as "x MOD y" which Postgres doesn't like
--- TODO: the solution to this is to make sure we use the correct SQL
--- generator.  See
--- http://hackage.haskell.org/packages/archive/haskelldb/2.2.2/doc/html/src/Database-HaskellDB-Sql-PostgreSQL.html#generator
 modC :: NumBinOp a
-modC x = unOp (OpOther "%") "mod" (show x) x
+modC x = proc y -> do
+  x' <- N.unsafeCoerce <<< O2.constant x -< ()
+  E.toQueryArrDef E.mod -< (y, x')
+-- }
 
 abs :: NumUnOp a
 abs = E.toQueryArrDef E.abs

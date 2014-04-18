@@ -131,6 +131,13 @@ times = binOp PQ.OpMul "times"
 divide :: ExprArr (Wire a, Wire a) (Wire a)
 divide = binOp PQ.OpDiv "div"
 
+-- HaskellDB's OpMod comes out as "x MOD y" which Postgres doesn't like
+-- TODO: the solution to this is to make sure we use the correct SQL
+-- generator.  See
+-- http://hackage.haskell.org/packages/archive/haskelldb/2.2.2/doc/html/src/Database-HaskellDB-Sql-PostgreSQL.html#generator
+mod :: ExprArr (Wire a, Wire a) (Wire a)
+mod = binOp (PQ.OpOther "%") "mod"
+
 gt :: ExprArr (Wire a, Wire a) (Wire Bool)
 gt = binOp PQ.OpGt "gt"
 

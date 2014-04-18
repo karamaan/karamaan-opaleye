@@ -1,34 +1,13 @@
 module Karamaan.Opaleye.OperatorsPrimatives where
 
-import Karamaan.Opaleye.Wire (Wire, unWire)
-import Karamaan.Opaleye.QueryArr (QueryArr(QueryArr), next, tagWith,
+import Karamaan.Opaleye.QueryArr (QueryArr, next, tagWith,
                                   simpleQueryArr, runSimpleQueryArr)
-import Database.HaskellDB.Query (ShowConstant)
-import Database.HaskellDB.PrimQuery (extend,
-                                     PrimExpr(AttrExpr),
-                                     BinOp,
+import Database.HaskellDB.PrimQuery (PrimExpr(AttrExpr),
                                      PrimQuery(Project, Binary), RelOp)
-import qualified Karamaan.Opaleye.Operators as Operators
-import Karamaan.Opaleye.Operators (binOp')
 import Karamaan.Opaleye.QueryColspec (QueryColspec, runWriterOfQueryColspec,
                                       runPackMapOfQueryColspec)
 
--- This could perhaps be merged with Operators, but really it all
--- needs tidying up anyway.
-
-unOp :: ShowConstant c => BinOp -> String -> String -> c
-        -> QueryArr (Wire a) (Wire a)
-unOp op opname constname constval = QueryArr f
-  where f (w, primQ, t0) = (w', primQ', next t0)
-          where s = unWire w
-                t_string = s
-                t'_string = constname
-                t = AttrExpr s
-                t' = Operators.constant constval
-                (assoc, w') = binOp' op opname t t_string t' t'_string
-                                     (tagWith t0)
-                primQ' = extend assoc primQ
-
+-- This should be merged with Operators.hs
 binrel :: RelOp -> QueryColspec a b -> QueryArr () a -> QueryArr () a
           -> QueryArr () b
 binrel op colspec q1 q2 = simpleQueryArr f where

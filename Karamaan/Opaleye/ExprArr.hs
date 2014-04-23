@@ -68,6 +68,9 @@ runExprArr'' expr (a, scope) = unsafeScopeLookup b scope1
 runExprArr' :: Expr (Wire a) -> PrimExpr
 runExprArr' = flip runExprArr'' ((), Map.empty)
 
+-- FIXME: There appears to be a bug here: We shouldn't discard the
+-- scope.  It may actually have stuff in it if we are composing in
+-- parallel with another ExprArr!
 constantLit :: Literal -> Expr (Wire a)
 constantLit l = ExprArr g
   where g ((), _, t0) = (w, scope, next t0)

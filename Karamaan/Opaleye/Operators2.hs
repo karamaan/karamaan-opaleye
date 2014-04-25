@@ -57,13 +57,8 @@ equalsOneOf = E.toQueryArrDef . E.equalsOneOf
 cat :: QueryArr (Wire String, Wire String) (Wire String)
 cat = E.toQueryArrDef E.cat
 
--- TODO: I guess this should be done with E.toQueryArrDef now too.
 constantLit :: Literal -> Query (Wire a)
-constantLit l = QueryArr f where
-  f ((), primQ, t0) = (w, primQ', next t0)
-    where primQ' = extend [(ws, ConstExpr l)] primQ
-          ws = tagWith t0 "constant"
-          w = Wire ws
+constantLit = E.toQueryArrDef . E.constantLit
 
 -- TODO: is this type signature right?
 -- Doesn't seem to work for string with postgresql-simple

@@ -9,7 +9,7 @@ import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Database.HaskellDB.PrimQuery (RelOp(Union, Intersect, Difference, UnionAll),
                                      extend,
-                                     PrimExpr(AttrExpr, ConstExpr),
+                                     PrimExpr(AttrExpr),
                                      Literal(OtherLit))
 import qualified Database.HaskellDB.PrimQuery as PrimQuery
 import Control.Arrow ((***), Arrow, (&&&), (<<<), second)

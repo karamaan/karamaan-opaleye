@@ -27,11 +27,15 @@ tableOfTableSpec wireMaker (TableSpec cols name) = Table name wireCols
 tableOfTableSpecDef :: Default WireMaker a b => TableSpec a -> Table b
 tableOfTableSpecDef = tableOfTableSpec def
 
+{-# DEPRECATED makeTableTDef "Use 'queryTable' instead" #-}
+makeTableTDef :: Default TableColspecP a a => Table a -> Query a
+makeTableTDef = queryTable
+
 -- For typeclass resolution it seems best to force the arguments to be
 -- the same.  Users can always use makeTableT to get more flexibility
 -- if they want.
-makeTableTDef :: Default TableColspecP a a => Table a -> Query a
-makeTableTDef = makeTableT def
+queryTable :: Default TableColspecP a a => Table a -> Query a
+queryTable = makeTableT def
 
 -- I don't know if this should be deprecated or not.  Should we force
 -- everything to go through a Table?

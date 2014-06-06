@@ -14,10 +14,20 @@ import Data.Profunctor (Profunctor, dimap, lmap, rmap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
                                 defaultEmpty, defaultProfunctorProduct)
 
--- TODO: this happens to have the same implementation as QueryColspec, but I
--- don't want to suggest that one derives from the other.  Perhaps make this
--- clearer by introducing another type from which they both inherit their
--- implementation.
+-- TODO: this happens to have the same implementation as QueryColspec,
+-- but I don't want to suggest that one derives from the other.
+-- Perhaps make this clearer by introducing another type from which
+-- they both inherit their implementation.  (Later note: is this
+-- actually right?  Do we really want their behaviour to differ?).
+--
+-- Like QueryColspec, a TableColspecP provides a way to extract a list
+-- of all the column names occurring in a product type of Wires (using
+-- the Writer) and a way of modifying the column names in place (using
+-- the PackMap).
+--
+-- We use it when we are making tables.  It allows us to take the
+-- column names of a table and generate unique internal names from
+-- them for use in the AST.
 newtype TableColspecP a b = TableColspecP (QueryColspec a b)
 
 -- TODO: we don't actually need TableColspec anymore.  It's just a partially
@@ -69,6 +79,18 @@ colspec w p = TableColspec
 col :: String -> TableColspec (Wire a)
 col s = colspec [s] (\f -> Wire (f s))
 
+-- WireMaker is for turning a product container of column names (of
+-- type String) into a product container of Opaleye Wires ('Wire a'
+-- for any type 'a').
+--
+-- The basic value of this product profunctor is
+--
+--     wireCol :: WireMaker String (Wire a)
+--
+-- and generalising to products gives values like
+--
+--    WireMaker (String, (String, String, String))
+--              (Wire Int, (Wire Bool, Wire Double, Wire String))
 newtype WireMaker a b = WireMaker (a -> b)
 
 runWireMaker :: WireMaker a b -> a -> b
@@ -92,4 +114,4 @@ instance ProductProfunctor WireMaker where
   (***!) = defaultProfunctorProduct
 
 instance Default WireMaker String (Wire a) where
-  def = WireMaker Wire
+  def = wireCol

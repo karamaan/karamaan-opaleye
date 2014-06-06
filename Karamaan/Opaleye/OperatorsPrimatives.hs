@@ -31,15 +31,14 @@ binrel op colspec q1 q2 = simpleQueryArr f where
           -- select w1name as w1nametag, w1name as w1nametag, ...
           -- which is an error as w1nametag is ambiguous.
           --
-          -- A solution would be to augment QueryColspec with a generalization
-          -- of runPackMap that can tag with increasing tags, rather than
-          -- just a fixed one.
+          -- A solution would be to augment QueryColspec with a
+          -- generalization of runPackMap that can tag with increasing
+          -- tags, rather than just a fixed one.  I think this would
+          -- be simplest to achieve if we made runPackMap a mapM
+          -- rather than a map (or in lens terminology a traversal).
           --
-          -- Later note: I can no longer see why I thought it was
-          -- possible that two wires in w1 should be able to have the
-          -- same name.  A wire in w1 can have the same name as a wire
-          -- in w2, but that's not the same thing at all!  Is this
-          -- FIXME actually just not a problem?  Tom -- 2013-12-18
+          -- (Two wires in w1 will have the same name, for example, if
+          -- one wire is duplicated, say via 'id &&& id')
           new = map tag' (runWriter w1)
 
           assoc = zip new . map AttrExpr . runWriter

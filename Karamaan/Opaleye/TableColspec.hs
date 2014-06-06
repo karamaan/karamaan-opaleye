@@ -19,6 +19,15 @@ import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
 -- Perhaps make this clearer by introducing another type from which
 -- they both inherit their implementation.  (Later note: is this
 -- actually right?  Do we really want their behaviour to differ?).
+--
+-- Like QueryColspec, a TableColspecP provides a way to extract a list
+-- of all the column names occurring in a product type of Wires (using
+-- the Writer) and a way of modifying the column names in place (using
+-- the PackMap).
+--
+-- We use it when we are making tables.  It allows us to take the
+-- column names of a table and generate unique internal names from
+-- them for use in the AST.
 newtype TableColspecP a b = TableColspecP (QueryColspec a b)
 
 -- TODO: we don't actually need TableColspec anymore.  It's just a partially

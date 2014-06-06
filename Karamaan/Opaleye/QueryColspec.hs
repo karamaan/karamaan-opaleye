@@ -68,6 +68,9 @@ writerWire = Writer (return . unWire)
 -- A QueryColspec provides a way to extract a list of all the column
 -- names occurring in a product type of Wires (using the Writer) and a
 -- way of modifying the column names in place (using the PackMap).
+--
+-- We use QueryColspec in several places where we want to generate new
+-- unique names from the names in existing queries.
 data QueryColspec a b = QueryColspec (Writer a) (PackMap a b)
 
 instance Functor (QueryColspec a) where

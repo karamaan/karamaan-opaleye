@@ -69,6 +69,18 @@ colspec w p = TableColspec
 col :: String -> TableColspec (Wire a)
 col s = colspec [s] (\f -> Wire (f s))
 
+-- WireMaker is for turning a product container of column names (of
+-- type String) into a product container of Opaleye Wires ('Wire a'
+-- for any type 'a').
+--
+-- The basic value of this product profunctor is
+--
+--     wireCol :: WireMaker String (Wire a)
+--
+-- and generalising to products gives values like
+--
+--    WireMaker (String, (String, String, String))
+--              (Wire Int, (Wire Bool, Wire Double, Wire String))
 newtype WireMaker a b = WireMaker (a -> b)
 
 runWireMaker :: WireMaker a b -> a -> b

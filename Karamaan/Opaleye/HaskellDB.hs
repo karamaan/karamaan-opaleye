@@ -13,7 +13,7 @@ ppInsertReturning :: SqlInsertReturning -> PP.Doc
 ppInsertReturning (SqlInsertReturning insert returnExprs) =
   P.ppInsert insert
   $$ PP.text "RETURNING"
-  <+> PP.parens (commaV P.ppSqlExpr returnExprs)
+  <+> commaV P.ppSqlExpr returnExprs
 
 -- TODO: this is from HaskellDB.Sql.Print, but they don't export it!
 -- Why oh why?

@@ -1,0 +1,9 @@
+dist
+\#*
+\#\.
+
+# nix development symlinks
+haskelldb
+karamaan-plankton
+product-profunctors
+nixpkgs

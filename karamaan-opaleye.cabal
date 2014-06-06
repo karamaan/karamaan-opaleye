@@ -20,7 +20,7 @@ library
     , mtl >= 2.1 && < 2.2
       -- vv This is just for RunQuery.  If we ever move
       -- RunQuery elsewhere we should remove this dependency.
-    , postgresql-simple   >= 0.3 && < 0.4
+    , postgresql-simple   >= 0.3 && < 0.5
     , pretty              >= 1.0 && < 1.2
     , product-profunctors >= 0.4 && < 0.5
     , profunctors         >= 4.0 && < 4.1

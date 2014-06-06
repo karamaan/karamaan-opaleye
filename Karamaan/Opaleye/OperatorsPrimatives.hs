@@ -40,6 +40,12 @@ binrel op colspec q1 q2 = simpleQueryArr f where
           -- same name.  A wire in w1 can have the same name as a wire
           -- in w2, but that's not the same thing at all!  Is this
           -- FIXME actually just not a problem?  Tom -- 2013-12-18
+          --
+          -- Even later note: I can now see why it is possible for two
+          -- wires in w1 to have the same name.  It will happen if one
+          -- wire is duplicated, for example via 'id &&& id'!  So it
+          -- is indeed very easy.  I need to think about how to deal
+          -- with that.  Tom -- 2014-06-06
           new = map tag' (runWriter w1)
 
           assoc = zip new . map AttrExpr . runWriter

@@ -65,6 +65,9 @@ packMapWire = PackMap (\f -> Wire . f . unWire)
 writerWire :: Writer (Wire a)
 writerWire = Writer (return . unWire)
 
+queryColspecWire :: QueryColspec (Wire a) (Wire a)
+queryColspecWire = QueryColspec writerWire packMapWire
+
 -- A QueryColspec provides a way to extract a list of all the column
 -- names occurring in a product type of Wires (using the Writer) and a
 -- way of modifying the column names in place (using the PackMap).
@@ -84,7 +87,7 @@ instance Profunctor QueryColspec where
   dimap f g (QueryColspec w p) = QueryColspec (contramap f w) (dimap f g p)
 
 instance Default QueryColspec (Wire a) (Wire a) where
-  def = QueryColspec writerWire packMapWire
+  def = queryColspecWire
 
 instance ProductProfunctor QueryColspec where
   empty = QueryColspec point empty

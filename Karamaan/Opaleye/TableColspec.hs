@@ -14,10 +14,11 @@ import Data.Profunctor (Profunctor, dimap, lmap, rmap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
                                 defaultEmpty, defaultProfunctorProduct)
 
--- TODO: this happens to have the same implementation as QueryColspec, but I
--- don't want to suggest that one derives from the other.  Perhaps make this
--- clearer by introducing another type from which they both inherit their
--- implementation.
+-- TODO: this happens to have the same implementation as QueryColspec,
+-- but I don't want to suggest that one derives from the other.
+-- Perhaps make this clearer by introducing another type from which
+-- they both inherit their implementation.  (Later note: is this
+-- actually right?  Do we really want their behaviour to differ?).
 newtype TableColspecP a b = TableColspecP (QueryColspec a b)
 
 -- TODO: we don't actually need TableColspec anymore.  It's just a partially

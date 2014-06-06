@@ -92,4 +92,4 @@ instance ProductProfunctor WireMaker where
   (***!) = defaultProfunctorProduct
 
 instance Default WireMaker String (Wire a) where
-  def = WireMaker Wire
+  def = wireCol

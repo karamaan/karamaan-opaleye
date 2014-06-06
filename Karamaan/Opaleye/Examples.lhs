@@ -3,9 +3,9 @@
 > --    elsewhere.
 > {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
 > {-# LANGUAGE TemplateHaskell #-}
-> 
+>
 > module Karamaan.Opaleye.Examples where
-> 
+>
 > import Prelude hiding (sum)
 > import Karamaan.Opaleye.Unpackspec (Unpackspec)
 > import Karamaan.Opaleye.Table (makeTableDef)
@@ -20,7 +20,7 @@
 > import Control.Category ((<<<))
 > import Control.Arrow (arr, (&&&), returnA)
 > import Data.Time.Calendar (Day)
-> 
+>
 > import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
 > import Data.Profunctor.Product (PPOfContravariant, ProductProfunctor, p2, p5)
 > import Data.Profunctor (dimap)
@@ -71,8 +71,12 @@ SELECT name as name_1,
        address as address_1
 FROM personTable as T1
 
-('sh' is just a conveniently named utility function for the purposes
-of this example file)
+'sh' is just a conveniently named utility function for the purposes
+of this example file, defined as follows:
+
+> sh :: Default (PPOfContravariant Unpackspec) a a
+>       => Query a -> IO ()
+> sh = putStrLn . showSqlForPostgresDefault
 
 Opaleye can use user defined types in queries.  It will save you a lot
 of headaches if you define your typeclasses to be polymorphic in all
@@ -126,7 +130,7 @@ and second columns of 'personTable'
 > nameAge :: Query (Wire String, Wire Int)
 > nameAge = arr (\(x, y, _) -> (x, y)) <<< personTable
 
-ghci> sh nameAge 
+ghci> sh nameAge
 SELECT name as name_1,
        age as age_1
 FROM personTable as T1
@@ -197,9 +201,9 @@ people, and the sum of their ages.
 > totalAge = proc () -> do
 >   (name1, age1, _) <- personTable -< ()
 >   (name2, age2, _) <- personTable -< ()
-> 
+>
 >   sumAge <- N.plus -< (age1, age2)
-> 
+>
 >   returnA -< (name1, name2, sumAge)
 
 ghci>
@@ -230,9 +234,9 @@ which is essentially a product followed by a restriction.
 > personAndBirthday = proc () -> do
 >   (name, age, address) <- personTable -< ()
 >   birthday <- birthdayTable -< ()
-> 
+>
 >   P.restrict <<< Op2.eq -< (name, bdName birthday)
-> 
+>
 >   returnA -< (name, age, address, bdDay birthday)
 
 ghci> sh personAndBirthday
@@ -266,9 +270,9 @@ makes this informal description of the behaviour simple to implement.
 > birthdayOfPerson :: QueryArr (Wire String) (Wire Day)
 > birthdayOfPerson = proc name -> do
 >   birthday <- birthdayTable -< ()
-> 
+>
 >   P.restrict <<< Op2.eq -< (name, bdName birthday)
-> 
+>
 >   returnA -< bdDay birthday
 
 We can't generate "the SQL of" birthdayOfPerson.  Since it's not a
@@ -279,7 +283,7 @@ reimplement 'personAndBirthday'' in a more neatly-factored way.
 > personAndBirthday' = proc () -> do
 >   (name, age, address) <- personTable -< ()
 >   birthday <- birthdayOfPerson -< name
-> 
+>
 >   returnA -< (name, age, address, birthday)
 
 ghci> sh personAndBirthday'
@@ -314,10 +318,10 @@ query finds everyone whose age is less than 18.
 >   -- active research project!
 >   eighteen <- Op2.constant 18 -< ()
 >   P.restrict <<< N.lt -< (age, eighteen)
-> 
+>
 >   returnA -< row
 
-ghci> sh children 
+ghci> sh children
 SELECT name as name_1,
        age as age_1,
        address as address_1
@@ -335,13 +339,13 @@ not in their twenties, and lives at a specific address.
 >
 >   ltTwenty  <- N.lt  -< (age, twenty)
 >   gteThirty <- N.gte -< (age, thirty)
-> 
+>
 >   P.restrict <<< Op2.or -< (ltTwenty, gteThirty)
-> 
+>
 >   myAddress <- Op2.constant "1 My Street, My Town" -< ()
-> 
+>
 >   P.restrict <<< Op2.eq -< (address, myAddress)
-> 
+>
 >   returnA -< row
 
 ghci> sh notTwentiesAtAddress
@@ -365,7 +369,7 @@ check 'addressIs1MyStreet'.
 >   ltTwenty  <- N.lt  -< (age, twenty)
 >   gteThirty <- N.gte -< (age, thirty)
 >   Op2.or -< (ltTwenty, gteThirty)
->   
+>
 > addressIs1MyStreet :: QueryArr (Wire String) (Wire Bool)
 > addressIs1MyStreet = proc address -> do
 >   myAddress <- Op2.constant "1 My Street, My Town" -< ()
@@ -374,17 +378,13 @@ check 'addressIs1MyStreet'.
 > notTwentiesAtAddress' :: Query (Wire String, Wire Int, Wire String)
 > notTwentiesAtAddress' = proc () -> do
 >   row@(_, age, address) <- personTable -< ()
-> 
+>
 >   P.restrict <<< notTwenties -< age
 >   P.restrict <<< addressIs1MyStreet -< address
-> 
+>
 >   returnA -< row
 
 The generated SQL is again exactly the same as before.
-
-> sh :: Default (PPOfContravariant Unpackspec) a a
->       => Query a -> IO ()
-> sh = putStrLn . showSqlForPostgresDefault
 
 Aggregation
 ===========

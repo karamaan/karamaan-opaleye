@@ -305,7 +305,7 @@ executeInsertConnDef conn =
   SQL.execute_ conn . fromString .: arrangeInsertSqlDef
 
 executeInsertReturningConn
-  :: Assocer t'=> TableMaybeWrapper t t'-> TableExprRunner t u -> AssocerE r
+  :: Assocer t' -> TableMaybeWrapper t t'-> TableExprRunner t u -> AssocerE r
   -> QueryRunner r r' -> SQL.Connection -> Table t -> Expr t' -> ExprArr u r
   -> IO [r']
 executeInsertReturningConn ass tmr ter assr (QueryRunner _ rowParser) conn =

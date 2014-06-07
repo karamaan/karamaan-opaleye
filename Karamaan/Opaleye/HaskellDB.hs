@@ -1,4 +1,7 @@
-module Karamaan.Opaleye.HaskellDB where
+module Karamaan.Opaleye.HaskellDB
+     ( SqlInsertReturning (..)
+     , ppInsertReturning
+     ) where
 
 import qualified Database.HaskellDB.Sql.Print as P
 import qualified Database.HaskellDB.Sql as S

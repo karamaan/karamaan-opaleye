@@ -1,6 +1,15 @@
-module Karamaan.Opaleye.Aggregate where
+module Karamaan.Opaleye.Aggregate
+    ( count
+    , avg
+    , sum
+    , groupBy
+    , aggregate
+    , (>:)
+    , max
+    )
+    where
 
-import Prelude hiding (sum)
+import Prelude hiding (max, sum)
 import Karamaan.Opaleye.Nullable (Nullable)
 import Karamaan.Opaleye.QueryArr (Query, runSimpleQueryArr,
                                   Tag, next, tagWith,

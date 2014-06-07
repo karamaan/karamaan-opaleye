@@ -1,6 +1,14 @@
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts #-}
 
-module Karamaan.Opaleye.Manipulation where
+module Karamaan.Opaleye.Manipulation
+    ( arrangeDeleteSqlDef
+    , arrangeUpdateSqlDef
+    , arrangeInsertSqlDef
+    , arrangeInsertReturningSqlDef
+    , executeInsertDef
+    , executeDeleteDef
+    , executeUpdateDef
+    ) where
 
 import Karamaan.Opaleye.Wire (Wire(Wire))
 import Karamaan.Opaleye.ExprArr (Scope, ExprArr, Expr, runExprArr'',

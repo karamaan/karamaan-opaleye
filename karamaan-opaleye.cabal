@@ -3,7 +3,7 @@ version:  0.22
 synopsis: A relational query language for Haskell
 author:   Purely Agile
 build-type: Simple
-cabal-version: >= 1.2
+cabal-version: >= 1.8
 License:      OtherLicense
 License-File: LICENSE
 
@@ -43,7 +43,6 @@ library
                    Karamaan.Opaleye.Join,
                    Karamaan.Opaleye.LeftJoin,
                    Karamaan.Opaleye.Manipulation,
-                   Karamaan.Opaleye.ManipulationExample,
                    Karamaan.Opaleye.Nullable,
                    Karamaan.Opaleye.Operators,
                    Karamaan.Opaleye.Operators2,
@@ -63,3 +62,10 @@ library
                    Karamaan.Opaleye.Unpackspec,
                    Karamaan.Opaleye.Values
   ghc-options:     -Wall
+
+test-suite examples
+  type: exitcode-stdio-1.0
+  main-is: Examples/Examples.hs
+  build-depends:
+    base >= 4 && < 5,
+    karamaan-opaleye

@@ -57,10 +57,15 @@ instance ProductProfunctor ValuesMaker where
     ValuesMaker (w ***< w', (liftA2 . liftA2) (,) c c', ts <> ts')
 
 infix 8 .:.
+infix 8 .:::.
 
 -- TODO: vv move this to Plankton?
 (.:.) :: (r -> z) -> (a -> b -> c -> r) -> (a -> b -> c -> z)
 (f .:. g) x y z = f (g x y z)
+
+(.:::.) :: (d -> e) -> (a -> a1 -> a2 -> a3 -> a4 -> b -> c -> d)
+        -> a -> a1 -> a2 -> a3 -> a4 -> b -> c -> e
+(f .:::. g) t u v w x y z = f (g t u v w x y z)
 
 nextCol :: S Int
 nextCol = do { a <- get; put (a + 1); return a }

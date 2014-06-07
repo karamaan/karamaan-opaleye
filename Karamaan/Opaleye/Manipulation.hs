@@ -10,6 +10,7 @@ module Karamaan.Opaleye.Manipulation
     , executeUpdateDef
     ) where
 
+import Karamaan.Opaleye.RunQuery (QueryRunner(QueryRunner), query_)
 import Karamaan.Opaleye.Wire (Wire(Wire))
 import Karamaan.Opaleye.ExprArr (Scope, ExprArr, Expr, runExprArr'',
                                  runExprArrStartEmpty, scopeOfWire,
@@ -37,7 +38,7 @@ import Control.Arrow ((&&&))
 import Karamaan.Opaleye.Table (Table(Table))
 import Data.Profunctor.Product.Default (Default, def)
 import Karamaan.Plankton ((.:))
-import Karamaan.Opaleye.Values ((.:.))
+import Karamaan.Opaleye.Values ((.:.),(.:::.))
 import Data.Function (on)
 import qualified Database.PostgreSQL.Simple as SQL
 import Data.String (fromString)
@@ -195,6 +196,31 @@ arrangeInsertReturning ass tmr ter assr table e ea =
         returnSqlExprs :: [S.SqlExpr]
         returnSqlExprs = map (G.sqlExpr defaultSqlGenerator) returnPrimExprs
 
+arrangeInsertReturningSql
+  :: Assocer maybeWires
+  -> TableMaybeWrapper wires maybeWires
+  -> TableExprRunner wires wires'
+  -> AssocerE resultWires
+  -> Table wires
+  -> Expr maybeWires
+  -> ExprArr wires' resultWires
+  -> String
+arrangeInsertReturningSql =
+  show . H.ppInsertReturning .:::. arrangeInsertReturning
+
+arrangeInsertReturningSqlDef
+  :: (Default (PPOfContravariant Assocer) maybeWires maybeWires,
+      Default TableMaybeWrapper wires maybeWires,
+      Default TableExprRunner wires wires',
+      Default (PPOfContravariant AssocerE) resultWires resultWires)
+  => Table wires
+  -> Expr maybeWires
+  -> ExprArr wires' resultWires
+  -> String
+arrangeInsertReturningSqlDef = arrangeInsertReturningSql def' def def def''
+  where def'  = unPPOfContravariant def
+        def'' = unPPOfContravariant def
+
 primExprsOfAssocer :: Assocer t -> t -> (t, Scope, z) -> [(String, PrimExpr)]
 primExprsOfAssocer (Assocer (MWriter2 assocer)) t (cols, scope, _)
   = assocer t cols scope
@@ -319,6 +345,36 @@ executeInsertConnDef :: (Default (PPOfContravariant Assocer)
                      -> IO Int64
 executeInsertConnDef conn =
   SQL.execute_ conn . fromString .: arrangeInsertSqlDef
+
+executeInsertReturningConn
+  :: Assocer maybeWires
+  -> TableMaybeWrapper wires maybeWires
+  -> TableExprRunner wires wires'
+  -> AssocerE resultWires
+  -> QueryRunner resultWires haskells
+  -> SQL.Connection
+  -> Table wires
+  -> Expr maybeWires
+  -> ExprArr wires' resultWires
+  -> IO [haskells]
+executeInsertReturningConn ass tmr ter assr (QueryRunner _ rowParser) conn =
+    query_ rowParser conn . fromString .:. arrangeInsertReturningSql ass tmr ter assr
+
+executeInsertReturningConnDef
+  :: (Default (PPOfContravariant Assocer) maybeWires maybeWires,
+      Default TableMaybeWrapper wires maybeWires,
+      Default TableExprRunner wires wires',
+      Default (PPOfContravariant AssocerE) resultWires resultWires,
+      Default QueryRunner resultWires haskells)
+  => SQL.Connection
+  -> Table wires
+  -> Expr maybeWires
+  -> ExprArr wires' resultWires
+  -> IO [haskells]
+executeInsertReturningConnDef
+  = executeInsertReturningConn def' def def def'' def
+  where def' = unPPOfContravariant def
+        def'' = unPPOfContravariant def
 
 executeUpdateConnDef :: (Default TableExprRunner wires wires',
                      Default (PPOfContravariant Assocer) maybewires maybewires,

@@ -31,7 +31,6 @@ library
     , text       >= 0.11 && < 1.2
 
   exposed-modules: Karamaan.Opaleye.Aggregate,
-                   Karamaan.Opaleye.Applicative,
                    Karamaan.Opaleye.ArrowLambda,
                    Karamaan.Opaleye.Bend,
                    Karamaan.Opaleye.Difference,

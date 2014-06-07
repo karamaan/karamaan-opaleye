@@ -1,14 +1,17 @@
+-- | Perform aggregations on query results.
 module Karamaan.Opaleye.Aggregate
-    ( count
-    , avg
-    , sum
-    , groupBy
+    ( -- * Working with 'Aggregator's
+      Aggregator
     , aggregate
-    , (>:)
+
+      -- * Standard Aggregations
+    , avg
+    , count
+    , groupBy
     , max
     , min
     , nullableMax
-    , Aggregator
+    , sum
     )
     where
 
@@ -37,9 +40,24 @@ import Data.Monoid (Monoid, mempty, (<>))
 -- Maybe it would be safer if we combined the two writers into
 -- "LWriter (Maybe AggrOp, String) a"?  That way we'd know they output
 -- the same number of results
+{-|
+
+An 'Aggregator' is a 'Profunctor' that takes (potentially many) rows of type
+@a@, groups them, and transforms each group into a single row of type @b@. This
+corresponds to aggregators using @GROUP BY@ in SQL.
+
+-}
 data Aggregator a b = Aggregator (LWriter (Maybe AggrOp) a) (Writer a)
                                  (PackMap a b)
 
+{-|
+
+Given a 'Query' producing rows of type @a@ and an 'Aggregator' accepting rows of
+type @a@, apply the aggregator to the results of the query.
+
+-}
+aggregate :: Aggregator a b -> Query a -> Query b
+aggregate agg q = simpleQueryArr (aggregate' agg . runSimpleQueryArr q)
 
 instance Functor (Aggregator a) where
   fmap f (Aggregator a w p) = Aggregator a w (fmap f p)
@@ -67,29 +85,35 @@ aggregatorMaker' op = Aggregator (writer (const [op])) writerWire packMapWire
 -- TODO: actually Postgres returns NULL for the sum of an empty column!
 --       We should make sure to postcompose with a fromNullable to set it to
 --       zero
+
+-- | Sum all rows in a group.
 sum :: Aggregator (Wire a) (Wire a)
 sum = aggregatorMaker AggrSum
 
+-- | Aggregate each group to the average value in that group.
 avg :: Aggregator (Wire a) (Wire a)
 avg = aggregatorMaker AggrAvg
 
+-- | Aggregate each group to the maximum value in that group.
 max :: Aggregator (Wire a) (Wire a)
 max = aggregatorMaker AggrMax
 
+-- | Aggregate each group to the maximum value in that group. If the group is empty , the result is @null@.
 nullableMax :: Aggregator (Wire a) (Wire (Nullable a))
 nullableMax = aggregatorMaker AggrMax
 
+-- | Aggregate each group to the minimum value in that group.
 min :: Aggregator (Wire a) (Wire a)
 min = aggregatorMaker AggrMin
 
+-- | Group the aggregation by equality on the input to 'groupBy'.
 groupBy :: Aggregator (Wire a) (Wire a)
 groupBy = aggregatorMaker' Nothing
 
+-- | Count the amount of rows inside each @GROUP BY@ clause (or the entire table
+-- if no grouping was specified).
 count :: Aggregator (Wire a) (Wire Int)
 count = aggregatorMaker AggrCount
-
-aggregate :: Aggregator a b -> Query a -> Query b
-aggregate agg q = simpleQueryArr (aggregate' agg . runSimpleQueryArr q)
 
 -- This is messy and there should be a lot more structure to it, but I can't see
 -- how, currently.  Once there's another function like this
@@ -114,14 +138,3 @@ assoc (snew, mop, sold) = (snew, makeAggr mop (AttrExpr sold))
 
 makeAggr :: Maybe AggrOp -> PrimExpr -> PrimExpr
 makeAggr = maybe id AggrExpr
-
--- Christopher preferred this API for aggregation
-(>:) :: Aggregator a b -> (x -> a) -> Aggregator x b
-(>:) = flip lmap
-
-pa3 :: ProductProfunctor p => (p a b1, p a b2, p a b3) -> p a (b1, b2, b3)
-pa3 = lmap (\x -> (x,x,x)) . p3
-
-example :: Aggregator (Wire String, Wire Int)
-                      (Wire String, Wire Int, Wire Int)
-example = pa3 (groupBy >: fst, sum >: snd, avg >: snd)

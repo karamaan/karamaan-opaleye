@@ -15,10 +15,10 @@ import Control.Arrow ((***))
 import Karamaan.Plankton ((.:))
 
 -- For specifying the columns as Strings
-data TableSpec a = TableSpec a String
+data TableSpec strings = TableSpec strings String
 
 -- For specifying the columns as Wires
-data Table a = Table String a
+data Table wires = Table String wires
 
 tableOfTableSpec :: WireMaker strings wires -> TableSpec strings -> Table wires
 tableOfTableSpec wireMaker (TableSpec cols name) = Table name wireCols

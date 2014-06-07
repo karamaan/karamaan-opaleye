@@ -5,9 +5,12 @@ module Karamaan.Opaleye.Manipulation
     , arrangeUpdateSqlDef
     , arrangeInsertSqlDef
     , arrangeInsertReturningSqlDef
+    , arrangeInsertReturningDef
     , executeInsertDef
     , executeDeleteDef
     , executeUpdateDef
+    , executeInsertReturningConn
+    , executeInsertReturningConnDef
     ) where
 
 import Karamaan.Opaleye.RunQuery (QueryRunner(QueryRunner), query_)

@@ -1,4 +1,5 @@
-module Examples.Manipulation () where
+{-# LANGUAGE Arrows #-}
+module Manipulation () where
 
 import Prelude hiding (or)
 import Karamaan.Opaleye.Wire (Wire(Wire))

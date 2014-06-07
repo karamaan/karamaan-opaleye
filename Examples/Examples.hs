@@ -1,6 +1,6 @@
 module Main where
 
-import Examples.Manipulation ()
+import Manipulation ()
 
 main :: IO ()
 main = return ()

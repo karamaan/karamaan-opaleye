@@ -29,10 +29,9 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project),
 import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.QueryColspec (Writer, PackMap, writerWire, packMapWire,
                                       runWriter, runPackMap, LWriter, writer)
-import Data.Profunctor (Profunctor, dimap, lmap)
+import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
-                                defaultEmpty, defaultProfunctorProduct,
-                                p3)
+                                defaultEmpty, defaultProfunctorProduct)
 import Data.Functor.Contravariant (contramap)
 import Control.Applicative (Applicative, (<*>), pure)
 import Data.Monoid (Monoid, mempty, (<>))

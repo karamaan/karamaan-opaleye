@@ -18,6 +18,7 @@ module Karamaan.Opaleye.ExprArr
     , and
     , not
     , constantLit
+    , constantDay
     , equalsOneOf
     , cat
     , notEq

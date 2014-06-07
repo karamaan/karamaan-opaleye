@@ -6,10 +6,12 @@ module Karamaan.Opaleye.Aggregate
     , aggregate
     , (>:)
     , max
+    , min
+    , Aggregator
     )
     where
 
-import Prelude hiding (max, sum)
+import Prelude hiding (max, sum, min)
 import Karamaan.Opaleye.Nullable (Nullable)
 import Karamaan.Opaleye.QueryArr (Query, runSimpleQueryArr,
                                   Tag, next, tagWith,

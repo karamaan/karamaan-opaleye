@@ -31,7 +31,7 @@ equalsC = restrictWith . flip wireIs . showConstant
 
 literalDay :: Day -> Literal
 literalDay = OtherLit . sqlStringOfDay
-                  -- ^^ I guess this should really be a DateLit, but I can't
+                  -- I guess this should really be a DateLit, but I can't
                   -- work out how to use HaskellDB's CalendarTime
 
 -- TODO: should we get rid of this as it is somewhat redundant?

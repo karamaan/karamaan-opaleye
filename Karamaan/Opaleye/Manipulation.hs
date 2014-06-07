@@ -35,10 +35,10 @@ import qualified Database.PostgreSQL.Simple as SQL
 import Data.String (fromString)
 import Data.Int (Int64)
 
--- A 'TableExprRunner t e' is used to connect a 'Table t' to an
--- 'ExprArr e o'.  In current usage 'o' is only ever 'Wire Bool' but I
--- guess it could be anything.  This is used to essentially "apply an
--- expression to a table".
+-- A 'TableExprRunner wires wires'' is used to connect a 'Table wires'
+-- to an 'ExprArr wires' o'.  In current usage 'o' is only ever 'Wire
+-- Bool' but I guess it could be anything.  This is used to
+-- essentially "apply an expression to a table".
 --
 -- TODO: could this actually be done in terms of
 --
@@ -51,13 +51,15 @@ import Data.Int (Int64)
 -- even if the projector components projects some columns away.  Is
 -- this what we want?  It will probably be hard to do something
 -- different without introducting another ProductProfunctor.
-data TableExprRunner t e = TableExprRunner (MWriter Scope t) (t -> e)
+data TableExprRunner wires wires' = TableExprRunner (MWriter Scope wires)
+                                                    (wires -> wires')
 
 -- A 'TableMaybeWrapper' is used to convert the 'Wire a's appearing in
 -- the columns of a 'Table' to 'Wire (Maybe a)'s, so that they can be
 -- matched with the 'Wire (Maybe a)'s occuring in the 'ExprArr' that is
 -- used to perform an update or an insert.
-newtype TableMaybeWrapper a b = TableMaybeWrapper (a -> b)
+newtype TableMaybeWrapper wires maybewires = TableMaybeWrapper
+                                             (wires -> maybewires)
 
 newtype MWriter2 m a = MWriter2 (a -> a -> m)
 

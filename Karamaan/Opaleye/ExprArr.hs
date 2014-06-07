@@ -97,9 +97,6 @@ runExprArr'' :: ExprArr a (Wire b) -> (a, Scope) -> PrimExpr
 runExprArr'' expr (a, scope) = unsafeScopeLookup b scope1
   where (b, scope1, _) = runExprArrStart expr (a, scope)
 
-runExprArr' :: Expr (Wire a) -> PrimExpr
-runExprArr' = flip runExprArr'' ((), Map.empty)
-
 -- Note that the returned Scope value is what is *added* to the
 -- overall scope, so ignoring the incoming Scope here is not a bug!
 constantLit :: Literal -> Expr (Wire a)

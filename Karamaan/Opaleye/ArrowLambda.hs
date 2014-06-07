@@ -1,7 +1,9 @@
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts,
     ScopedTypeVariables #-}
 
-module Karamaan.Opaleye.ArrowLambda where
+module Karamaan.Opaleye.ArrowLambda
+       {-# DEPRECATED "This is for exploratory purposes only" #-}
+       where
 
 import Data.Profunctor (Profunctor, dimap)
 import Control.Arrow (Arrow, arr, (<<<))
@@ -15,9 +17,6 @@ import Karamaan.Opaleye.Wire (Wire)
 import qualified Control.Category as Cat
 
 import Data.Profunctor.Product (p4)
-
--- This is work in progress.  It's inadvisable to use it in your own
--- code currently!
 
 newtype ArrowLambda arr a b c = ArrowLambda (arr a b -> c)
 

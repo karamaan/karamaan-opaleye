@@ -38,6 +38,8 @@ import Data.Time.Calendar (Day)
 -- instance Default QueryRunner (Wire MyType) MyType where
 --     def = fieldQueryRunnerF MyType
 
+-- * 'wires' represents types like '(Wire Int, Wire Bool, Wire String)'
+-- * 'haskells' represents types like '(Int, Bool, String)'
 data QueryRunner wires haskells = QueryRunner (Unpackspec wires)
                                               (RowParser haskells)
 

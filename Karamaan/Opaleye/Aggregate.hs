@@ -7,6 +7,7 @@ module Karamaan.Opaleye.Aggregate
     , (>:)
     , max
     , min
+    , nullableMax
     , Aggregator
     )
     where

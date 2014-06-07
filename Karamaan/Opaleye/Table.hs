@@ -20,50 +20,54 @@ data TableSpec a = TableSpec a String
 -- For specifying the columns as Wires
 data Table a = Table String a
 
-tableOfTableSpec :: WireMaker a b -> TableSpec a -> Table b
+tableOfTableSpec :: WireMaker strings wires -> TableSpec strings -> Table wires
 tableOfTableSpec wireMaker (TableSpec cols name) = Table name wireCols
   where wireCols = runWireMaker wireMaker cols
 
-tableOfTableSpecDef :: Default WireMaker a b => TableSpec a -> Table b
+tableOfTableSpecDef :: Default WireMaker strings wires =>
+                       TableSpec strings -> Table wires
 tableOfTableSpecDef = tableOfTableSpec def
 
 {-# DEPRECATED makeTableTDef "Use 'queryTable' instead" #-}
-makeTableTDef :: Default TableColspecP a a => Table a -> Query a
+makeTableTDef :: Default TableColspecP wires wires => Table wires -> Query wires
 makeTableTDef = queryTable
 
 -- For typeclass resolution it seems best to force the arguments to be
 -- the same.  Users can always use makeTableT to get more flexibility
 -- if they want.
-queryTable :: Default TableColspecP a a => Table a -> Query a
+queryTable :: Default TableColspecP wires wires => Table wires -> Query wires
 queryTable = makeTableT def
 
 -- I don't know if this should be deprecated or not.  Should we force
 -- everything to go through a Table?
-makeTableDef :: (Default WireMaker a b, Default TableColspecP b b)
-                => a -> String -> Query b
+makeTableDef :: (Default WireMaker strings wires,
+                 Default TableColspecP wires wires) =>
+                strings -> String -> Query wires
 makeTableDef = makeTableTDef . tableOfTableSpec def .: TableSpec
 
-makeTableT :: TableColspecP a b -> Table a -> Query b
+makeTableT :: TableColspecP wires wires' -> Table wires -> Query wires'
 makeTableT colspec (Table name cols) = makeTableQueryColspec colspec cols name
 
-makeTableQueryColspec :: TableColspecP a b -> a -> String -> Query b
+makeTableQueryColspec :: TableColspecP wires wires' ->
+                         wires -> String -> Query wires'
 makeTableQueryColspec = makeTable .: tableColspecOfTableColspecP
 
 -- makeTable is informally deprecated, but Values.hs still uses it,
 -- so I don't want to deprecate it with a pragma yet.
 --{-# DEPRECATED makeTable "Use 'makeTableT' or 'makeTableTDef' instead" #-}
-makeTable :: TableColspec a -> String -> Query a
+makeTable :: TableColspec wires -> String -> Query wires
 makeTable colspec = makeTable' colspec (zip x x)
   where x = runWriterOfColspec colspec
 
-makeTable' :: TableColspec a -> [(String, String)] -> String -> Query a
+makeTable' :: TableColspec wires -> [(String, String)] -> String -> Query wires
 makeTable' colspec cols table_name = simpleQueryArr f
   where f ((), t0) = (retwires, primQuery, next t0)
           where (retwires, primQuery) = makeTable'' colspec cols table_name (tagWith t0)
 
 -- TODO: this needs tidying
-makeTable'' :: TableColspec a -> [(String, String)] -> String -> (String -> String)
-               -> (a, PrimQuery)
+makeTable'' :: TableColspec wires
+               -> [(String, String)] -> String -> (String -> String)
+               -> (wires, PrimQuery)
 makeTable'' colspec cols table_name tag' =
   let basetablecols :: [String]
       basetablecols = map snd cols

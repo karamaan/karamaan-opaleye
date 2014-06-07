@@ -2,6 +2,7 @@
 
 module Karamaan.Opaleye.Manipulation where
 
+import Karamaan.Opaleye.RunQuery (QueryRunner(QueryRunner), query_)
 import Karamaan.Opaleye.Wire (Wire(Wire))
 import Karamaan.Opaleye.ExprArr (Scope, ExprArr, Expr, runExprArr'',
                                  runExprArrStartEmpty, scopeOfWire,
@@ -29,7 +30,7 @@ import Control.Arrow ((&&&))
 import Karamaan.Opaleye.Table (Table(Table))
 import Data.Profunctor.Product.Default (Default, def)
 import Karamaan.Plankton ((.:))
-import Karamaan.Opaleye.Values ((.:.))
+import Karamaan.Opaleye.Values ((.:.),(.:::.))
 import Data.Function (on)
 import qualified Database.PostgreSQL.Simple as SQL
 import Data.String (fromString)
@@ -181,6 +182,12 @@ arrangeInsertReturning ass tmr ter assr table e ea =
         returnSqlExprs :: [S.SqlExpr]
         returnSqlExprs = map (G.sqlExpr defaultSqlGenerator) returnPrimExprs
 
+arrangeInsertReturningSql
+  :: Assocer t' -> TableMaybeWrapper t t'-> TableExprRunner t u -> AssocerE r
+  -> Table t -> Expr t' -> ExprArr u r -> String
+arrangeInsertReturningSql =
+  fromString . show . H.ppInsertReturning .:::. arrangeInsertReturning
+
 primExprsOfAssocer :: Assocer t -> t -> (t, Scope, z) -> [(String, PrimExpr)]
 primExprsOfAssocer (Assocer (MWriter2 assocer)) t (cols, scope, _)
   = assocer t cols scope
@@ -268,6 +275,7 @@ arrangeInsertSqlDef :: (Default (PPOfContravariant Assocer) t' t',
                     => Table t -> Expr t' -> String
 arrangeInsertSqlDef = show . ppInsert .: arrangeInsertDef
 
+
 arrangeInsertReturningSqlDef :: (Default (PPOfContravariant Assocer) t' t',
                      Default TableMaybeWrapper t t',
                      Default TableExprRunner t u,
@@ -294,6 +302,25 @@ executeInsertConnDef :: (Default (PPOfContravariant Assocer) t' t',
                     => SQL.Connection -> Table t -> Expr t' -> IO Int64
 executeInsertConnDef conn =
   SQL.execute_ conn . fromString .: arrangeInsertSqlDef
+
+executeInsertReturningConn
+  :: Assocer t'=> TableMaybeWrapper t t'-> TableExprRunner t u -> AssocerE r
+  -> QueryRunner r r' -> SQL.Connection -> Table t -> Expr t' -> ExprArr u r
+  -> IO [r']
+executeInsertReturningConn ass tmr ter assr (QueryRunner _ rowParser) conn =
+    query_ rowParser conn . fromString .:. arrangeInsertReturningSql ass tmr ter assr
+
+executeInsertReturningConnDef
+  :: (Default (PPOfContravariant Assocer) t' t',
+      Default TableMaybeWrapper t t',
+      Default TableExprRunner t u,
+      Default (PPOfContravariant AssocerE) r r,
+      Default QueryRunner r r')
+  => SQL.Connection -> Table t -> Expr t' -> ExprArr u r -> IO [r']
+executeInsertReturningConnDef
+  = executeInsertReturningConn def' def def def'' def
+  where def' = unPPOfContravariant def
+        def'' = unPPOfContravariant def
 
 executeUpdateConnDef :: (Default TableExprRunner t u,
                      Default (PPOfContravariant Assocer) t' t',

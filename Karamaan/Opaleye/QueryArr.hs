@@ -1,4 +1,23 @@
-module Karamaan.Opaleye.QueryArr where
+{-|
+
+This modules defines the 'QueryArr' arrow, which is an arrow that represents
+selecting data from a database, and composing multiple queries together.
+
+-}
+module Karamaan.Opaleye.QueryArr
+    ( QueryArr (..)
+    , Query
+    , Tag
+    , tagWith
+    , start
+    , next
+    , simpleQueryArr
+    , runQueryArrPrim
+    , runSimpleQueryArr
+    , first3
+    , restrictWith
+    )
+where
 
 import Prelude hiding ((.), id)
 import Database.HaskellDB.PrimQuery (PrimQuery(Empty, Restrict, Project),

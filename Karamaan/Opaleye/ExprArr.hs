@@ -1,12 +1,44 @@
 {-# LANGUAGE FlexibleContexts #-}
 
-module Karamaan.Opaleye.ExprArr where
+module Karamaan.Opaleye.ExprArr
+    ( Scope
+    , ExprArr
+    , Expr
+    , runExprArr''
+    , scopeOfWire
+    , runExprArrStartEmpty
+    , runExprArrStart
+    , unsafeScopeLookup
+    , eq
+    , plus
+    , mul
+    , constant
+    , or
+    , toQueryArrDef
+    , and
+    , not
+    , constantLit
+    , constantDay
+    , equalsOneOf
+    , cat
+    , notEq
+    , unOp
+    , lt
+    , lte
+    , gt
+    , gte
+    , mod
+    , abs
+    , divide
+    , times
+    , minus
+    ) where
 
-import Prelude hiding ((.), id, or)
+import Prelude hiding ((.), id, or, and, not, mod, abs)
 import qualified Data.Map as Map
 import Data.Map (Map)
 import Database.HaskellDB.PrimQuery (PrimExpr, extend, Literal)
-import Control.Arrow (Arrow, arr, first, (&&&), (***))
+import Control.Arrow (Arrow, arr, first, (***))
 import Control.Category (Category, id, (.), (<<<))
 import Karamaan.Opaleye.QueryArr (Tag, first3, next, tagWith, start,
                                   QueryArr(QueryArr))
@@ -64,9 +96,6 @@ runExprArrStartEmpty expr a = runExprArr expr (a, Map.empty, start)
 runExprArr'' :: ExprArr a (Wire b) -> (a, Scope) -> PrimExpr
 runExprArr'' expr (a, scope) = unsafeScopeLookup b scope1
   where (b, scope1, _) = runExprArrStart expr (a, scope)
-
-runExprArr' :: Expr (Wire a) -> PrimExpr
-runExprArr' = flip runExprArr'' ((), Map.empty)
 
 -- Note that the returned Scope value is what is *added* to the
 -- overall scope, so ignoring the incoming Scope here is not a bug!
@@ -169,21 +198,6 @@ notEq = binOp PQ.OpNotEq "noteq"
 
 cat :: ExprArr (Wire String, Wire String) (Wire String)
 cat = binOp (PQ.OpOther "||") "cat"
-
-one :: Expr (Wire Int)
-one = constant 1
-
-two :: Expr (Wire Int)
-two = constant 2
-
-three :: Expr (Wire Int)
-three = constant 3
-
-onePlusTwo :: Expr (Wire Int)
-onePlusTwo = plus <<< (one &&& two)
-
-sumTimesThree :: Expr (Wire Int)
-sumTimesThree = mul <<< (three &&& onePlusTwo)
 
 equalsOneOf :: ShowConstant a => [a] -> ExprArr (Wire a) (Wire Bool)
 -- TODO: Should this be foldl', since laziness gets us nothing here?

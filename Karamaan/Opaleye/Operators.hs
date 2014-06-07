@@ -1,4 +1,4 @@
-module Karamaan.Opaleye.Operators where
+module Karamaan.Opaleye.Operators (operatorName) where
 
 -- TODO vv I put this take 5 in here because the query strings were getting
 -- too long and postgres was complaining that it was truncating them.

@@ -1,6 +1,19 @@
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
 
-module Karamaan.Opaleye.QueryColspec where
+module Karamaan.Opaleye.QueryColspec
+    ( PackMap(PackMap)
+    , MWriter(Writer)
+    , Writer
+    , QueryColspec(QueryColspec)
+    , runPackMapOfQueryColspec
+    , runWriterOfQueryColspec
+    , runWriter
+    , writerWire
+    , packMapWire
+    , runPackMap
+    , LWriter
+    , writer
+    ) where
 
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
 import Control.Applicative (Applicative, (<*>), pure, liftA2)

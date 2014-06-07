@@ -1,6 +1,16 @@
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
 
-module Karamaan.Opaleye.TableColspec where
+module Karamaan.Opaleye.TableColspec
+    ( TableColspec
+    , TableColspecP
+    , runWriterOfColspec
+    , runPackMapOfColspec
+    , tableColspecOfTableColspecP
+    , WireMaker
+    , runWireMaker
+    , col
+    )
+    where
 
 import Karamaan.Opaleye.Wire (Wire(Wire))
 import Karamaan.Opaleye.QueryColspec (QueryColspec(QueryColspec),

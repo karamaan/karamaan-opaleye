@@ -1,4 +1,9 @@
-module Karamaan.Opaleye.Wire where
+module Karamaan.Opaleye.Wire
+    ( Wire(Wire)
+    , unWire
+    , unsafeCoerce
+    )
+    where
 
 newtype Wire a = Wire String deriving Show
 

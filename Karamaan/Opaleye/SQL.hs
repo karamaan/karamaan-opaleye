@@ -18,7 +18,7 @@ import Data.Profunctor.Product.Default (Default, def)
 -- in, for example, Values.hs, may be Postgres specific.
 --
 -- Support for other DBMSes can be added if required.
-showSqlForPostgres :: Unpackspec a -> Query a -> String
+showSqlForPostgres :: Unpackspec wires -> Query wires -> String
 showSqlForPostgres = optimizeFormatAndShowSQL .: runQueryArrPrim
 
 formatAndShowSQL :: PrimQuery -> String
@@ -29,7 +29,6 @@ optimizeFormatAndShowSQL = formatAndShowSQL . optimize
 
 -- TODO: the other "Default" functions are called "...Def".  I think we
 -- should standardize on the latter.
-showSqlForPostgresDefault :: Default (PPOfContravariant Unpackspec) a a
-                             => Query a
-                             -> String
+showSqlForPostgresDefault :: Default (PPOfContravariant Unpackspec) wires wires
+                             => Query wires -> String
 showSqlForPostgresDefault = showSqlForPostgres (unPPOfContravariant def)

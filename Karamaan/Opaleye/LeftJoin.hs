@@ -1,7 +1,9 @@
 {-# LANGUAGE Arrows, FlexibleContexts, FlexibleInstances,
              MultiParamTypeClasses #-}
 
-module Karamaan.Opaleye.LeftJoin where
+module Karamaan.Opaleye.LeftJoin
+       {-# DEPRECATED "This is for exploratory purposes only" #-}
+       where
 
 import Data.Profunctor.Product.Default (Default, def)
 import Karamaan.Opaleye.QueryColspec (QueryColspec)

@@ -183,17 +183,26 @@ arrangeInsertReturning ass tmr ter assr table e ea =
         returnSqlExprs = map (G.sqlExpr defaultSqlGenerator) returnPrimExprs
 
 arrangeInsertReturningSql
-  :: Assocer t' -> TableMaybeWrapper t t'-> TableExprRunner t u -> AssocerE r
-  -> Table t -> Expr t' -> ExprArr u r -> String
+  :: Assocer maybeWires
+  -> TableMaybeWrapper wires maybeWires
+  -> TableExprRunner wires wires'
+  -> AssocerE resultWires
+  -> Table wires
+  -> Expr maybeWires
+  -> ExprArr wires' resultWires
+  -> String
 arrangeInsertReturningSql =
   show . H.ppInsertReturning .:::. arrangeInsertReturning
 
 arrangeInsertReturningSqlDef
-  :: (Default (PPOfContravariant Assocer) t' t',
-      Default TableMaybeWrapper t t',
-      Default TableExprRunner t u,
-      Default (PPOfContravariant AssocerE) r r)
-  => Table t -> Expr t' -> ExprArr u r -> String
+  :: (Default (PPOfContravariant Assocer) maybeWires maybeWires,
+      Default TableMaybeWrapper wires maybeWires,
+      Default TableExprRunner wires wires',
+      Default (PPOfContravariant AssocerE) resultWires resultWires)
+  => Table wires
+  -> Expr maybeWires
+  -> ExprArr wires' resultWires
+  -> String
 arrangeInsertReturningSqlDef = arrangeInsertReturningSql def' def def def''
   where def'  = unPPOfContravariant def
         def'' = unPPOfContravariant def
@@ -305,19 +314,30 @@ executeInsertConnDef conn =
   SQL.execute_ conn . fromString .: arrangeInsertSqlDef
 
 executeInsertReturningConn
-  :: Assocer t' -> TableMaybeWrapper t t'-> TableExprRunner t u -> AssocerE r
-  -> QueryRunner r r' -> SQL.Connection -> Table t -> Expr t' -> ExprArr u r
-  -> IO [r']
+  :: Assocer maybeWires
+  -> TableMaybeWrapper wires maybeWires
+  -> TableExprRunner wires wires'
+  -> AssocerE resultWires
+  -> QueryRunner resultWires haskells
+  -> SQL.Connection
+  -> Table wires
+  -> Expr maybeWires
+  -> ExprArr wires' resultWires
+  -> IO [haskells]
 executeInsertReturningConn ass tmr ter assr (QueryRunner _ rowParser) conn =
     query_ rowParser conn . fromString .:. arrangeInsertReturningSql ass tmr ter assr
 
 executeInsertReturningConnDef
-  :: (Default (PPOfContravariant Assocer) t' t',
-      Default TableMaybeWrapper t t',
-      Default TableExprRunner t u,
-      Default (PPOfContravariant AssocerE) r r,
-      Default QueryRunner r r')
-  => SQL.Connection -> Table t -> Expr t' -> ExprArr u r -> IO [r']
+  :: (Default (PPOfContravariant Assocer) maybeWires maybeWires,
+      Default TableMaybeWrapper wires maybeWires,
+      Default TableExprRunner wires wires',
+      Default (PPOfContravariant AssocerE) resultWires resultWires,
+      Default QueryRunner resultWires haskells)
+  => SQL.Connection
+  -> Table wires
+  -> Expr maybeWires
+  -> ExprArr wires' resultWires
+  -> IO [haskells]
 executeInsertReturningConnDef
   = executeInsertReturningConn def' def def def'' def
   where def' = unPPOfContravariant def

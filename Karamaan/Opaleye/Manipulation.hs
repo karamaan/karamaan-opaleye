@@ -143,7 +143,8 @@ instance ProductContravariant AssocerE where
 -- End of very boring instance definitions
 
 -- arrange* do the meat of the computation
-arrangeDelete :: TableExprRunner t a -> Table t -> ExprArr a (Wire Bool)
+arrangeDelete :: TableExprRunner wires wires' -> Table wires
+                 -> ExprArr wires' (Wire Bool)
                  -> SqlDelete
 arrangeDelete tableExprRunner
               (Table tableName tableCols)
@@ -152,11 +153,12 @@ arrangeDelete tableExprRunner
   where condition = runExprArr'' conditionExpr colsAndScope'
         colsAndScope' = colsAndScope tableExprRunner tableCols
 
-colsAndScope :: TableExprRunner t u -> t -> (u, Scope)
+colsAndScope :: TableExprRunner wires wires' -> wires -> (wires', Scope)
 colsAndScope (TableExprRunner (Writer makeScope) adaptCols)
   = adaptCols &&& makeScope
 
-arrangeInsert :: Assocer t' -> TableMaybeWrapper t t' -> Table t -> Expr t'
+arrangeInsert :: Assocer maybewires -> TableMaybeWrapper wires maybewires
+                 -> Table wires -> Expr maybewires
                  -> SqlInsert
 arrangeInsert assocer
               (TableMaybeWrapper maybeWrapper)
@@ -167,9 +169,11 @@ arrangeInsert assocer
           assocs = primExprsOfAssocer assocer tableMaybeCols
                                       (runExprArrStartEmpty insertExpr ())
 
-arrangeInsertReturning :: Assocer t' -> TableMaybeWrapper t t'
-                       -> TableExprRunner t u -> AssocerE r
-                       -> Table t -> Expr t' -> ExprArr u r
+arrangeInsertReturning :: Assocer maybewires
+                       -> TableMaybeWrapper wires maybewires
+                       -> TableExprRunner wires wires' -> AssocerE returning
+                       -> Table wires -> Expr maybewires
+                       -> ExprArr wires' returning
                        -> H.SqlInsertReturning
 arrangeInsertReturning ass tmr ter assr table e ea =
   H.SqlInsertReturning (arrangeInsert ass tmr table e) returnSqlExprs
@@ -189,8 +193,11 @@ primExprsOfAssocerE :: AssocerE t -> (t, Scope, z) -> [PrimExpr]
 primExprsOfAssocerE (AssocerE (Writer assocerE)) (cols, scope, _)
   = assocerE cols scope
 
-arrangeUpdate :: TableExprRunner t u -> Assocer t' -> TableMaybeWrapper t t'
-              -> Table t -> ExprArr u t' -> ExprArr u (Wire Bool) -> SqlUpdate
+arrangeUpdate :: TableExprRunner wires wires' -> Assocer maybewires
+              -> TableMaybeWrapper wires maybewires
+              -> Table wires -> ExprArr wires' maybewires
+              -> ExprArr wires' (Wire Bool)
+              -> SqlUpdate
 arrangeUpdate tableExprRunner
               assocer
               (TableMaybeWrapper maybeWrapper)
@@ -206,30 +213,33 @@ arrangeUpdate tableExprRunner
 
 -- arrange*Def pass the default typeclass instances in automatically,
 -- to reduce boilerplate
-arrangeDeleteDef :: Default TableExprRunner t a =>
-                    Table t -> ExprArr a (Wire Bool) -> SqlDelete
+arrangeDeleteDef :: Default TableExprRunner wires wires' =>
+                    Table wires -> ExprArr wires' (Wire Bool) -> SqlDelete
 arrangeDeleteDef = arrangeDelete def
 
-arrangeInsertDef :: (Default (PPOfContravariant Assocer) t' t',
-                     Default TableMaybeWrapper t t')
-                    => Table t -> Expr t' -> SqlInsert
+arrangeInsertDef :: (Default (PPOfContravariant Assocer) maybewires maybewires,
+                     Default TableMaybeWrapper wires maybewires)
+                    => Table wires -> Expr maybewires -> SqlInsert
 arrangeInsertDef = arrangeInsert def' def
   where def' = unPPOfContravariant def
 
-arrangeInsertReturningDef :: (Default (PPOfContravariant Assocer) t' t',
-                     Default TableMaybeWrapper t t',
-                     Default TableExprRunner t u,
+arrangeInsertReturningDef :: (Default (PPOfContravariant Assocer)
+                                      maybewires maybewires,
+                     Default TableMaybeWrapper wires maybewires,
+                     Default TableExprRunner wires wires',
                      Default (PPOfContravariant AssocerE) r r)
-                    => Table t -> Expr t' -> ExprArr u r -> H.SqlInsertReturning
+                    => Table wires -> Expr maybewires -> ExprArr wires' r
+                             -> H.SqlInsertReturning
 arrangeInsertReturningDef = arrangeInsertReturning def' def def def''
   where def' = unPPOfContravariant def
         def'' = unPPOfContravariant def
         -- ^^ TODO: really need a typeclass polymorphic version of these!
 
-arrangeUpdateDef :: (Default TableExprRunner t u,
-                     Default (PPOfContravariant Assocer) t' t',
-                     Default TableMaybeWrapper t t') =>
-                    Table t -> ExprArr u t' -> ExprArr u (Wire Bool)
+arrangeUpdateDef :: (Default TableExprRunner wires wires',
+                     Default (PPOfContravariant Assocer) maybewires maybewires,
+                     Default TableMaybeWrapper wires maybewires) =>
+                    Table wires -> ExprArr wires' maybewires
+                    -> ExprArr wires' (Wire Bool)
                     -> SqlUpdate
 arrangeUpdateDef = arrangeUpdate def def' def
   where def' = unPPOfContravariant def
@@ -259,70 +269,78 @@ assocerWire (Wire s) w scope = (s, unsafeScopeLookup w scope)
 assocerEWire :: Wire a -> Scope -> [PrimExpr]
 assocerEWire = return .: unsafeScopeLookup
 
-arrangeDeleteSqlDef :: Default TableExprRunner t a =>
-                    Table t -> ExprArr a (Wire Bool) -> String
+arrangeDeleteSqlDef :: Default TableExprRunner wires wires' =>
+                    Table wires -> ExprArr wires' (Wire Bool) -> String
 arrangeDeleteSqlDef  = show . ppDelete .: arrangeDeleteDef
 
-arrangeInsertSqlDef :: (Default (PPOfContravariant Assocer) t' t',
-                     Default TableMaybeWrapper t t')
-                    => Table t -> Expr t' -> String
+arrangeInsertSqlDef :: (Default (PPOfContravariant Assocer) wires' wires',
+                     Default TableMaybeWrapper wires wires')
+                    => Table wires -> Expr wires' -> String
 arrangeInsertSqlDef = show . ppInsert .: arrangeInsertDef
 
-arrangeInsertReturningSqlDef :: (Default (PPOfContravariant Assocer) t' t',
-                     Default TableMaybeWrapper t t',
-                     Default TableExprRunner t u,
+arrangeInsertReturningSqlDef :: (Default (PPOfContravariant Assocer)
+                                         maybewires maybewires,
+                     Default TableMaybeWrapper wires maybewires,
+                     Default TableExprRunner wires wires',
                      Default (PPOfContravariant AssocerE) r r)
-                    => Table t -> Expr t' -> ExprArr u r -> String
+                    => Table wires -> Expr maybewires -> ExprArr wires' r
+                             -> String
 arrangeInsertReturningSqlDef = show . H.ppInsertReturning
                                .:. arrangeInsertReturningDef
 
-arrangeUpdateSqlDef :: (Default TableExprRunner t u,
-                     Default (PPOfContravariant Assocer) t' t',
-                     Default TableMaybeWrapper t t') =>
-                    Table t -> ExprArr u t' -> ExprArr u (Wire Bool)
+arrangeUpdateSqlDef :: (Default TableExprRunner wires wires',
+                     Default (PPOfContravariant Assocer) maybewires maybewires,
+                     Default TableMaybeWrapper wires maybewires) =>
+                    Table wires -> ExprArr wires' maybewires
+                    -> ExprArr wires' (Wire Bool)
                     -> String
 arrangeUpdateSqlDef = (show . ppUpdate) .:. arrangeUpdateDef
 
-executeDeleteConnDef :: Default TableExprRunner t a =>
+executeDeleteConnDef :: Default TableExprRunner wires wires' =>
                     SQL.Connection ->
-                    Table t -> ExprArr a (Wire Bool) -> IO Int64
+                    Table wires -> ExprArr wires' (Wire Bool) -> IO Int64
 executeDeleteConnDef conn =
   SQL.execute_ conn . fromString .: arrangeDeleteSqlDef
 
-executeInsertConnDef :: (Default (PPOfContravariant Assocer) t' t',
-                     Default TableMaybeWrapper t t')
-                    => SQL.Connection -> Table t -> Expr t' -> IO Int64
+executeInsertConnDef :: (Default (PPOfContravariant Assocer)
+                                 maybewires maybewires,
+                     Default TableMaybeWrapper wires maybewires)
+                    => SQL.Connection -> Table wires -> Expr maybewires
+                     -> IO Int64
 executeInsertConnDef conn =
   SQL.execute_ conn . fromString .: arrangeInsertSqlDef
 
-executeUpdateConnDef :: (Default TableExprRunner t u,
-                     Default (PPOfContravariant Assocer) t' t',
-                     Default TableMaybeWrapper t t') =>
+executeUpdateConnDef :: (Default TableExprRunner wires wires',
+                     Default (PPOfContravariant Assocer) maybewires maybewires,
+                     Default TableMaybeWrapper wires maybewires) =>
                     SQL.Connection ->
-                    Table t -> ExprArr u t' -> ExprArr u (Wire Bool)
+                    Table wires -> ExprArr wires' maybewires
+                    -> ExprArr wires' (Wire Bool)
                     -> IO Int64
 executeUpdateConnDef conn =
   SQL.execute_ conn . fromString .:. arrangeUpdateSqlDef
 
-executeDeleteDef :: Default TableExprRunner t a =>
+executeDeleteDef :: Default TableExprRunner wires wires' =>
                     SQL.ConnectInfo ->
-                    Table t -> ExprArr a (Wire Bool) -> IO Int64
+                    Table wires -> ExprArr wires' (Wire Bool) -> IO Int64
 executeDeleteDef connectInfo t e = do
   conn <- SQL.connect connectInfo
   executeDeleteConnDef conn t e
 
-executeInsertDef :: (Default (PPOfContravariant Assocer) t' t',
-                     Default TableMaybeWrapper t t')
-                    => SQL.ConnectInfo -> Table t -> Expr t' -> IO Int64
+executeInsertDef :: (Default (PPOfContravariant Assocer) maybewires maybewires,
+                     Default TableMaybeWrapper wires maybewires)
+                    => SQL.ConnectInfo -> Table wires -> Expr maybewires
+                    -> IO Int64
 executeInsertDef connectInfo t e = do
   conn <- SQL.connect connectInfo
   executeInsertConnDef conn t e
 
-executeUpdateDef :: (Default TableExprRunner t u,
-                     Default (PPOfContravariant Assocer) t' t',
-                     Default TableMaybeWrapper t t') =>
+executeUpdateDef :: (Default TableExprRunner wires wires',
+                     Default (PPOfContravariant Assocer) maybewires maybewires,
+                     Default TableMaybeWrapper wires maybewires) =>
                     SQL.ConnectInfo ->
-                    Table t -> ExprArr u t' -> ExprArr u (Wire Bool)
+                    Table wires -> ExprArr wires' maybewires
+                    -> ExprArr wires' (Wire Bool)
                     -> IO Int64
 executeUpdateDef connectInfo t e e' = do
   conn <- SQL.connect connectInfo

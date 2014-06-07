@@ -2,6 +2,7 @@
 
 module Karamaan.Opaleye.Manipulation where
 
+import Karamaan.Opaleye.RunQuery (QueryRunner(QueryRunner), query_)
 import Karamaan.Opaleye.Wire (Wire(Wire))
 import Karamaan.Opaleye.ExprArr (Scope, ExprArr, Expr, runExprArr'',
                                  runExprArrStartEmpty, scopeOfWire,
@@ -268,6 +269,7 @@ arrangeInsertSqlDef :: (Default (PPOfContravariant Assocer) t' t',
                     => Table t -> Expr t' -> String
 arrangeInsertSqlDef = show . ppInsert .: arrangeInsertDef
 
+
 arrangeInsertReturningSqlDef :: (Default (PPOfContravariant Assocer) t' t',
                      Default TableMaybeWrapper t t',
                      Default TableExprRunner t u,
@@ -294,6 +296,25 @@ executeInsertConnDef :: (Default (PPOfContravariant Assocer) t' t',
                     => SQL.Connection -> Table t -> Expr t' -> IO Int64
 executeInsertConnDef conn =
   SQL.execute_ conn . fromString .: arrangeInsertSqlDef
+
+executeInsertReturningConn
+  :: (Default (PPOfContravariant Assocer) t' t',
+      Default TableMaybeWrapper t t',
+      Default TableExprRunner t u,
+      Default (PPOfContravariant AssocerE) r r)
+  => QueryRunner r r' -> SQL.Connection -> Table t
+  -> Expr t' -> ExprArr u r -> IO [r']
+executeInsertReturningConn (QueryRunner _ rowParser) conn =
+    query_ rowParser conn . fromString .:. arrangeInsertReturningSqlDef
+
+executeInsertReturningConnDef
+  :: (Default (PPOfContravariant Assocer) t' t',
+      Default TableMaybeWrapper t t',
+      Default TableExprRunner t u,
+      Default (PPOfContravariant AssocerE) r r,
+      Default QueryRunner r r')
+  => SQL.Connection -> Table t -> Expr t' -> ExprArr u r -> IO [r']
+executeInsertReturningConnDef = executeInsertReturningConn def
 
 executeUpdateConnDef :: (Default TableExprRunner t u,
                      Default (PPOfContravariant Assocer) t' t',

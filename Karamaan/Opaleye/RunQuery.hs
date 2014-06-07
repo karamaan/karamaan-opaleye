@@ -38,7 +38,10 @@ import Data.Time.Calendar (Day)
 -- instance Default QueryRunner (Wire MyType) MyType where
 --     def = fieldQueryRunnerF MyType
 
-data QueryRunner a b = QueryRunner (Unpackspec a) (RowParser b)
+-- * 'wires' represents types like '(Wire Int, Wire Bool, Wire String)'
+-- * 'haskells' represents types like '(Int, Bool, String)'
+data QueryRunner wires haskells = QueryRunner (Unpackspec wires)
+                                              (RowParser haskells)
 
 instance Profunctor QueryRunner where
   dimap f g (QueryRunner u b) = QueryRunner (contramap f u) (fmap g b)
@@ -126,16 +129,18 @@ instance Reifies s (RowParser a) => FromRow (FR a s) where
 asProxyOf3 :: h (g (f s)) -> Proxy s -> h (g (f s))
 asProxyOf3 a _ = a
 
-runQuery :: QueryRunner a b -> Query a -> SQL.Connection -> IO [b]
+runQuery :: QueryRunner wires haskells -> Query wires -> SQL.Connection
+         -> IO [haskells]
 runQuery (QueryRunner u rowParser) q conn = query_ rowParser conn sql
   where sql :: SQL.Query
         sql = fromString (showSqlForPostgres u q)
 
-runQueryDefault :: Default QueryRunner a b => Query a -> SQL.Connection -> IO [b]
+runQueryDefault :: Default QueryRunner wires haskells
+                => Query wires -> SQL.Connection -> IO [haskells]
 runQueryDefault = runQuery def
 
-runQueryDefaultConnectInfo :: Default QueryRunner a b
-                              => SQL.ConnectInfo -> Query a -> IO [b]
+runQueryDefaultConnectInfo :: Default QueryRunner wires haskells
+                              => SQL.ConnectInfo -> Query wires -> IO [haskells]
 runQueryDefaultConnectInfo connectInfo q = do
   conn <- SQL.connect connectInfo
   runQueryDefault q conn
@@ -152,6 +157,6 @@ runQueryDefaultConnectInfo connectInfo q = do
 -- https://www.fpcomplete.com/user/thoughtpolice/using-reflection but
 -- I couldn't see how to get it to work.  It seems we need to come up
 -- with a value of type 'RowParser (RowParser c -> c)'.
-query_ :: RowParser c -> SQL.Connection -> SQL.Query -> IO [c]
+query_ :: RowParser haskells -> SQL.Connection -> SQL.Query -> IO [haskells]
 query_ rowParser conn sql = reify rowParser (fmap (map runFR)
                                             . asProxyOf3 (SQL.query_ conn sql))

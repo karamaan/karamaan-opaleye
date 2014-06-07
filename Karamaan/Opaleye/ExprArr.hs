@@ -38,7 +38,7 @@ import Prelude hiding ((.), id, or, and, not, mod, abs)
 import qualified Data.Map as Map
 import Data.Map (Map)
 import Database.HaskellDB.PrimQuery (PrimExpr, extend, Literal)
-import Control.Arrow (Arrow, arr, first, (&&&), (***))
+import Control.Arrow (Arrow, arr, first, (***))
 import Control.Category (Category, id, (.), (<<<))
 import Karamaan.Opaleye.QueryArr (Tag, first3, next, tagWith, start,
                                   QueryArr(QueryArr))

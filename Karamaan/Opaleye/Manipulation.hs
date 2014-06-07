@@ -196,31 +196,6 @@ arrangeInsertReturning ass tmr ter assr table e ea =
         returnSqlExprs :: [S.SqlExpr]
         returnSqlExprs = map (G.sqlExpr defaultSqlGenerator) returnPrimExprs
 
-arrangeInsertReturningSql
-  :: Assocer maybeWires
-  -> TableMaybeWrapper wires maybeWires
-  -> TableExprRunner wires wires'
-  -> AssocerE resultWires
-  -> Table wires
-  -> Expr maybeWires
-  -> ExprArr wires' resultWires
-  -> String
-arrangeInsertReturningSql =
-  show . H.ppInsertReturning .:::. arrangeInsertReturning
-
-arrangeInsertReturningSqlDef
-  :: (Default (PPOfContravariant Assocer) maybeWires maybeWires,
-      Default TableMaybeWrapper wires maybeWires,
-      Default TableExprRunner wires wires',
-      Default (PPOfContravariant AssocerE) resultWires resultWires)
-  => Table wires
-  -> Expr maybeWires
-  -> ExprArr wires' resultWires
-  -> String
-arrangeInsertReturningSqlDef = arrangeInsertReturningSql def' def def def''
-  where def'  = unPPOfContravariant def
-        def'' = unPPOfContravariant def
-
 primExprsOfAssocer :: Assocer t -> t -> (t, Scope, z) -> [(String, PrimExpr)]
 primExprsOfAssocer (Assocer (MWriter2 assocer)) t (cols, scope, _)
   = assocer t cols scope
@@ -314,15 +289,31 @@ arrangeInsertSqlDef :: (Default (PPOfContravariant Assocer) wires' wires',
                     => Table wires -> Expr wires' -> String
 arrangeInsertSqlDef = show . ppInsert .: arrangeInsertDef
 
-arrangeInsertReturningSqlDef :: (Default (PPOfContravariant Assocer)
-                                         maybewires maybewires,
-                     Default TableMaybeWrapper wires maybewires,
-                     Default TableExprRunner wires wires',
-                     Default (PPOfContravariant AssocerE) r r)
-                    => Table wires -> Expr maybewires -> ExprArr wires' r
-                             -> String
-arrangeInsertReturningSqlDef = show . H.ppInsertReturning
-                               .:. arrangeInsertReturningDef
+arrangeInsertReturningSql
+  :: Assocer maybeWires
+  -> TableMaybeWrapper wires maybeWires
+  -> TableExprRunner wires wires'
+  -> AssocerE resultWires
+  -> Table wires
+  -> Expr maybeWires
+  -> ExprArr wires' resultWires
+  -> String
+arrangeInsertReturningSql =
+  show . H.ppInsertReturning .:::. arrangeInsertReturning
+
+arrangeInsertReturningSqlDef
+  :: (Default (PPOfContravariant Assocer) maybeWires maybeWires,
+      Default TableMaybeWrapper wires maybeWires,
+      Default TableExprRunner wires wires',
+      Default (PPOfContravariant AssocerE) resultWires resultWires)
+  => Table wires
+  -> Expr maybeWires
+  -> ExprArr wires' resultWires
+  -> String
+arrangeInsertReturningSqlDef = arrangeInsertReturningSql def' def def def''
+  where def'  = unPPOfContravariant def
+        def'' = unPPOfContravariant def
+
 
 arrangeUpdateSqlDef :: (Default TableExprRunner wires wires',
                      Default (PPOfContravariant Assocer) maybewires maybewires,

@@ -186,7 +186,17 @@ arrangeInsertReturningSql
   :: Assocer t' -> TableMaybeWrapper t t'-> TableExprRunner t u -> AssocerE r
   -> Table t -> Expr t' -> ExprArr u r -> String
 arrangeInsertReturningSql =
-  fromString . show . H.ppInsertReturning .:::. arrangeInsertReturning
+  show . H.ppInsertReturning .:::. arrangeInsertReturning
+
+arrangeInsertReturningSqlDef
+  :: (Default (PPOfContravariant Assocer) t' t',
+      Default TableMaybeWrapper t t',
+      Default TableExprRunner t u,
+      Default (PPOfContravariant AssocerE) r r)
+  => Table t -> Expr t' -> ExprArr u r -> String
+arrangeInsertReturningSqlDef = arrangeInsertReturningSql def' def def def''
+  where def'  = unPPOfContravariant def
+        def'' = unPPOfContravariant def
 
 primExprsOfAssocer :: Assocer t -> t -> (t, Scope, z) -> [(String, PrimExpr)]
 primExprsOfAssocer (Assocer (MWriter2 assocer)) t (cols, scope, _)
@@ -274,15 +284,6 @@ arrangeInsertSqlDef :: (Default (PPOfContravariant Assocer) t' t',
                      Default TableMaybeWrapper t t')
                     => Table t -> Expr t' -> String
 arrangeInsertSqlDef = show . ppInsert .: arrangeInsertDef
-
-
-arrangeInsertReturningSqlDef :: (Default (PPOfContravariant Assocer) t' t',
-                     Default TableMaybeWrapper t t',
-                     Default TableExprRunner t u,
-                     Default (PPOfContravariant AssocerE) r r)
-                    => Table t -> Expr t' -> ExprArr u r -> String
-arrangeInsertReturningSqlDef = show . H.ppInsertReturning
-                               .:. arrangeInsertReturningDef
 
 arrangeUpdateSqlDef :: (Default TableExprRunner t u,
                      Default (PPOfContravariant Assocer) t' t',

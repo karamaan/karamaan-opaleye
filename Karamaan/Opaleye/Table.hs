@@ -28,10 +28,6 @@ tableOfTableSpecDef :: Default WireMaker strings wires =>
                        TableSpec strings -> Table wires
 tableOfTableSpecDef = tableOfTableSpec def
 
-{-# DEPRECATED makeTableTDef "Use 'queryTable' instead" #-}
-makeTableTDef :: Default TableColspecP wires wires => Table wires -> Query wires
-makeTableTDef = queryTable
-
 -- For typeclass resolution it seems best to force the arguments to be
 -- the same.  Users can always use makeTableT to get more flexibility
 -- if they want.

@@ -39,7 +39,7 @@ queryTable = makeTableT def
 makeTableDef :: (Default WireMaker strings wires,
                  Default TableColspecP wires wires) =>
                 strings -> String -> Query wires
-makeTableDef = makeTableTDef . tableOfTableSpec def .: TableSpec
+makeTableDef = queryTable . tableOfTableSpec def .: TableSpec
 
 makeTableT :: TableColspecP wires wires' -> Table wires -> Query wires'
 makeTableT colspec (Table name cols) = makeTableQueryColspec colspec cols name
@@ -50,7 +50,7 @@ makeTableQueryColspec = makeTable .: tableColspecOfTableColspecP
 
 -- makeTable is informally deprecated, but Values.hs still uses it,
 -- so I don't want to deprecate it with a pragma yet.
---{-# DEPRECATED makeTable "Use 'makeTableT' or 'makeTableTDef' instead" #-}
+--{-# DEPRECATED makeTable "Use 'makeTableT' or 'queryTable' instead" #-}
 makeTable :: TableColspec wires -> String -> Query wires
 makeTable colspec = makeTable' colspec (zip x x)
   where x = runWriterOfColspec colspec

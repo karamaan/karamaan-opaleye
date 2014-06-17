@@ -5,6 +5,24 @@ module Karamaan.Opaleye.LeftJoin
        {-# DEPRECATED "This is for exploratory purposes only" #-}
        where
 
+{- Don't actually use this module!  It was an attempt to see if I
+could implement outer-join-like functionality in Opaleye without
+actually having the outer join primatives implemented in HaskellDB.
+It didn't lead to production-ready code, although it did give me some
+good ideas.
+
+Steps to add outer join functionality to Opaleye:
+
+1. Implement an outer join primative in HaskellDB's PrimQuery.
+   OR
+   Implement an entirely new AST specially for Opaleye, including
+   the outer join primative.
+   (The former will be easier!)
+
+2. Use the NullMaker technology below to allow the correct typing of
+   the left join.
+-}
+
 import Data.Profunctor.Product.Default (Default, def)
 import Karamaan.Opaleye.QueryColspec (QueryColspec)
 import Karamaan.Opaleye.QueryArr (Query)

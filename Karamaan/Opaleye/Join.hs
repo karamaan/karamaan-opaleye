@@ -12,6 +12,13 @@ import qualified Karamaan.Opaleye.Nullable as Nullable
 import Control.Arrow (returnA, first)
 import Control.Category ((<<<))
 
+{- Herein are contained some abstractions that can help with
+simulating outer-join like behaviour in Opaleye.  The correct
+long-term approach is to actually implement outer joins in Opaleye,
+but this requires patching HaskellDB or developing our own AST
+replacement so it is slightly harder than trivial.
+-}
+
 -- This is slightly subtle.  The eq *can* return Unknown
 -- (see http://en.wikipedia.org/wiki/Null_%28SQL%29#Comparisons_with_NULL_and_the_three-valued_logic_.283VL.29)
 -- but since we restrict immediately the Unknown is not distinguised

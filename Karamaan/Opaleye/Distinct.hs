@@ -33,7 +33,7 @@ distinct x = x `union` x
 -- This is how I used to implement it.  It didn't work very well.
 -- I think this is a correct implementation, but HaskellDB still seems to have
 -- trouble dealing with GROUP BY. See Report.Trade.Descendants.activeEdgesBroken
-{-# DEPRECATED distinct "Use 'distinctBetter' instead" #-}
+{-# DEPRECATED distinct1 "Use 'distinctBetter' instead" #-}
 distinct1 :: Query (Wire a) -> Query (Wire a)
 distinct1 q = simpleQueryArr $ \((), t0) ->
   let (Wire oldCol, primQ, t1) = runSimpleQueryArr q ((), t0)

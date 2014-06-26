@@ -4,9 +4,9 @@
 
 module Karamaan.Opaleye.RunQuery.TH where
 
-import Language.Haskell.TH (Dec(NewtypeD), Con(RecC, NormalC),
+import Language.Haskell.TH (Dec(NewtypeD, DataD), Con(RecC, NormalC),
                             Type(ConT), Q, Exp(ConE), Name,
-                            Info(TyConI), reify)
+                            Info(TyConI), reify, TyVarBndr)
 import Data.Profunctor.Product.TH (Error, varNameOfBinder)
 import Control.Monad ((<=<), when)
 
@@ -69,3 +69,35 @@ newtypeConstructorName :: Con -> Either Error Name
 newtypeConstructorName (NormalC name _) = return name
 newtypeConstructorName (RecC name _) = return name
 newtypeConstructorName _ = Left "Unexpected non-newtype constructor"
+
+makeWireQueryRunnerInstanceEnum :: Name -> Q [Dec]
+makeWireQueryRunnerInstanceEnum = returnOrFail <=< r make <=< reify
+  where r = (return .)
+        returnOrFail (Right decs) = decs
+        returnOrFail (Left errMsg) = fail errMsg
+        make = makeWireQueryRunnerInstanceEnumE
+
+makeWireQueryRunnerInstanceEnumE :: Info -> Either Error (Q [Dec])
+makeWireQueryRunnerInstanceEnumE info = do
+  (tyName, tyVars) <- dataDecStuffOfInfo info
+  when ((not . null) tyVars) (Left "I can't handle data with type parameters")
+  let instanceDefinitions' = instanceDefinitionsEnum tyName
+
+  return instanceDefinitions'
+
+instanceDefinitionsEnum :: Name -> Q [Dec]
+instanceDefinitionsEnum tyName = instanceDec where
+  baseType = return (ConT tyName)
+
+  instanceDec = [d| instance Default QueryRunner (Wire $baseType)
+                                                  $baseType where
+                        def = fieldQueryRunnerF toEnum
+
+                    instance Default QueryRunner (Wire (Nullable $baseType))
+                                                  (Maybe $baseType) where
+                        def = fieldQueryRunnerF (fmap toEnum) |]
+
+dataDecStuffOfInfo :: Info -> Either Error (Name, [TyVarBndr])
+dataDecStuffOfInfo (TyConI (DataD _cxt tyName tyVars _constructors _deriving)) =
+  return (tyName, tyVars)
+dataDecStuffOfInfo _ = Left "That doesn't look like a data declaration to me"

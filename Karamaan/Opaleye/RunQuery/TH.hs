@@ -28,11 +28,11 @@ import Data.Profunctor.Product.Default (Default, def)
 --   def = fieldQueryRunnerF (fmap StrategyId)
 
 makeWireQueryRunnerInstance :: Name -> Q [Dec]
-makeWireQueryRunnerInstance = returnOrFail <=< r makeAandIE <=< reify
+makeWireQueryRunnerInstance = returnOrFail <=< r make <=< reify
   where r = (return .)
         returnOrFail (Right decs) = decs
         returnOrFail (Left errMsg) = fail errMsg
-        makeAandIE = makeWireQueryRunnerInstanceE
+        make = makeWireQueryRunnerInstanceE
 
 makeWireQueryRunnerInstanceE :: Info -> Either Error (Q [Dec])
 makeWireQueryRunnerInstanceE info = do

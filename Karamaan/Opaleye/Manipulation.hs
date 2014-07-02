@@ -1,12 +1,15 @@
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts #-}
 
 module Karamaan.Opaleye.Manipulation
-    ( arrangeDeleteSqlDef
+    ( Assocer
+    , TableMaybeWrapper
+    , arrangeDeleteSqlDef
     , arrangeUpdateSqlDef
     , arrangeInsertSqlDef
     , arrangeInsertReturningSqlDef
     , arrangeInsertReturningDef
     , executeInsertDef
+    , executeInsertConnDef
     , executeDeleteDef
     , executeUpdateDef
     , executeInsertReturningConn

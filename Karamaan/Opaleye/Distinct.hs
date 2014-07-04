@@ -12,8 +12,15 @@ import qualified Data.Profunctor.Product as PP
 import qualified Data.Profunctor.Product.Default as D
 import Data.Profunctor.Product.Default (Default)
 
--- TODO: now that we have more experience with product profunctors we
--- can probably use a ProductProfunctor to do generic DISTINCT!
+distinct' :: U.Unpackspec wires -> Query wires -> Query wires
+distinct' u q = simpleQueryArr $ \((), t0) ->
+  let (a, primQ, t1) = runSimpleQueryArr q ((), t0)
+      cols = U.runUnpackspec u a
+  in (a, Group (map (\oldCol -> (oldCol, AttrExpr oldCol)) cols) primQ, t1)
+
+distinctBetter :: D.Default (PP.PPOfContravariant U.Unpackspec) wires wires =>
+                  Query wires -> Query wires
+distinctBetter = distinct' D.cdef 
 
 -- I realised you can implement distinct x = x `union` x!
 -- This may fail massively with large queries unless the optimiser realises
@@ -26,6 +33,7 @@ distinct x = x `union` x
 -- This is how I used to implement it.  It didn't work very well.
 -- I think this is a correct implementation, but HaskellDB still seems to have
 -- trouble dealing with GROUP BY. See Report.Trade.Descendants.activeEdgesBroken
+{-# DEPRECATED distinct1 "Use 'distinctBetter' instead" #-}
 distinct1 :: Query (Wire a) -> Query (Wire a)
 distinct1 q = simpleQueryArr $ \((), t0) ->
   let (Wire oldCol, primQ, t1) = runSimpleQueryArr q ((), t0)
@@ -39,13 +47,3 @@ distinct1 q = simpleQueryArr $ \((), t0) ->
 -- oldCol' adds an *additional* tag to a column name that presumably
 -- already has one.  I wasn't sure if that was a good idea anyway.
   in (Wire newCol, Group [(newCol, AttrExpr oldCol)] primQ, t2)
-
-distinct' :: U.Unpackspec wires -> Query wires -> Query wires
-distinct' u q = simpleQueryArr $ \((), t0) ->
-  let (a, primQ, t1) = runSimpleQueryArr q ((), t0)
-      cols = U.runUnpackspec u a
-  in (a, Group (map (\oldCol -> (oldCol, AttrExpr oldCol)) cols) primQ, t1)
-
-distinctBetter :: D.Default (PP.PPOfContravariant U.Unpackspec) wires wires =>
-                  Query wires -> Query wires
-distinctBetter = distinct' D.cdef

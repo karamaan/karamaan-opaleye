@@ -102,7 +102,7 @@ runExprArrStart :: ExprArr a b -> (a, Scope) -> (b, Scope, Tag)
 runExprArrStart expr (a, scope) = runExprArr expr (a, scope, start)
 
 runExprArrStartEmpty :: ExprArr a b -> a -> (b, Scope, Tag)
-runExprArrStartEmpty expr a = runExprArr expr (a, Map.empty, start)
+runExprArrStartEmpty expr a = runExprArr expr (a, emptyScope, start)
 
 runExprArr'' :: ExprArr a (Wire b) -> (a, Scope) -> PrimExpr
 runExprArr'' expr (a, scope) = unsafeScopeLookup b scope1

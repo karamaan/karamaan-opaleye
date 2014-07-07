@@ -6,18 +6,28 @@ import qualified Karamaan.Opaleye.ExprArr as E
 import qualified Data.Profunctor as P
 import qualified Data.Profunctor.Product as PP
 import Data.Profunctor.Product ((***!))
-import qualified Database.HaskellDB.Query as Q
+import qualified Karamaan.Opaleye.ShowConstant as S
 import Karamaan.Opaleye.Wire (Wire)
 import qualified Data.Profunctor.Product.Default as D
 import qualified Control.Arrow as A
 import Control.Arrow ((<<<))
-import qualified Data.Time.Calendar as C
+
+{- MakeExpr provides conveniences for turning Haskell values into
+   Opaleye `Expr`s.
+
+   As with Karamaan.Opaleye.ShowConstant, explicit type signatures
+   will be needed frequently.
+-}
 
 newtype MakeExpr haskells wires = MakeExpr (haskells -> E.Expr wires)
 newtype MakeMaybeExpr mHaskells mWires = MakeMaybeExpr
                                          (MakeExpr mHaskells mWires)
 newtype MakeJustExpr haskells jWires = MakeJustExpr
                                          (MakeExpr haskells jWires)
+
+-- {
+-- These instances are all completely boilerplate.  In principle they
+-- could be derived.
 
 instance P.Profunctor MakeExpr where
   dimap f g (MakeExpr h) = MakeExpr (P.dimap f (P.dimap id g) h)
@@ -45,27 +55,47 @@ instance PP.ProductProfunctor MakeJustExpr where
   empty = MakeJustExpr PP.empty
   MakeJustExpr f ***! MakeJustExpr g = MakeJustExpr (f ***! g)
 
-constant :: Q.ShowConstant a => MakeExpr a (Wire a)
-constant = MakeExpr E.constant
+-- End of boilerplate instances
+-- }
 
-constantMaybe :: Q.ShowConstant a => MakeMaybeExpr (Maybe a) (Maybe (Wire a))
+
+constant :: S.ShowConstant a b => MakeExpr a (Wire b)
+constant = MakeExpr S.showConstant
+
+constantMaybe :: S.ShowConstant a b => MakeMaybeExpr (Maybe a) (Maybe (Wire b))
 constantMaybe = MakeMaybeExpr (MakeExpr (\x -> case x
                                                of Nothing -> A.arr (const Nothing)
                                                   Just a -> A.arr Just
-                                                            <<< E.constant a))
+                                                            <<< S.showConstant a))
 
-constantJust :: Q.ShowConstant a => MakeJustExpr a (Maybe (Wire a))
-constantJust = MakeJustExpr (MakeExpr (\a -> A.arr Just <<< E.constant a))
+constantJust :: S.ShowConstant a b => MakeJustExpr a (Maybe (Wire b))
+constantJust = MakeJustExpr (MakeExpr (\a -> A.arr Just <<< S.showConstant a))
 
 makeExprPP :: MakeExpr haskells wires -> haskells -> E.Expr wires
 makeExprPP (MakeExpr f) = f
 
+-- The following typeclass functions have the example specialisations,
+-- assuming
+--
+--   1. the necessary correspondence between a and a', etc, as given by
+--      ShowConstant
+--   2. a suitable Default instance for the MyRecord type
+
+-- makeExpr :: MyRecord a b c -> Expr (MyRecord (Wire a') (Wire b') (Wire c'))
+--
+-- This is used for converting Haskell values to Opaleye Exprs
 makeExpr :: D.Default MakeExpr haskells wires => haskells -> E.Expr wires
 makeExpr = makeExprPP D.def
 
 makeMaybeExprPP :: MakeMaybeExpr mHaskells mWires -> mHaskells -> E.Expr mWires
 makeMaybeExprPP (MakeMaybeExpr (MakeExpr f)) = f
 
+-- makeMaybeExpr :: MyRecord (Maybe a) (Maybe b) (Maybe c)
+--                  -> Expr (MyRecord (Maybe (Wire a'))
+--                                    (Maybe (Wire b'))
+--                                    (Maybe (Wire c')))
+--
+-- This is used for the data manipulation functionality
 makeMaybeExpr :: D.Default MakeMaybeExpr mHaskells mWires =>
                  mHaskells -> E.Expr mWires
 makeMaybeExpr = makeMaybeExprPP D.def
@@ -73,24 +103,23 @@ makeMaybeExpr = makeMaybeExprPP D.def
 makeJustExprPP :: MakeJustExpr haskells jWires -> haskells -> E.Expr jWires
 makeJustExprPP (MakeJustExpr (MakeExpr f)) = f
 
+-- makeMaybeExpr :: MyRecord a b c
+--                  -> Expr (MyRecord (Maybe (Wire a'))
+--                                    (Maybe (Wire b'))
+--                                    (Maybe (Wire c')))
+--
+-- This is used for the data manipulation functionality
 makeJustExpr :: D.Default MakeJustExpr haskells jWires =>
                  haskells -> E.Expr jWires
 makeJustExpr = makeJustExprPP D.def
 
-instance Q.ShowConstant a => D.Default MakeExpr a (Wire a) where
+instance S.ShowConstant a b => D.Default MakeExpr a (Wire b) where
   def = constant
 
-instance Q.ShowConstant a =>
-         D.Default MakeMaybeExpr (Maybe a) (Maybe (Wire a)) where
+instance S.ShowConstant a b =>
+         D.Default MakeMaybeExpr (Maybe a) (Maybe (Wire b)) where
   def = constantMaybe
 
-instance Q.ShowConstant a =>
-         D.Default MakeJustExpr a (Maybe (Wire a)) where
+instance S.ShowConstant a b =>
+         D.Default MakeJustExpr a (Maybe (Wire b)) where
   def = constantJust
-{-
-instance D.Default MakeMaybeExpr (Maybe C.Day) (Maybe (Wire C.Day)) where
-  def = MakeMaybeExpr (MakeExpr (\x -> case x
-                                       of Nothing -> A.arr (const Nothing)
-                                          Just a -> A.arr Just
-                                                    <<< E.constantDay a))
--}

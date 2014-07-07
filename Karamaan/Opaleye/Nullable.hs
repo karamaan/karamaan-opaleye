@@ -18,6 +18,8 @@ import Database.HaskellDB.PrimQuery (UnOp(OpIsNull))
 -- It's not actually used for values.
 --data Nullable a = PhantomNullable
 
+-- FIXME: Shouldn't these all now deal with ExprArr rather than QueryArr?
+
 -- For now just use a type synonym.  We will switch to a type later.
 -- Don't use Maybe in Wires in new code!
 type Nullable = Maybe

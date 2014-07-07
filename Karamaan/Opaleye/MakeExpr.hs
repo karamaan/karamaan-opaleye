@@ -63,13 +63,17 @@ constant :: S.ShowConstant a b => MakeExpr a (Wire b)
 constant = MakeExpr S.showConstant
 
 constantMaybe :: S.ShowConstant a b => MakeMaybeExpr (Maybe a) (Maybe (Wire b))
-constantMaybe = MakeMaybeExpr (MakeExpr (\x -> case x
-                                               of Nothing -> A.arr (const Nothing)
-                                                  Just a -> A.arr Just
-                                                            <<< S.showConstant a))
+constantMaybe = MakeMaybeExpr (MakeExpr constantMaybe')
+  where constantMaybe' :: S.ShowConstant a b
+                          => Maybe a -> E.Expr (Maybe (Wire b))
+        constantMaybe' Nothing = A.arr (const Nothing)
+        constantMaybe' (Just a) = A.arr Just <<< S.showConstant a
 
 constantJust :: S.ShowConstant a b => MakeJustExpr a (Maybe (Wire b))
-constantJust = MakeJustExpr (MakeExpr (\a -> A.arr Just <<< S.showConstant a))
+constantJust = MakeJustExpr (MakeExpr constantJust')
+  where constantJust' :: S.ShowConstant a b
+                         => a -> E.Expr (Maybe (Wire b))
+        constantJust' a = A.arr Just <<< S.showConstant a
 
 makeExprPP :: MakeExpr haskells wires -> haskells -> E.Expr wires
 makeExprPP (MakeExpr f) = f

@@ -107,10 +107,10 @@ makeMaybeExpr = makeMaybeExprPP D.def
 makeJustExprPP :: MakeJustExpr haskells jWires -> haskells -> E.Expr jWires
 makeJustExprPP (MakeJustExpr (MakeExpr f)) = f
 
--- makeMaybeExpr :: MyRecord a b c
---                  -> Expr (MyRecord (Maybe (Wire a'))
---                                    (Maybe (Wire b'))
---                                    (Maybe (Wire c')))
+-- makeJustExpr :: MyRecord a b c
+--                 -> Expr (MyRecord (Maybe (Wire a'))
+--                                   (Maybe (Wire b'))
+--                                   (Maybe (Wire c')))
 --
 -- This is used for the data manipulation functionality
 makeJustExpr :: D.Default MakeJustExpr haskells jWires =>

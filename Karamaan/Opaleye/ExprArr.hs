@@ -9,6 +9,7 @@ module Karamaan.Opaleye.ExprArr
     , runExprArrStartEmpty
     , runExprArrStart
     , unsafeScopeLookup
+    , unsafeCoerce
     , eq
     , plus
     , mul
@@ -45,6 +46,7 @@ import Karamaan.Opaleye.QueryArr (Tag, first3, next, tagWith, start,
                                   QueryArr(QueryArr))
 import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Karamaan.Opaleye.Wire (Wire(Wire))
+import qualified Karamaan.Opaleye.Wire as Wire
 import qualified Database.HaskellDB.PrimQuery as PQ
 import qualified Data.Maybe as M
 import Karamaan.Plankton.Arrow (replaceWith, foldrArr, opC)
@@ -120,6 +122,9 @@ constantDay = unsafeConstant . Values.dayToSQL
 
 unsafeConstant :: String -> Expr (Wire a)
 unsafeConstant = constantLit . PQ.OtherLit
+
+unsafeCoerce :: ExprArr (Wire a) (Wire b)
+unsafeCoerce = arr Wire.unsafeCoerce
 
 -- TODO: Could probably do something like
 -- makeOp :: opMaker a b -> (b -> PrimExpr) -> ExprArr a b -> Wire c

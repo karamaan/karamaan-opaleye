@@ -4,11 +4,12 @@ module Karamaan.Opaleye.Nullable where
 
 import Karamaan.Opaleye.QueryArr (QueryArr, Query)
 import Karamaan.Opaleye.Wire (Wire)
-import qualified Karamaan.Opaleye.ExprArr as E
 import qualified Karamaan.Opaleye.Wire as Wire
+import qualified Karamaan.Opaleye.ExprArr as E
 import qualified Karamaan.Opaleye.Operators2 as Op2
-import Control.Arrow (arr)
+import Control.Arrow (arr, (<<<))
 import Database.HaskellDB.PrimQuery (UnOp(OpIsNull))
+import qualified Database.HaskellDB.PrimQuery as PQ
 
 -- TODO: At the appropriate time we will replace the Nullable type
 -- synonym to Maybe with its own type, and then the transition to
@@ -47,3 +48,6 @@ fromNullable' d = proc m -> do
 
 toNullable :: QueryArr (Wire a) (Wire (Nullable a))
 toNullable = unsafeCoerce
+
+null :: E.Expr (Wire (Nullable a))
+null = E.unsafeCoerce <<< E.constantLit PQ.NullLit

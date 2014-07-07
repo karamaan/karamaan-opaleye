@@ -49,5 +49,8 @@ fromNullable' d = proc m -> do
 toNullable :: QueryArr (Wire a) (Wire (Nullable a))
 toNullable = unsafeCoerce
 
+toNullableExpr :: E.ExprArr (Wire a) (Wire (Nullable a))
+toNullableExpr = E.unsafeCoerce
+
 null :: E.Expr (Wire (Nullable a))
 null = E.unsafeCoerce <<< E.constantLit PQ.NullLit

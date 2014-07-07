@@ -14,7 +14,6 @@ module Karamaan.Opaleye.Manipulation
     , executeUpdateDef
     , executeInsertReturningConn
     , executeInsertReturningConnDef
-    , executeInsertConnDef
     , executeDeleteConnDef
     , executeUpdateConnDef
     ) where

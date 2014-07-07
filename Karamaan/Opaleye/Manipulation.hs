@@ -14,6 +14,9 @@ module Karamaan.Opaleye.Manipulation
     , executeUpdateDef
     , executeInsertReturningConn
     , executeInsertReturningConnDef
+    , executeInsertConnDef
+    , executeDeleteConnDef
+    , executeUpdateConnDef
     ) where
 
 import Karamaan.Opaleye.RunQuery (QueryRunner(QueryRunner), query_)

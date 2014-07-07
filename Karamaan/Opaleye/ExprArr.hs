@@ -12,7 +12,7 @@ module Karamaan.Opaleye.ExprArr
     , emptyScope
     , unsafeScopeLookup
     , unsafeCoerce
-    , mapUnion
+    , scopeUnion
     , eq
     , plus
     , mul
@@ -229,8 +229,10 @@ toQueryArr writera writerb exprArr = QueryArr f
                          . U.runUnpackspec writerb) w1
                 primQ1 = extend exprs primQ0
 
-mapUnion :: Ord k => [Map k v] -> Map k v
-mapUnion = List.foldl' Map.union Map.empty
+scopeUnion :: [Scope] -> Scope
+scopeUnion = scopeUnion' where
+  scopeUnion' :: Ord k => [Map k v] -> Map k v
+  scopeUnion' = List.foldl' Map.union Map.empty
 
 toQueryArrDef :: (D.Default (P.PPOfContravariant U.Unpackspec) a a,
                   D.Default (P.PPOfContravariant U.Unpackspec) b b)
@@ -242,7 +244,7 @@ scopeOfWire :: Wire a -> Scope
 scopeOfWire (Wire s) = Map.singleton s (PQ.AttrExpr s)
 
 scopeOfCols :: U.Unpackspec wires -> wires -> Scope
-scopeOfCols unpackspec = mapUnion
+scopeOfCols unpackspec = scopeUnion
                          . map (scopeOfWire . Wire)
                          . U.runUnpackspec unpackspec
 

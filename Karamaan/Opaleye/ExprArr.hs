@@ -8,6 +8,7 @@ module Karamaan.Opaleye.ExprArr
     , scopeOfWire
     , runExprArrStartEmpty
     , runExprArrStart
+    , emptyScope
     , unsafeScopeLookup
     , unsafeCoerce
     , eq
@@ -48,7 +49,6 @@ import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Karamaan.Opaleye.Wire (Wire(Wire))
 import qualified Karamaan.Opaleye.Wire as Wire
 import qualified Database.HaskellDB.PrimQuery as PQ
-import qualified Data.Maybe as M
 import Karamaan.Plankton.Arrow (replaceWith, foldrArr, opC)
 import Karamaan.Opaleye.Operators (operatorName)
 import Data.Profunctor (Profunctor, dimap)
@@ -65,6 +65,9 @@ import qualified Data.List as List
 -- all of Predicates.hs to this way of doing things.
 
 type Scope = Map String PrimExpr
+
+emptyScope :: Scope
+emptyScope = Map.empty
 
 newtype ExprArr a b = ExprArr ((a, Scope, Tag) -> (b, Scope, Tag))
   deriving (Functor)
@@ -239,4 +242,6 @@ scopeOfWire :: Wire a -> Scope
 scopeOfWire (Wire s) = Map.singleton s (PQ.AttrExpr s)
 
 unsafeScopeLookup :: Wire a -> Scope -> PrimExpr
-unsafeScopeLookup (Wire w) s = M.fromJust (Map.lookup w s)
+unsafeScopeLookup (Wire w) s = case Map.lookup w s of
+  Nothing -> error ("Could not find Wire " ++ w ++ " in scope")
+  Just a  -> a

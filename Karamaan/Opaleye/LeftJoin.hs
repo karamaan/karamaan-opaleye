@@ -106,22 +106,23 @@ leftJoinPP unpackA unpackB nullmaker qA qB expr = Q.simpleQueryArr f where
   f ((), startTag) = ((wiresA, wireNullablesB), primQueryR, endTag)
     where (wiresA, primQueryA, midTag) = Q.runQueryArrPrim' startTag unpackA qA
           (wiresB, primQueryB, endTag) = Q.runQueryArrPrim' midTag unpackB qB
-          sqlA = SQL.optimizeFormatAndShowSQL primQueryA
-          sqlB = SQL.optimizeFormatAndShowSQL primQueryB
-          scopeA = E.scopeOfCols unpackA wiresA
-          scopeB = E.scopeOfCols unpackB wiresB
-          scope = E.scopeUnion [scopeA, scopeB]
-          primExpr = E.runExprArr'' expr ((wiresA, wiresB), scope)
-          sqlExpr = SQL.formatAndShowSQLExpr primExpr
+          sqlExpr = SQL.formatAndShowSQLExpr primExpr where
+            primExpr = E.runExprArr'' expr ((wiresA, wiresB), scope)
+            scope = E.scopeUnion [scopeA, scopeB] where
+              scopeA = E.scopeOfCols unpackA wiresA
+              scopeB = E.scopeOfCols unpackB wiresB
           primQueryRS = "((" ++ sqlA ++ ") AS T1 LEFT OUTER JOIN (" ++ sqlB
-                            ++ ") AS T2 ON " ++ sqlExpr ++ ")"
-          colsA = U.runUnpackspec unpackA wiresA
-          colsB = U.runUnpackspec unpackB wiresB
-          allCols = colsA ++ colsB
+                            ++ ") AS T2 ON " ++ sqlExpr ++ ")" where
+            sqlA = SQL.optimizeFormatAndShowSQL primQueryA
+            sqlB = SQL.optimizeFormatAndShowSQL primQueryB
+          allCols = colsA ++ colsB where
+            colsA = U.runUnpackspec unpackA wiresA
+            colsB = U.runUnpackspec unpackB wiresB
           -- FIXME: ^^ maybe need to nub the cols
-          makeAssoc x = (x, PQ.AttrExpr x)
-          projCols = map makeAssoc allCols
           primQueryR = PQ.Project projCols (PQ.BaseTable  primQueryRS allCols)
+            where makeAssoc x = (x, PQ.AttrExpr x)
+                  projCols = map makeAssoc allCols
+            -- NB ^^ these are the same as in Table.hs
           wireNullablesB = toNullable nullmaker wiresB
 
 leftJoin' :: (Default (PP.PPOfContravariant U.Unpackspec) wiresA wiresA,

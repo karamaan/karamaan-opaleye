@@ -1,17 +1,19 @@
 {-# LANGUAGE Arrows, FlexibleContexts, FlexibleInstances,
              MultiParamTypeClasses #-}
 
-module Karamaan.Opaleye.LeftJoin
-       {-# DEPRECATED "This is for exploratory purposes only" #-}
-       where
+module Karamaan.Opaleye.LeftJoin where
 
-{- Don't actually use this module!  It was an attempt to see if I
-could implement outer-join-like functionality in Opaleye without
-actually having the outer join primatives implemented in HaskellDB.
-It didn't lead to production-ready code, although it did give me some
-good ideas.
+{-
+A hacky implementation of LEFT JOIN for Opaleye.
 
-Steps to add outer join functionality to Opaleye:
+    leftJoin' q1 q2 expr
+
+does the equivalent of
+
+    q1 LEFT OUTER JOIN q2 ON expr
+
+There is a better approach to implementing LEFT JOIN in Opaleye but it
+will be more time consuming:
 
 1. Implement an outer join primative in HaskellDB's PrimQuery.
    OR
@@ -73,6 +75,7 @@ instance ProductProfunctor NullMaker where
   empty = NullMaker id (arr id)
   NullMaker f n ***! NullMaker f' n' = NullMaker (f *** f') (n &&& n')
 
+{-# DEPRECATED leftJoin "This was for exploratory purposes only" #-}
 leftJoin :: (Default QueryColspec l l, Default QueryColspec r' r')
          => NullMaker r r'
          -> Query l -> (l -> Wire b)

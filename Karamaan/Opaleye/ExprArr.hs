@@ -222,9 +222,7 @@ equalsOneOf = foldrArr or false . map (opC eq . constant)
 toQueryArr :: U.Unpackspec a -> U.Unpackspec b -> ExprArr a b -> QueryArr a b
 toQueryArr writera writerb exprArr = QueryArr f
   where f (w0, primQ0, t0) = (w1, primQ1, t1)
-          where scope0 = (mapUnion
-                          . map (scopeOfWire . Wire)
-                          . U.runUnpackspec writera) w0
+          where scope0 = scopeOfCols writera w0
                 (w1, scope1, t1) = runExprArr exprArr (w0, scope0, t0)
                 exprs = (map (\w -> (w, unsafeScopeLookup (Wire w) scope1))
                          . U.runUnpackspec writerb) w1
@@ -241,6 +239,11 @@ toQueryArrDef = toQueryArr (P.unPPOfContravariant D.def)
 
 scopeOfWire :: Wire a -> Scope
 scopeOfWire (Wire s) = Map.singleton s (PQ.AttrExpr s)
+
+scopeOfCols :: U.Unpackspec wires -> wires -> Scope
+scopeOfCols unpackspec = mapUnion
+                         . map (scopeOfWire . Wire)
+                         . U.runUnpackspec unpackspec
 
 unsafeScopeLookup :: Wire a -> Scope -> PrimExpr
 unsafeScopeLookup (Wire w) s = case Map.lookup w s of

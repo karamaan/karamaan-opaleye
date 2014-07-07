@@ -100,6 +100,12 @@ leftJoin nm qL fL qR fR = join `Op2.union` outer
 
           returnA -< (rowL, nulls')
 
+-- This is implemented using the trick of shimming arbitrary SQL into
+-- a PrimQuery.  We use the BaseTable constructor and give it the SQL
+-- rather than a table name.  This is not an ideal state of affairs,
+-- but it was easier than adding left joins to PrimQuery.  Either we
+-- will eventually add left joins to PrimQuery or we will just come up
+-- with our own datatype.
 leftJoinPP :: U.Unpackspec wiresA -> U.Unpackspec wiresB
               -> NullMaker wiresB wireNullablesB
               -> Query wiresA -> Query wiresB

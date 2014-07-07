@@ -26,6 +26,7 @@ Steps to add outer join functionality to Opaleye:
 import Data.Profunctor.Product.Default (Default, def)
 import Karamaan.Opaleye.QueryColspec (QueryColspec)
 import Karamaan.Opaleye.QueryArr (Query)
+import qualified Karamaan.Opaleye.QueryArr as Q
 import Karamaan.Opaleye.Wire (Wire)
 import qualified Karamaan.Opaleye.Wire as Wire
 import qualified Karamaan.Opaleye.Operators2 as Op2
@@ -34,6 +35,10 @@ import qualified Karamaan.Opaleye.Predicates as P
 import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!))
 import qualified Database.HaskellDB.PrimQuery as PQ
+import qualified Karamaan.Opaleye.Unpackspec as U
+import qualified Karamaan.Opaleye.SQL as SQL
+import qualified Karamaan.Opaleye.ExprArr as E
+import qualified Data.Profunctor.Product as PP
 
 -- FIXME: this seems to fail on the union because the NULLs are not
 -- given explicit types.  This is an annoyance of Postgres.  There'll be
@@ -91,3 +96,44 @@ leftJoin nm qL fL qR fR = join `Op2.union` outer
           nulls' <- nulls nm -< ()
 
           returnA -< (rowL, nulls')
+
+leftJoinPP :: U.Unpackspec wiresA -> U.Unpackspec wiresB
+              -> NullMaker wiresB wireNullablesB
+              -> Query wiresA -> Query wiresB
+              -> E.ExprArr (wiresA, wiresB) (Wire Bool)
+              -> Query (wiresA, wireNullablesB)
+leftJoinPP unpackA unpackB nullmaker qA qB expr = Q.simpleQueryArr f where
+  f ((), startTag) = ((wiresA, wireNullablesB), primQueryR, endTag)
+    where (wiresA, primQueryA, midTag) = Q.runQueryArrPrim' startTag unpackA qA
+          (wiresB, primQueryB, endTag) = Q.runQueryArrPrim' midTag unpackB qB
+          sqlA = SQL.optimizeFormatAndShowSQL primQueryA
+          sqlB = SQL.optimizeFormatAndShowSQL primQueryB
+          scopeA = (E.mapUnion
+                    . map (E.scopeOfWire . Wire.Wire)
+                    . U.runUnpackspec unpackA) wiresA
+          scopeB = (E.mapUnion
+                    . map (E.scopeOfWire . Wire.Wire)
+                    . U.runUnpackspec unpackB) wiresB
+          scope = E.mapUnion [scopeA, scopeB]
+          primExpr = E.runExprArr'' expr ((wiresA, wiresB), scope)
+          sqlExpr = SQL.formatAndShowSQLExpr primExpr
+          primQueryRS = "((" ++ sqlA ++ ") AS T1 LEFT OUTER JOIN (" ++ sqlB
+                            ++ ") AS T2 ON " ++ sqlExpr ++ ")"
+          colsA = U.runUnpackspec unpackA wiresA
+          colsB = U.runUnpackspec unpackB wiresB
+          allCols = colsA ++ colsB
+          -- FIXME: ^^ maybe need to nub the cols
+          makeAssoc x = (x, PQ.AttrExpr x)
+          projCols = map makeAssoc allCols
+          primQueryR = PQ.Project projCols (PQ.BaseTable  primQueryRS allCols)
+          wireNullablesB = toNullable nullmaker wiresB
+
+leftJoin' :: (Default (PP.PPOfContravariant U.Unpackspec) wiresA wiresA,
+              Default (PP.PPOfContravariant U.Unpackspec) wiresB wiresB,
+              Default NullMaker wiresB wireNullablesB)
+             => Query wiresA -> Query wiresB
+              -> E.ExprArr (wiresA, wiresB) (Wire Bool)
+              -> Query (wiresA, wireNullablesB)
+leftJoin' = leftJoinPP (PP.unPPOfContravariant def)
+                       (PP.unPPOfContravariant def)
+                       def

@@ -13,6 +13,7 @@ module Karamaan.Opaleye.QueryArr
     , next
     , simpleQueryArr
     , runQueryArrPrim
+    , runQueryArrPrim'
     , runSimpleQueryArr
     , first3
     , restrictWith
@@ -63,11 +64,15 @@ runQueryArr (QueryArr f) = f
 runSimpleQueryArr :: QueryArr a b -> (a, Tag) -> (b, PrimQuery, Tag)
 runSimpleQueryArr f (a, t) = runQueryArr f (a, Empty, t)
 
+runQueryArrPrim' :: Tag -> Unpackspec b -> Query b -> (b, PrimQuery, Tag)
+runQueryArrPrim' startTag unpackspec f
+  =  (b, Project (map (id &&& AttrExpr) cols) primQuery, endTag)
+  where (b, primQuery, endTag) = runSimpleQueryArr f ((), startTag)
+        cols = runUnpackspec unpackspec b
+
 runQueryArrPrim :: Unpackspec b -> Query b -> PrimQuery
-runQueryArrPrim unpackspec f
-  =  Project (map (id &&& AttrExpr) cols) primQuery
-  where (a, primQuery, _) = runQueryArr f ((), Empty, start)
-        cols = runUnpackspec unpackspec a
+runQueryArrPrim unpackspec f = primQuery
+  where (_, primQuery, _) = runQueryArrPrim' start unpackspec f
 
 first3 :: (a1 -> b) -> (a1, a2, a3) -> (b, a2, a3)
 first3 f (a1, a2, a3) = (f a1, a2, a3)

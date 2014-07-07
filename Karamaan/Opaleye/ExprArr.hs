@@ -11,6 +11,7 @@ module Karamaan.Opaleye.ExprArr
     , emptyScope
     , unsafeScopeLookup
     , unsafeCoerce
+    , mapUnion
     , eq
     , plus
     , mul

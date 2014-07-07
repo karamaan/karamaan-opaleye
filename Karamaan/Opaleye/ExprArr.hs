@@ -6,6 +6,7 @@ module Karamaan.Opaleye.ExprArr
     , Expr
     , runExprArr''
     , scopeOfWire
+    , scopeOfCols
     , runExprArrStartEmpty
     , runExprArrStart
     , emptyScope

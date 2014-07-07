@@ -108,12 +108,8 @@ leftJoinPP unpackA unpackB nullmaker qA qB expr = Q.simpleQueryArr f where
           (wiresB, primQueryB, endTag) = Q.runQueryArrPrim' midTag unpackB qB
           sqlA = SQL.optimizeFormatAndShowSQL primQueryA
           sqlB = SQL.optimizeFormatAndShowSQL primQueryB
-          scopeA = (E.mapUnion
-                    . map (E.scopeOfWire . Wire.Wire)
-                    . U.runUnpackspec unpackA) wiresA
-          scopeB = (E.mapUnion
-                    . map (E.scopeOfWire . Wire.Wire)
-                    . U.runUnpackspec unpackB) wiresB
+          scopeA = E.scopeOfCols unpackA wiresA
+          scopeB = E.scopeOfCols unpackB wiresB
           scope = E.mapUnion [scopeA, scopeB]
           primExpr = E.runExprArr'' expr ((wiresA, wiresB), scope)
           sqlExpr = SQL.formatAndShowSQLExpr primExpr

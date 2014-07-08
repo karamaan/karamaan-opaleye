@@ -68,7 +68,8 @@ runQueryArrPrim' :: Tag -> Unpackspec b -> Query b -> (b, PrimQuery, Tag)
 runQueryArrPrim' startTag unpackspec f
   =  (b, Project (map (id &&& AttrExpr) cols) primQuery, endTag)
   -- FIXME: ^^ I belive this also fails if there are duplicated column names
-  -- like union and left join.  There are a lot of bugs caused by this!
+  -- like union and left join.  This duplicated column names issue is triggered
+  -- in a lot of places!
   where (b, primQuery, endTag) = runSimpleQueryArr f ((), startTag)
         cols = runUnpackspec unpackspec b
 

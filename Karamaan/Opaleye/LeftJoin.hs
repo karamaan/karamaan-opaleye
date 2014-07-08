@@ -55,6 +55,10 @@ import qualified Data.Profunctor.Product as PP
 -- I don't really like that this is 'a -> b'.  To be safe it should be
 -- QueryArr a b, or ExprArr a b, when that exists.  I don't think it
 -- will cause any problems though, if it is not exported.
+--
+-- We don't need the second component for the new join implementation.
+-- It was only to "fill in nulls" in the old, bad, version.
+-- We can delete this component when we delete the old, bad, version.
 data NullMaker a b = NullMaker (a -> b) (Query b)
 
 toNullable :: NullMaker a b -> a -> b

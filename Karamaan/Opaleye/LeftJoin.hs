@@ -135,7 +135,8 @@ leftJoinPP unpackA unpackB nullmaker qA qB expr = Q.simpleQueryArr f where
           allCols = colsA ++ colsB where
             colsA = U.runUnpackspec unpackA wiresA
             colsB = U.runUnpackspec unpackB wiresB
-          -- FIXME: ^^ maybe need to nub the cols
+          -- FIXME: ^^ maybe need to nub the cols otherwise we will
+          -- potentially duplicate column names and create an invalid query
           primQueryR = PQ.Project projCols (PQ.BaseTable  primQueryRS allCols)
             where makeAssoc x = (x, PQ.AttrExpr x)
                   projCols = map makeAssoc allCols

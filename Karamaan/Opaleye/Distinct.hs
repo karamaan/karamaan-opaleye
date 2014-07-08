@@ -12,6 +12,13 @@ import qualified Data.Profunctor.Product as PP
 import qualified Data.Profunctor.Product.Default as D
 import Data.Profunctor.Product.Default (Default)
 
+{-
+Design comment: There is a neater way of doing `distinct` that would
+avoid getting our hands dirty with explicit PrimQuery constructors but
+would introduce a new product profunctor.  That is, create a product
+profunctor which makes an aggregator all of whose components are `groupBy`
+-}
+
 distinct' :: U.Unpackspec wires -> Query wires -> Query wires
 distinct' u q = simpleQueryArr $ \((), t0) ->
   let (a, primQ, t1) = runSimpleQueryArr q ((), t0)

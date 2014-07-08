@@ -15,6 +15,8 @@
 > import qualified Karamaan.Opaleye.Operators2 as Op2
 > import qualified Karamaan.Opaleye.Predicates as P
 > import qualified Karamaan.Opaleye.Operators.Numeric as N
+> import qualified Karamaan.Opaleye.ExprArr as E
+> import qualified Karamaan.Opaleye.LeftJoin as LJ
 > import Karamaan.Opaleye.Wire (Wire)
 > import Karamaan.Opaleye.SQL (showSqlForPostgresDefault)
 > import Control.Category ((<<<))
@@ -452,6 +454,36 @@ FROM widgetTable as T1
 GROUP BY style,
          color
 
+Outer join
+==========
+
+Opaleye supports left joins.  (Full outer joins will be added when I
+get round to it!  File an issue[1] if you need them).
+
+> type WireNullableBirthday = Birthday' (Wire (Nullable String))
+>                                       (Wire (Nullable Day))
+
+> personBirthdayLeftJoin :: Query ((Wire String, Wire Int, Wire String),
+>                                  WireNullableBirthday)
+> personBirthdayLeftJoin = LJ.leftJoin' personTable birthdayTable eqName
+>     where eqName :: E.ExprArr ((Wire String, Wire Int, Wire String),
+>                                WireBirthday) (Wire Bool)
+>           eqName = proc ((name, _, _), birthdayRow) -> do
+>             E.eq -< (name, bdName birthdayRow)
+
+ghci> sh personBirthdayLeftJoin
+SELECT name_1,
+       age_1,
+       address_1,
+       name_2,
+       birthday_2
+FROM ((SELECT name as name_1,
+       age as age_1,
+       address as address_1
+FROM personTable as T1) AS T1 LEFT OUTER JOIN (SELECT name as name_2,
+       birthday as birthday_2
+FROM birthdayTable as T1) AS T2 ON (name_1) = (name_2)) as T1
+
 Running queries on Postgres
 ===========================
 
@@ -483,3 +515,5 @@ Conclusion
 ==========
 
 There ends the Opaleye introductions module.  Please send me your questions!
+
+[1] https://github.com/karamaan/karamaan-opaleye/issues

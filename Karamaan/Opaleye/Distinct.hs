@@ -27,7 +27,7 @@ distinct' u q = simpleQueryArr $ \((), t0) ->
 
 distinctBetter :: D.Default (PP.PPOfContravariant U.Unpackspec) wires wires =>
                   Query wires -> Query wires
-distinctBetter = distinct' D.cdef 
+distinctBetter = distinct' D.cdef
 
 -- I realised you can implement distinct x = x `union` x!
 -- This may fail massively with large queries unless the optimiser realises

@@ -471,13 +471,6 @@ get round to it!  File an issue[1] if you need them).
 >           eqName = proc ((name, _, _), birthdayRow) -> do
 >             E.eq -< (name, bdName birthdayRow)
 
-Because SQL turns non-nullable columns in the right input query into
-nullable columns we have to change the type of the output to have
-nullable columns.  There is a multiparameter typeclass to make the
-type change and in order to get the type checking to work
-satisfactorily you need to provide type signatures for both the input
-and the output.
-
 ghci> sh personBirthdayLeftJoin
 SELECT name_1,
        age_1,
@@ -490,6 +483,13 @@ FROM ((SELECT name as name_1,
 FROM personTable as T1) AS T1 LEFT OUTER JOIN (SELECT name as name_2,
        birthday as birthday_2
 FROM birthdayTable as T1) AS T2 ON (name_1) = (name_2)) as T1
+
+Because SQL turns non-nullable columns in the right input query into
+nullable columns we have to change the type of the output to have
+nullable columns.  There is a multiparameter typeclass to make the
+type change and in order to get the type checking to work
+satisfactorily you need to provide type signatures for both the input
+and the output.
 
 Running queries on Postgres
 ===========================

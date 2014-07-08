@@ -65,6 +65,10 @@ toNullable (NullMaker f _) = f
 nulls :: NullMaker a b -> Query b
 nulls (NullMaker _ n) = n
 
+-- NB: We probably also need an instance
+--
+--       Default NullMaker (Wire (Maybe a)) (Wire (Maybe a))
+
 instance Default NullMaker (Wire a) (Wire (Maybe a)) where
   def = NullMaker Wire.unsafeCoerce (Op2.constantLit PQ.NullLit)
 

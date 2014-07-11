@@ -18,8 +18,9 @@ Some brief release notes:
 * Please don't post public links to the Github repos.  I want to keep it
   low-key for now.
 
-* There's little documentation, but I (Tom Ellis) am happy to answer
-  questions by email on a very prompt basis.  Don't be shy and don't
+* There's little documentation, but [I am happy to answer
+  questions](http://web.jaguarpaw.co.uk/~tom/contact/) by email on a
+  very prompt basis.  Don't be shy and don't
   be worried about taking up my time.  Please fire off an email to me
   at any time with questions or comments.
 

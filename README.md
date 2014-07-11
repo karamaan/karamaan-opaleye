@@ -31,3 +31,6 @@ Some brief release notes:
 
 * Data manipulation (DELETE, INSERT, UPDATE) is supported but not documented
   at all.
+
+* If you want to submit any pull requests please make them against the
+  dev branch.

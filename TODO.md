@@ -2,12 +2,16 @@
 
 ## Outer joins
 
-I'm afraid adding outer joins will be a lot of work.  It requires
-hacking both HaskellDB's `PrimQuery` and `SqlSelect` to support them.
-The Opaleye side doesn't pose much of a problem.  It will require a
-new product profunctor to deal with the nullability introduced by the
-outer joins, but we already have `NullMaker` in the exploratory module
-`LeftJoin.hs` which does most, or perhaps all, of the job.
+There is a hacky version of `LEFT OUTER JOIN` in
+`Karamaan.Opaleye.LeftJoin`.  It doesn't use the AST but instead uses
+a trick to embed the SQL directly.  It is not the correct long-term
+solution but will do for now.  When a non-hacky version is implemented
+the API will not need to change.  `FULL OUTER JOIN` can be implemented
+exactly the same way.
+
+A non-hacky version will be a lot of work.  It requires hacking both
+HaskellDB's `PrimQuery` and `SqlSelect` to support them.  The Opaleye
+side doesn't pose much of a problem.
 
 It can be done by someone dedicated enough who's willing to spend the
 time to get their hands dirty with the internals.

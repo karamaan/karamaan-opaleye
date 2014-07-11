@@ -35,4 +35,4 @@ Some brief release notes:
 * If you want to submit any pull requests please make them against the
   dev branch.
 
-* Please join the (Opaleye mailing list)[https://lists.sourceforge.net/lists/listinfo/opaleye-users]
+* Please join the [Opaleye mailing list](https://lists.sourceforge.net/lists/listinfo/opaleye-users)

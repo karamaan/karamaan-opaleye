@@ -1,11 +1,11 @@
 You will need the following libraries
 
-    https://github.com/karamaan/karamaan-plankton
-    https://github.com/karamaan/product-profunctors
+* [https://github.com/karamaan/karamaan-plankton](https://github.com/karamaan/karamaan-plankton)
+* [https://github.com/karamaan/product-profunctors](https://github.com/karamaan/product-profunctors)
 
 You should also use the Github version of HaskellDB available here
 
-    https://github.com/tomjaguarpaw/haskelldb
+* [https://github.com/tomjaguarpaw/haskelldb](https://github.com/tomjaguarpaw/haskelldb)
 
 which will be kept up-to-date with any patches needed to support new
 functionality in Opaleye.  (You should update karamaan-opaleye.cabal

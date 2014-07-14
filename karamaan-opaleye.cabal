@@ -17,7 +17,7 @@ library
     , haskelldb          == 2.2.2.0.0.0.3
       -- vv mtl just for the State monad in Values.
       -- Remove this dependency when we write our own monad.
-    , mtl >= 2.1 && < 2.2
+    , mtl >= 2.1 && < 2.3
       -- vv This is just for RunQuery.  If we ever move
       -- RunQuery elsewhere we should remove this dependency.
     , postgresql-simple   >= 0.3 && < 0.5

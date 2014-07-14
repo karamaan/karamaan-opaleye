@@ -17,6 +17,12 @@ Design comment: There is a neater way of doing `distinct` that would
 avoid getting our hands dirty with explicit PrimQuery constructors but
 would introduce a new product profunctor.  That is, create a product
 profunctor which makes an aggregator all of whose components are `groupBy`
+
+NB: This could only work if HaskellDB actually did GROUP BY properly.
+As it is if you GROUP BY all columns it is equivalent to the identity
+operation.  We can only use this design comment once we have our own
+AST, at which point we could just introduce our own DISTINCT operation
+anyway.
 -}
 
 distinct' :: U.Unpackspec wires -> Query wires -> Query wires

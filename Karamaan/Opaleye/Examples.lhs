@@ -189,7 +189,7 @@ previous example rewritten with Arrow notation.
 Again the same SQL is generated.
 
 Arrow notation is much more convenient than Arrow combinators when
-writing involved queries.  As a simple introduction we'll see how to
+writing involved queries.  As a simple introduction we'll see
 how to add two numeric fields.  This query returns all pairs of
 people, and the sum of their ages.
 

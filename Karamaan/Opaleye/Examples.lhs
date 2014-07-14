@@ -77,7 +77,7 @@ FROM personTable as T1
 of this example file)
 
 Opaleye can use user defined types in queries.  It will save you a lot
-of headaches if you define your typeclasses to be polymorphic in all
+of headaches if you define your data types to be polymorphic in all
 their fields.  If you want to use concrete types in particular places,
 as you almost always will, you can use type synonyms.  For example:
 
@@ -191,7 +191,7 @@ previous example rewritten with Arrow notation.
 Again the same SQL is generated.
 
 Arrow notation is much more convenient than Arrow combinators when
-writing involved queries.  As a simple introduction we'll see how to
+writing involved queries.  As a simple introduction we'll see
 how to add two numeric fields.  This query returns all pairs of
 people, and the sum of their ages.
 

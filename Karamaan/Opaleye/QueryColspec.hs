@@ -13,6 +13,7 @@ module Karamaan.Opaleye.QueryColspec
     , runPackMap
     , LWriter
     , writer
+    , queryColspecWire
     ) where
 
 import Karamaan.Opaleye.Wire (Wire(Wire), unWire)

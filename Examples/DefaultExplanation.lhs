@@ -1,5 +1,5 @@
 > {-# LANGUAGE FlexibleContexts #-}
-> module Karamaan.Opaleye.DefaultExplanation where
+> module DefaultExplanation where
 >
 > import qualified Karamaan.Opaleye.Operators2 as Operators2
 > import Karamaan.Opaleye.QueryColspec (QueryColspec)

@@ -37,7 +37,6 @@ library
                    Karamaan.Opaleye.Difference,
                    Karamaan.Opaleye.Distinct,
                    Karamaan.Opaleye.Explore,
-                   Karamaan.Opaleye.Examples,
                    Karamaan.Opaleye.ExprArr,
                    Karamaan.Opaleye.HaskellDB,
                    Karamaan.Opaleye.Join,
@@ -68,8 +67,12 @@ library
 
 test-suite examples
   type: exitcode-stdio-1.0
-  main-is: Examples.hs
+  main-is: ImportExamples.hs
   hs-source-dirs: Examples
   build-depends:
     base >= 4 && < 5,
+    postgresql-simple,
+    product-profunctors,
+    profunctors,
+    time,
     karamaan-opaleye

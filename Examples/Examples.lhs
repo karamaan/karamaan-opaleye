@@ -4,7 +4,7 @@
 > {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
 > {-# LANGUAGE TemplateHaskell #-}
 >
-> module Karamaan.Opaleye.Examples where
+> module Examples where
 >
 > import Prelude hiding (sum)
 > import Karamaan.Opaleye.Unpackspec (Unpackspec)

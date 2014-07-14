@@ -16,6 +16,14 @@ module Karamaan.Opaleye.Manipulation
     , executeInsertReturningConnDef
     , executeDeleteConnDef
     , executeUpdateConnDef
+    , runInsertDef
+    , runInsertConnDef
+    , runDeleteDef
+    , runUpdateDef
+    , runInsertReturningConn
+    , runInsertReturningConnDef
+    , runDeleteConnDef
+    , runUpdateConnDef
     ) where
 
 import Karamaan.Opaleye.RunQuery (QueryRunner(QueryRunner), query_)
@@ -51,6 +59,10 @@ import Data.Function (on)
 import qualified Database.PostgreSQL.Simple as SQL
 import Data.String (fromString)
 import Data.Int (Int64)
+
+-- NB: The functions in here called 'execute...' are going to have
+-- their names changed to 'run...' for consistency with the
+-- terminology in RunQuery.hs
 
 -- A 'TableExprRunner wires wires'' is used to connect a 'Table wires'
 -- to an 'ExprArr wires' o'.  In current usage 'o' is only ever 'Wire
@@ -331,12 +343,19 @@ arrangeUpdateSqlDef :: (Default TableExprRunner wires wires',
                     -> String
 arrangeUpdateSqlDef = (show . ppUpdate) .:. arrangeUpdateDef
 
+{-# DEPRECATED executeDeleteConnDef "Use 'run...' instead of 'execute...' " #-}
 executeDeleteConnDef :: Default TableExprRunner wires wires' =>
                     SQL.Connection ->
                     Table wires -> ExprArr wires' (Wire Bool) -> IO Int64
 executeDeleteConnDef conn =
   SQL.execute_ conn . fromString .: arrangeDeleteSqlDef
 
+runDeleteConnDef :: Default TableExprRunner wires wires' =>
+                    SQL.Connection ->
+                    Table wires -> ExprArr wires' (Wire Bool) -> IO Int64
+runDeleteConnDef = executeDeleteConnDef
+
+{-# DEPRECATED executeInsertConnDef "Use 'run...' instead of 'execute...' " #-}
 executeInsertConnDef :: (Default (PPOfContravariant Assocer)
                                  maybewires maybewires,
                      Default TableMaybeWrapper wires maybewires)
@@ -345,6 +364,14 @@ executeInsertConnDef :: (Default (PPOfContravariant Assocer)
 executeInsertConnDef conn =
   SQL.execute_ conn . fromString .: arrangeInsertSqlDef
 
+runInsertConnDef :: (Default (PPOfContravariant Assocer)
+                                 maybewires maybewires,
+                     Default TableMaybeWrapper wires maybewires)
+                    => SQL.Connection -> Table wires -> Expr maybewires
+                     -> IO Int64
+runInsertConnDef = executeInsertConnDef
+
+{-# DEPRECATED executeInsertReturningConn "Use 'run...' instead of 'execute...' " #-}
 executeInsertReturningConn
   :: Assocer maybeWires
   -> TableMaybeWrapper wires maybeWires
@@ -359,6 +386,20 @@ executeInsertReturningConn
 executeInsertReturningConn ass tmr ter assr (QueryRunner _ rowParser) conn =
     query_ rowParser conn . fromString .:. arrangeInsertReturningSql ass tmr ter assr
 
+runInsertReturningConn
+  :: Assocer maybeWires
+  -> TableMaybeWrapper wires maybeWires
+  -> TableExprRunner wires wires'
+  -> AssocerE resultWires
+  -> QueryRunner resultWires haskells
+  -> SQL.Connection
+  -> Table wires
+  -> Expr maybeWires
+  -> ExprArr wires' resultWires
+  -> IO [haskells]
+runInsertReturningConn = executeInsertReturningConn
+
+{-# DEPRECATED executeInsertReturningConnDef "Use 'run...' instead of 'execute...' " #-}
 executeInsertReturningConnDef
   :: (Default (PPOfContravariant Assocer) maybeWires maybeWires,
       Default TableMaybeWrapper wires maybeWires,
@@ -375,6 +416,20 @@ executeInsertReturningConnDef
   where def' = unPPOfContravariant def
         def'' = unPPOfContravariant def
 
+runInsertReturningConnDef
+  :: (Default (PPOfContravariant Assocer) maybeWires maybeWires,
+      Default TableMaybeWrapper wires maybeWires,
+      Default TableExprRunner wires wires',
+      Default (PPOfContravariant AssocerE) resultWires resultWires,
+      Default QueryRunner resultWires haskells)
+  => SQL.Connection
+  -> Table wires
+  -> Expr maybeWires
+  -> ExprArr wires' resultWires
+  -> IO [haskells]
+runInsertReturningConnDef = executeInsertReturningConnDef
+
+{-# DEPRECATED executeUpdateConnDef "Use 'run...' instead of 'execute...' " #-}
 executeUpdateConnDef :: (Default TableExprRunner wires wires',
                      Default (PPOfContravariant Assocer) maybewires maybewires,
                      Default TableMaybeWrapper wires maybewires) =>
@@ -385,6 +440,16 @@ executeUpdateConnDef :: (Default TableExprRunner wires wires',
 executeUpdateConnDef conn =
   SQL.execute_ conn . fromString .:. arrangeUpdateSqlDef
 
+runUpdateConnDef :: (Default TableExprRunner wires wires',
+                     Default (PPOfContravariant Assocer) maybewires maybewires,
+                     Default TableMaybeWrapper wires maybewires) =>
+                    SQL.Connection ->
+                    Table wires -> ExprArr wires' maybewires
+                    -> ExprArr wires' (Wire Bool)
+                    -> IO Int64
+runUpdateConnDef = executeUpdateConnDef
+
+{-# DEPRECATED executeDeleteDef "Use 'run...' instead of 'execute...' " #-}
 executeDeleteDef :: Default TableExprRunner wires wires' =>
                     SQL.ConnectInfo ->
                     Table wires -> ExprArr wires' (Wire Bool) -> IO Int64
@@ -392,6 +457,12 @@ executeDeleteDef connectInfo t e = do
   conn <- SQL.connect connectInfo
   executeDeleteConnDef conn t e
 
+runDeleteDef :: Default TableExprRunner wires wires' =>
+                SQL.ConnectInfo ->
+                Table wires -> ExprArr wires' (Wire Bool) -> IO Int64
+runDeleteDef = executeDeleteDef
+
+{-# DEPRECATED executeInsertDef "Use 'run...' instead of 'execute...' " #-}
 executeInsertDef :: (Default (PPOfContravariant Assocer) maybewires maybewires,
                      Default TableMaybeWrapper wires maybewires)
                     => SQL.ConnectInfo -> Table wires -> Expr maybewires
@@ -400,6 +471,13 @@ executeInsertDef connectInfo t e = do
   conn <- SQL.connect connectInfo
   executeInsertConnDef conn t e
 
+runInsertDef :: (Default (PPOfContravariant Assocer) maybewires maybewires,
+                 Default TableMaybeWrapper wires maybewires)
+                => SQL.ConnectInfo -> Table wires -> Expr maybewires
+                -> IO Int64
+runInsertDef = executeInsertDef
+
+{-# DEPRECATED executeUpdateDef "Use 'run...' instead of 'execute...' " #-}
 executeUpdateDef :: (Default TableExprRunner wires wires',
                      Default (PPOfContravariant Assocer) maybewires maybewires,
                      Default TableMaybeWrapper wires maybewires) =>
@@ -410,3 +488,12 @@ executeUpdateDef :: (Default TableExprRunner wires wires',
 executeUpdateDef connectInfo t e e' = do
   conn <- SQL.connect connectInfo
   executeUpdateConnDef conn t e e'
+
+runUpdateDef :: (Default TableExprRunner wires wires',
+                 Default (PPOfContravariant Assocer) maybewires maybewires,
+                 Default TableMaybeWrapper wires maybewires) =>
+                SQL.ConnectInfo ->
+                Table wires -> ExprArr wires' maybewires
+                -> ExprArr wires' (Wire Bool)
+                -> IO Int64
+runUpdateDef = executeUpdateDef

@@ -33,7 +33,10 @@ Some brief release notes:
 * Data manipulation (DELETE, INSERT, UPDATE) is supported but not documented
   at all.
 
-* If you want to submit any pull requests please make them against the
+* You'll probably benefit from ensuring you are looking at [the `dev`
+  branch](https://github.com/karamaan/karamaan-opaleye/tree/dev) as it
+  has the latest features.  `master` is usually a few weeks behind.
+  If you want to submit any pull requests please make them against the
   dev branch.
 
 * Please join the [Opaleye mailing list](https://lists.sourceforge.net/lists/listinfo/opaleye-users)

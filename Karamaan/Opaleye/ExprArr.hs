@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, DeriveFunctor #-}
+{-# LANGUAGE FlexibleContexts, DeriveFunctor, FlexibleInstances #-}
 
 module Karamaan.Opaleye.ExprArr
     ( Scope
@@ -43,6 +43,7 @@ module Karamaan.Opaleye.ExprArr
 
 import Control.Applicative (Applicative (..))
 import Prelude hiding (or, and, not, mod, abs, signum)
+import qualified Prelude
 import qualified Data.Map as Map
 import Data.Map (Map)
 import Database.HaskellDB.PrimQuery (PrimExpr, extend, Literal)
@@ -81,6 +82,14 @@ newtype ExprArr a b = ExprArr ((a, Scope, Tag) -> (b, Scope, Tag))
 instance Applicative (ExprArr a) where
   pure = arr . const
   f <*> x = arr (uncurry ($)) <<< (f &&& x)
+
+instance (Num b, ShowConstant b) => Num (ExprArr a (Wire b)) where
+  f + g    = plus   <<< (f &&& g)
+  f - g    = minus  <<< (f &&& g)
+  f * g    = mul    <<< (f &&& g)
+  abs    f = abs    <<< f
+  signum f = signum <<< f
+  fromInteger = constantRC . fromInteger
 
 type Expr b = ExprArr () b
 

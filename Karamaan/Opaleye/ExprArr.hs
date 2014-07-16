@@ -40,12 +40,13 @@ module Karamaan.Opaleye.ExprArr
     ) where
 
 import Control.Applicative (Applicative (..))
-import Prelude hiding ((.), id, or, and, not, mod, abs, signum)
+import Prelude hiding (or, and, not, mod, abs, signum)
 import qualified Data.Map as Map
 import Data.Map (Map)
 import Database.HaskellDB.PrimQuery (PrimExpr, extend, Literal)
 import Control.Arrow (Arrow, arr, first, (***), (&&&))
-import Control.Category (Category, id, (.), (<<<))
+import Control.Category (Category, (<<<))
+import qualified Control.Category
 import Karamaan.Opaleye.QueryArr (Tag, first3, next, tagWith, start,
                                   QueryArr(QueryArr))
 import Database.HaskellDB.Query (ShowConstant, showConstant)
@@ -77,7 +78,7 @@ newtype ExprArr a b = ExprArr ((a, Scope, Tag) -> (b, Scope, Tag))
 
 instance Applicative (ExprArr a) where
   pure = arr . const
-  f <*> x = arr (uncurry ($)) . (f &&& x)
+  f <*> x = arr (uncurry ($)) <<< (f &&& x)
 
 type Expr b = ExprArr () b
 
@@ -95,7 +96,7 @@ instance Profunctor ExprArr where
   dimap f g a = arr g <<< a <<< arr f
 
 instance ProductProfunctor ExprArr where
-  empty = id
+  empty = Control.Category.id
   (***!) = (***)
 
 runExprArr :: ExprArr a b -> (a, Scope, Tag) -> (b, Scope, Tag)

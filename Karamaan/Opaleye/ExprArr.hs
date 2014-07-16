@@ -131,33 +131,37 @@ unsafeConstant = constantLit . PQ.OtherLit
 unsafeCoerce :: ExprArr (Wire a) (Wire b)
 unsafeCoerce = arr Wire.unsafeCoerce
 
--- TODO: Could probably do something like
--- makeOp :: opMaker a b -> (b -> PrimExpr) -> ExprArr a b -> Wire c
--- where makeOp is a ProductProfunctor
--- This would allow us to do constants (nullary operations), unary operations
--- and binary operations uniformly, providing a bit more type safety due to
--- parametricity.
 -- TODO: ExprArr (Wire a, Wire b) (Wire c)?
 binOp :: PQ.BinOp -> String -> ExprArr (Wire a, Wire a) (Wire b)
-binOp op name = ExprArr g
-  where g ((u, u'), scope, t0) = (w, scope', next t0)
-          where ws = tagWith t0 (operatorName v name v')
-                w = Wire ws
-                (Wire v, Wire v') = (u, u')
-                lookupS = flip unsafeScopeLookup scope
-                uExpr = lookupS u
+binOp op name = makeExprArr wireName primExpr
+  where wireName u = operatorName v name v'
+          where (Wire v, Wire v') = u
+        primExpr lookupS (Wire u, Wire u') = PQ.BinExpr op uExpr u'Expr
+          where uExpr = lookupS u
                 u'Expr = lookupS u'
-                scope' = Map.singleton ws (PQ.BinExpr op uExpr u'Expr)
 
 unOp :: PQ.UnOp -> String -> ExprArr (Wire a) (Wire b)
-unOp op name = ExprArr g
-  where g (u, scope, t0) = (w, scope', next t0)
-          where ws = tagWith t0 (name ++ "_" ++ take 5 v)
-                w = Wire ws
-                Wire v = u
-                lookupS = flip unsafeScopeLookup scope
-                uExpr = lookupS u
-                scope' = Map.singleton ws (PQ.UnExpr op uExpr)
+unOp op name = makeExprArr wireName primExpr
+  where wireName u = name ++ "_" ++ take 5 v
+          where Wire v = u
+        primExpr lookupS (Wire u) = PQ.UnExpr op uExpr
+          where uExpr = lookupS u
+
+unFun :: String -> String -> ExprArr (Wire a) (Wire b)
+unFun op name = makeExprArr wireName primExpr
+  where wireName u = name ++ "_" ++ take 5 v
+          where Wire v = u
+        primExpr lookupS (Wire u) = PQ.FunExpr op [uExpr]
+          where uExpr = lookupS u
+
+makeExprArr :: (wires -> String) -> ((String -> PrimExpr) -> wires -> PrimExpr)
+               -> ExprArr wires (Wire a)
+makeExprArr wireName primExpr = ExprArr g where
+  g (u, scope, t0) = (w, scope', next t0)
+    where ws = tagWith t0 (wireName u)
+          w = Wire ws
+          lookupS = flip unsafeScopeLookup' scope
+          scope' = Map.singleton ws (primExpr lookupS u)
 
 abs :: ExprArr (Wire a) (Wire a)
 abs = unOp (PQ.UnOpOther "@") "abs"
@@ -225,7 +229,7 @@ toQueryArr writera writerb exprArr = QueryArr f
   where f (w0, primQ0, t0) = (w1, primQ1, t1)
           where scope0 = scopeOfCols writera w0
                 (w1, scope1, t1) = runExprArr exprArr (w0, scope0, t0)
-                exprs = (map (\w -> (w, unsafeScopeLookup (Wire w) scope1))
+                exprs = (map (\w -> (w, unsafeScopeLookup' w scope1))
                          . U.runUnpackspec writerb) w1
                 primQ1 = extend exprs primQ0
 
@@ -249,6 +253,9 @@ scopeOfCols unpackspec = scopeUnion
                          . U.runUnpackspec unpackspec
 
 unsafeScopeLookup :: Wire a -> Scope -> PrimExpr
-unsafeScopeLookup (Wire w) s = case Map.lookup w s of
+unsafeScopeLookup (Wire w) = unsafeScopeLookup' w
+
+unsafeScopeLookup' :: String -> Scope -> PrimExpr
+unsafeScopeLookup' w s = case Map.lookup w s of
   Nothing -> error ("Could not find Wire " ++ w ++ " in scope")
   Just a  -> a

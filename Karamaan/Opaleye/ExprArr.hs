@@ -36,10 +36,11 @@ module Karamaan.Opaleye.ExprArr
     , divide
     , times
     , minus
+    , signum
     ) where
 
 import Control.Applicative (Applicative (..))
-import Prelude hiding ((.), id, or, and, not, mod, abs)
+import Prelude hiding ((.), id, or, and, not, mod, abs, signum)
 import qualified Data.Map as Map
 import Data.Map (Map)
 import Database.HaskellDB.PrimQuery (PrimExpr, extend, Literal)
@@ -165,6 +166,9 @@ makeExprArr wireName primExpr = ExprArr g where
 
 abs :: ExprArr (Wire a) (Wire a)
 abs = unOp (PQ.UnOpOther "@") "abs"
+
+signum :: ExprArr (Wire a) (Wire a)
+signum = unFun "sign" "sign"
 
 plus :: ExprArr (Wire a, Wire a) (Wire a)
 plus = binOp PQ.OpPlus "plus"

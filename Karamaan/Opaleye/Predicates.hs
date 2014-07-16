@@ -17,7 +17,7 @@ import Control.Arrow (arr, Arrow, first, (<<<))
 -- Predicates contains code from an earlier time when I didn't understand the
 -- more convenient ways to work with Arrows.
 
--- We now have an alpha implementation of 'ExprArr' which essentially
+-- We now have a complete implementation of 'ExprArr' which essentially
 -- does all the PrimExpr plumbing with a safer API.  In the future
 -- it's preferable to use 'ExprArr' to any of the combinators here
 -- (except restrict which is still needed).

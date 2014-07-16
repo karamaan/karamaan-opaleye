@@ -122,12 +122,16 @@ constantLit l = ExprArr g
                 w = Wire ws
                 scope = Map.singleton ws (PQ.ConstExpr l)
 
+-- Probably best just to use Karamaan.Opaleye.ShowConstant.showConstant
+-- these days.  constant may well be deprecated at some future point.
 constant :: ShowConstant a => a -> Expr (Wire a)
 constant = constantLit . showConstant
 
 constantRC :: ShowConstant a => a -> ExprArr b (Wire a)
 constantRC = replaceWith . constant
 
+-- Probably best just to use Karamaan.Opaleye.ShowConstant.showConstant
+-- these days.  constantDay will be deprecated at some point in the future.
 constantDay :: Day -> Expr (Wire Day)
 constantDay = unsafeConstant . Values.dayToSQL
 

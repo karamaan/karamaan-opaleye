@@ -26,6 +26,10 @@ import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, (***!), empty, defaultEmpty,
                                 defaultProfunctorProduct)
 
+-- NB: All of the logical, constant and conditional operators here
+-- will one day be deprecated.  You should use the ExprArr versions
+-- instead.
+
 -- The only reason this is called Operators2 rather than Operators is that
 -- I had to split the Operators module in two to avoid circular dependencies.
 -- At some point I should come up with a better naming system.

@@ -17,6 +17,7 @@ module Karamaan.Opaleye.ExprArr
     , plus
     , mul
     , constant
+    , constantRC
     , or
     , toQueryArrDef
     , and
@@ -123,6 +124,9 @@ constantLit l = ExprArr g
 
 constant :: ShowConstant a => a -> Expr (Wire a)
 constant = constantLit . showConstant
+
+constantRC :: ShowConstant a => a -> ExprArr b (Wire a)
+constantRC = replaceWith . constant
 
 constantDay :: Day -> Expr (Wire Day)
 constantDay = unsafeConstant . Values.dayToSQL

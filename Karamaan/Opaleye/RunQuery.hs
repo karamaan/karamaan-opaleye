@@ -9,7 +9,7 @@ import Database.PostgreSQL.Simple.Internal (RowParser)
 import Database.PostgreSQL.Simple.FromField (FieldParser, FromField, fromField)
 import Database.PostgreSQL.Simple.FromRow (FromRow, fromRow, fieldWith)
 import Data.Profunctor (Profunctor, dimap)
-import Data.Functor.Contravariant (Contravariant, contramap)
+import Data.Functor.Contravariant (contramap)
 import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
                                 defaultEmpty, defaultProfunctorProduct)
 import Control.Applicative (Applicative, (<*>), pure)

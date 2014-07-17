@@ -34,7 +34,7 @@ import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
                                 defaultEmpty, defaultProfunctorProduct)
 import Data.Functor.Contravariant (contramap)
 import Control.Applicative (Applicative, (<*>), pure)
-import Data.Monoid (Monoid, mempty, (<>))
+import Data.Monoid (mempty, (<>))
 
 -- Maybe it would be safer if we combined the two writers into
 -- "LWriter (Maybe AggrOp, String) a"?  That way we'd know they output

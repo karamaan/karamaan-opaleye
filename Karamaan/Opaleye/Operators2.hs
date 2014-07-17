@@ -12,7 +12,7 @@ import Database.HaskellDB.PrimQuery (RelOp(Union, Intersect, Difference, UnionAl
                                      PrimExpr(AttrExpr),
                                      Literal(OtherLit))
 import qualified Database.HaskellDB.PrimQuery as PrimQuery
-import Control.Arrow ((***), Arrow, (&&&), (<<<), second)
+import Control.Arrow ((***), (&&&), (<<<), second)
 import Control.Applicative (Applicative, pure, (<*>))
 import Data.Time.Calendar (Day)
 import qualified Karamaan.Opaleye.Values as Values

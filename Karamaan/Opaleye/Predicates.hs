@@ -11,7 +11,7 @@ import Database.HaskellDB.PrimQuery (PrimExpr(AttrExpr, UnExpr, ConstExpr,
                                      BinOp(OpOr, OpEq, OpNotEq),
                                      UnOp(OpIsNull), Literal(OtherLit))
 import Data.Time.Calendar (Day)
-import Control.Arrow (arr, Arrow, first, (<<<))
+import Control.Arrow (arr, first, (<<<))
 
 -- The combinators are to be in Operators2 are to be preferred to the ones here.
 -- Predicates contains code from an earlier time when I didn't understand the

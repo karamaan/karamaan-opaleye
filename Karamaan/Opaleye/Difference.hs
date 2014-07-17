@@ -13,7 +13,7 @@ import Control.Arrow ((<<<), returnA, arr)
 -- where the column of 'q' selected by 'column' occurs in 'exclude'
 without :: (b -> Wire a) -> Query (Wire a) -> Query b -> Query b
 without f exclude q = proc () -> do
-  keep <- D.distinct1 (arr f <<< q) `O.difference` exclude -< ()
+  keep <- D.distinctBetter (arr f <<< q) `O.difference` exclude -< ()
   row  <- q -< ()
   P.restrict <<< O.eq -< (keep, f row)
   returnA -< row

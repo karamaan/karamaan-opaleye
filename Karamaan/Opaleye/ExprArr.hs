@@ -19,6 +19,7 @@ module Karamaan.Opaleye.ExprArr
     , constant
     , constantRC
     , or
+    , toQueryArr
     , toQueryArrDef
     , and
     , not

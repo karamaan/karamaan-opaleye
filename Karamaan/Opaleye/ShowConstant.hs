@@ -7,9 +7,12 @@ module Karamaan.Opaleye.ShowConstant where
 import qualified Karamaan.Opaleye.ExprArr as E
 import qualified Karamaan.Opaleye.Nullable as N
 import qualified Database.HaskellDB.PrimQuery as PQ
+import Data.Text (Text, unpack)
 import Karamaan.Opaleye.Wire (Wire)
 import Control.Arrow ((<<<))
 import Data.Time.Calendar (Day)
+import Data.Time (UTCTime, formatTime)
+import System.Locale (defaultTimeLocale)
 
 {- The ShowConstant class is intended to eventualy replace HaskellDB's
    ShowConstant.
@@ -34,6 +37,9 @@ instance ShowConstant haskell opaleye
 instance ShowConstant String String where
   showConstant = E.constantLit . PQ.StringLit
 
+instance ShowConstant Text Text where
+  showConstant = E.constantLit . PQ.StringLit . unpack
+
 instance ShowConstant Int Int where
   showConstant = E.constantLit . PQ.IntegerLit . fromIntegral
 
@@ -48,3 +54,8 @@ instance ShowConstant Bool Bool where
 
 instance ShowConstant Day Day where
   showConstant = E.constantDay
+
+instance ShowConstant UTCTime UTCTime where
+  showConstant = E.constantLit . PQ.StringLit . formatTime defaultTimeLocale format
+    where
+      format = "%Y-%m-%dT%H:%M:%SZ"

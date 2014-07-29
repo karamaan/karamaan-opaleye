@@ -57,6 +57,7 @@ library
                    Karamaan.Opaleye.Reexports,
                    Karamaan.Opaleye.ReexportsTable,
                    Karamaan.Opaleye.ShowConstant,
+                   Karamaan.Opaleye.ShowConstant.TH,
                    Karamaan.Opaleye.SQL,
                    Karamaan.Opaleye.Table,
                    Karamaan.Opaleye.TableColspec,

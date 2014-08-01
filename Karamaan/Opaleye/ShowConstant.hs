@@ -9,6 +9,8 @@ import qualified Karamaan.Opaleye.ExprArr as E
 import qualified Karamaan.Opaleye.Nullable as N
 import qualified Database.HaskellDB.PrimQuery as PQ
 import Data.Text (Text, unpack)
+import Data.UUID (UUID)
+import qualified Data.UUID as UUID
 import Karamaan.Opaleye.Wire (Wire, unsafeCoerce)
 import Control.Arrow ((<<<))
 import Data.Time.Calendar (Day)
@@ -60,6 +62,9 @@ instance ShowConstant UTCTime UTCTime where
   showConstant = E.constantLit . PQ.StringLit . formatTime defaultTimeLocale format
     where
       format = "%Y-%m-%dT%H:%M:%SZ"
+
+instance ShowConstant UUID UUID where
+  showConstant = showThrough UUID.toString
 
 -- | Create a ShowConstant instance using another instance.
 --

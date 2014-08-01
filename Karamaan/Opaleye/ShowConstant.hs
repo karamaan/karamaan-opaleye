@@ -41,7 +41,7 @@ instance ShowConstant String String where
   showConstant = E.constantLit . PQ.StringLit
 
 instance ShowConstant Text Text where
-  showConstant = E.constantLit . PQ.StringLit . unpack
+  showConstant = showThrough unpack
 
 instance ShowConstant Int Int where
   showConstant = E.constantLit . PQ.IntegerLit . fromIntegral
@@ -59,7 +59,7 @@ instance ShowConstant Day Day where
   showConstant = E.constantDay
 
 instance ShowConstant UTCTime UTCTime where
-  showConstant = E.constantLit . PQ.StringLit . formatTime defaultTimeLocale format
+  showConstant = showThrough (formatTime defaultTimeLocale format)
     where
       format = "%Y-%m-%dT%H:%M:%SZ"
 

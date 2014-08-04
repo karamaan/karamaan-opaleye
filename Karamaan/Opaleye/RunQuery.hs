@@ -147,6 +147,8 @@ runQueryDefaultConnectInfo connectInfo q = do
 
 -- SQL.query_ with explicit RowParser
 --
+-- TODO: postgresql-simple now has queryWith_ which replaces this
+--
 -- This uses Data.Reflection, and as such is very mysterious to me, so BE
 -- CAREFUL!  Data.Reflection ought to be a known Haskell quantity, albeit
 -- a powerful one, however no one really seems to understand this well

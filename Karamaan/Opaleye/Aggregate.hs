@@ -37,6 +37,7 @@ import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
 import Data.Functor.Contravariant (contramap)
 import Control.Applicative (Applicative, (<*>), pure)
 import Data.Monoid (mempty, (<>))
+import qualified Control.Monad.State as S
 
 -- Maybe it would be safer if we combined the two writers into
 -- "LWriter (Maybe AggrOp, String) a"?  That way we'd know they output
@@ -137,6 +138,12 @@ aggregate' agg (out, primQ', j) =
         jobber :: PrimQuery
         jobber = Project (map assoc zipped) primQ'
     in (runPackMap mapper tag' out, jobber, next j)
+
+tagS :: String -> S.State Tag String
+tagS s = do
+  t <- S.get
+  S.put (next t)
+  return (tagWith t s)
 
 assoc :: (String, Maybe AggrOp, String) -> (Attribute, PrimExpr)
 assoc (snew, mop, sold) = (snew, makeAggr mop (AttrExpr sold))

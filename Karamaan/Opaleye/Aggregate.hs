@@ -99,7 +99,8 @@ avg = aggregatorMaker AggrAvg
 max :: Aggregator (Wire a) (Wire a)
 max = aggregatorMaker AggrMax
 
--- | Aggregate each group to the maximum value in that group. If the group is empty , the result is @null@.
+-- | Aggregate each group to the maximum value in that group. If the group is
+-- empty , the result is @null@.
 nullableMax :: Aggregator (Wire a) (Wire (Nullable a))
 nullableMax = aggregatorMaker AggrMax
 

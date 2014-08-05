@@ -12,6 +12,7 @@ module Karamaan.Opaleye.Aggregate
     , min
     , nullableMax
     , sum
+    , stddev
     )
     where
 
@@ -26,6 +27,7 @@ import Database.HaskellDB.PrimQuery (PrimQuery(Project),
                                      PrimExpr(AttrExpr,
                                               AggrExpr),
                                      Attribute)
+import qualified Database.HaskellDB.PrimQuery as PQ
 import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.QueryColspec (Writer, PackMap, writerWire, packMapWire,
                                       runWriter, runPackMap, LWriter, writer)
@@ -113,6 +115,9 @@ groupBy = aggregatorMaker' Nothing
 -- if no grouping was specified).
 count :: Aggregator (Wire a) (Wire Int)
 count = aggregatorMaker AggrCount
+
+stddev :: Aggregator (Wire a) (Wire a)
+stddev = aggregatorMaker PQ.AggrStdDev
 
 -- This is messy and there should be a lot more structure to it, but I can't see
 -- how, currently.  Once there's another function like this

@@ -30,7 +30,7 @@ import System.Locale (defaultTimeLocale)
 -}
 
 class ShowConstant haskell opaleye where
-  showConstant :: haskell -> E.Expr (Wire opaleye)
+  showConstant :: haskell -> E.ExprArr a (Wire opaleye)
 
 instance ShowConstant haskell opaleye
          => ShowConstant (Maybe haskell) (N.Nullable opaleye) where
@@ -73,5 +73,5 @@ instance ShowConstant UUID UUID where
 --   instance ShowConstant X X where
 --     showConstant = showThrough unX
 -- @
-showThrough :: forall a b. ShowConstant a a => (b -> a) -> b -> E.Expr (Wire b)
-showThrough f = fmap unsafeCoerce . (showConstant :: a -> E.Expr (Wire a)) . f
+showThrough :: forall a b c. ShowConstant a a => (b -> a) -> b -> E.ExprArr c (Wire b)
+showThrough f = fmap unsafeCoerce . (showConstant :: a -> E.ExprArr c (Wire a)) . f

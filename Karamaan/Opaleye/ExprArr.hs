@@ -17,7 +17,6 @@ module Karamaan.Opaleye.ExprArr
     , plus
     , mul
     , constant
-    , constantRC
     , or
     , toQueryArr
     , toQueryArrDef
@@ -116,27 +115,24 @@ runExprArr'' expr (a, scope) = unsafeScopeLookup b scope1
 
 -- Note that the returned Scope value is what is *added* to the
 -- overall scope, so ignoring the incoming Scope here is not a bug!
-constantLit :: Literal -> Expr (Wire a)
+constantLit :: Literal -> ExprArr b (Wire a)
 constantLit l = ExprArr g
-  where g ((), _, t0) = (w, scope, next t0)
+  where g (_, _, t0) = (w, scope, next t0)
           where ws = tagWith t0 "constant"
                 w = Wire ws
                 scope = Map.singleton ws (PQ.ConstExpr l)
 
 -- Probably best just to use Karamaan.Opaleye.ShowConstant.showConstant
 -- these days.  constant may well be deprecated at some future point.
-constant :: ShowConstant a => a -> Expr (Wire a)
+constant :: ShowConstant a => a -> ExprArr b (Wire a)
 constant = constantLit . showConstant
-
-constantRC :: ShowConstant a => a -> ExprArr b (Wire a)
-constantRC = replaceWith . constant
 
 -- Probably best just to use Karamaan.Opaleye.ShowConstant.showConstant
 -- these days.  constantDay will be deprecated at some point in the future.
-constantDay :: Day -> Expr (Wire Day)
+constantDay :: Day -> ExprArr b (Wire Day)
 constantDay = unsafeConstant . Values.dayToSQL
 
-unsafeConstant :: String -> Expr (Wire a)
+unsafeConstant :: String -> ExprArr b (Wire a)
 unsafeConstant = constantLit . PQ.OtherLit
 
 unsafeCoerce :: ExprArr (Wire a) (Wire b)

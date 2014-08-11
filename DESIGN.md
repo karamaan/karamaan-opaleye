@@ -158,3 +158,44 @@ However, SQL does not make it easy to support this kind of
 functionality and it is unclear what the performance implications will
 be.  This functionality will be left as something to explore in the
 much longer term.
+
+## Expression arrows
+
+Currently the only way to create expressions is via "expression
+arrows".  This is somewhat cumbersome.  Fortunately expression arrows
+are "pure", meaning that amongst other nice properties,
+
+    a  <- aArr -< aIn
+    a' <- aArr -< aIn
+    f -< (a, a')
+
+is the same as
+
+    a <- aArr -< aIn
+    f -< (a, a)
+
+and
+
+    a <- aArr -< aIn
+    b <- bArr -< bIn
+    returnA -< (a, b)
+
+is the same as
+
+    b <- bArr -< bIn
+    a <- aArr -< aIn
+    returnA -< (a, b)
+
+Having got a good sense of how expression arrows work I think they
+could be made genuinely pure.  That is to say, instead of having
+
+    plus :: ExprArr (Wire Int, Wire Int) (Wire Int)
+
+we could have simply
+
+    plus :: Wire Int -> Wire Int -> Wire Int
+
+I am not aware of any way this could lead to invalid queries, but at
+the same time I am not certain that it cannot.  I will hold of on
+making this change for now, as it would be very hard to reverse, but
+it is worth keeping in mind.

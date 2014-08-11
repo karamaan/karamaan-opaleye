@@ -199,3 +199,7 @@ I am not aware of any way this could lead to invalid queries, but at
 the same time I am not certain that it cannot.  I will hold of on
 making this change for now, as it would be very hard to reverse, but
 it is worth keeping in mind.
+
+The change that would be made is simple.  `Wire a` would no longer
+contain a string referring to a column.  Instead it would contain an
+entire `PrimExpr`.  This is what HaskellDB did with it's `Expr` type.

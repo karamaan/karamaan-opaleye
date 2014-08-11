@@ -50,6 +50,7 @@ library
                    Karamaan.Opaleye.Operators2,
                    Karamaan.Opaleye.OperatorsPrimatives,
                    Karamaan.Opaleye.Operators.Numeric,
+                   Karamaan.Opaleye.Order
                    Karamaan.Opaleye.Predicates,
                    Karamaan.Opaleye.QueryArr,
                    Karamaan.Opaleye.QueryColspec,

@@ -13,6 +13,8 @@ module Karamaan.Opaleye.Aggregate
     , nullableMax
     , sum
     , stddev
+    , boolOr
+    , boolAnd
     )
     where
 
@@ -23,7 +25,7 @@ import Karamaan.Opaleye.QueryArr (Query, runSimpleQueryArr,
                                   simpleQueryArr)
 import Database.HaskellDB.PrimQuery (PrimQuery(Project),
                                      AggrOp(AggrSum, AggrAvg, AggrMax, AggrMin,
-                                            AggrCount),
+                                            AggrCount, AggrOther),
                                      PrimExpr(AttrExpr,
                                               AggrExpr),
                                      Attribute)
@@ -119,6 +121,12 @@ count = aggregatorMaker AggrCount
 
 stddev :: Aggregator (Wire a) (Wire a)
 stddev = aggregatorMaker PQ.AggrStdDev
+
+boolOr :: Aggregator (Wire Bool) (Wire Bool)
+boolOr = aggregatorMaker (AggrOther "bool_or")
+
+boolAnd :: Aggregator (Wire Bool) (Wire Bool)
+boolAnd = aggregatorMaker (AggrOther "bool_and")
 
 -- This is messy and there should be a lot more structure to it, but I can't see
 -- how, currently.  Once there's another function like this

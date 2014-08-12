@@ -21,6 +21,7 @@ import Karamaan.Opaleye.SQL (showSqlForPostgres)
 import Karamaan.Opaleye.QueryArr (Query)
 import Data.String (fromString)
 import Data.Text (Text)
+import Data.UUID (UUID)
 
 import Data.Reflection (Reifies, reflect, reify)
 import Data.Proxy (Proxy(Proxy))
@@ -95,6 +96,9 @@ instance Default QueryRunner (Wire LocalTime) LocalTime where
 instance Default QueryRunner (Wire Bool) Bool where
   def = fieldQueryRunner
 
+instance Default QueryRunner (Wire UUID) UUID where
+  def = fieldQueryRunner
+
 instance Default QueryRunner (Wire (Maybe Int)) (Maybe Int) where
   def = fieldQueryRunner
 
@@ -117,6 +121,9 @@ instance Default QueryRunner (Wire (Maybe LocalTime)) (Maybe LocalTime) where
   def = fieldQueryRunner
 
 instance Default QueryRunner (Wire (Maybe Bool)) (Maybe Bool) where
+  def = fieldQueryRunner
+
+instance Default QueryRunner (Wire (Maybe UUID)) (Maybe UUID) where
   def = fieldQueryRunner
 
 -- Reflection stuff, see

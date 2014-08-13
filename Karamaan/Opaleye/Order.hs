@@ -1,5 +1,12 @@
 {-# LANGUAGE FlexibleContexts, GeneralizedNewtypeDeriving #-}
-module Karamaan.Opaleye.Order (orderBy, orderByU, asc, desc, OrderSpec) where
+module Karamaan.Opaleye.Order
+  ( -- * Ordering
+    orderBy, orderByU
+  , asc, desc, OrderSpec
+
+    -- * Limiting
+  , limit
+  ) where
 
 import Database.HaskellDB.PrimQuery ( PrimQuery (..), SpecialOp (..)
                                     , OrderExpr (..), PrimExpr
@@ -13,6 +20,10 @@ import Karamaan.Opaleye.ExprArr (ExprArr, runExprArr'', Scope, scopeOfCols)
 import Karamaan.Opaleye.QueryArr (Query, simpleQueryArr, runSimpleQueryArr, Tag)
 import Karamaan.Opaleye.Unpackspec (Unpackspec)
 import Karamaan.Opaleye.Wire (Wire)
+
+
+-- * Ordering
+
 
 {-|
 
@@ -80,3 +91,20 @@ desc = orderSpec OpDesc
 
 orderSpec :: OrderOp -> ExprArr a (Wire b) -> OrderSpec a
 orderSpec dir expr = OrderSpec [SingleOrderSpec dir (curry $ runExprArr'' expr)]
+
+
+-- * Limiting
+
+
+{- |
+
+Limit the results of the given query to the given maximum number of
+items.
+
+-}
+
+limit :: Int -> Query a -> Query a
+limit n a = simpleQueryArr (limit' n . runSimpleQueryArr a)
+
+limit' :: Int -> (a, PrimQuery, Tag) -> (a, PrimQuery, Tag)
+limit' n (x, q, t) = (x, Special (Top n) q, t)

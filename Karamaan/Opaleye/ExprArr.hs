@@ -75,6 +75,13 @@ type Scope = Map String PrimExpr
 emptyScope :: Scope
 emptyScope = Map.empty
 
+-- An ExprArr takes some wires, a scope to look up the meaning of the
+-- wires in (returning a PrimExpr) and a fresh tag.
+--
+-- It returns the new wires, a scope for looking up the new wires in
+-- and a new fresh tag.  The returned scope only has to be so big as
+-- to contain the new wires so we are at liberty to throw the old
+-- scope away if we like.
 newtype ExprArr a b = ExprArr ((a, Scope, Tag) -> (b, Scope, Tag))
   deriving (Functor)
 
@@ -114,8 +121,9 @@ runExprArr'' :: ExprArr a (Wire b) -> (a, Scope) -> PrimExpr
 runExprArr'' expr (a, scope) = unsafeScopeLookup b scope1
   where (b, scope1, _) = runExprArrStart expr (a, scope)
 
--- Note that the returned Scope value is what is *added* to the
--- overall scope, so ignoring the incoming Scope here is not a bug!
+-- Note that we only need to be able to look up the returned Wire in
+-- the returned Scope, so it's not a mistake to ignore the argument
+-- Scope.
 constantLit :: Literal -> Expr (Wire a)
 constantLit l = ExprArr g
   where g ((), _, t0) = (w, scope, next t0)

@@ -33,13 +33,13 @@ For intuition compare this with `() -> [b]`.
 
 ## Unions of query arrows
 
-Opaleye allows you to take unions of values of type `Query () b`.
+Opaleye allows you to take unions of values of type `QueryArr () b`.
 This corresponds directly to SQL's `UNION`, and the Haskell list
 analogue is `a ++ b`.  (There is a caveat here.  `++` is closer to
 `UNION ALL` since it does not remove duplicates, but the difference
 between the two is irrelevant for the purposes of this document.)
 
-If we have two queries `foo` and `bar` of type `Query () b` then the
+If we have two queries `foo` and `bar` of type `QueryArr () b` then the
 lambda-style code for their union can be written
 
     SELECT ... columns of type b ...
@@ -50,7 +50,7 @@ lambda-style code for their union can be written
     FROM ... the tables of bar ...
     WHERE ... some conditions involving bar ...
 
-If instead `foo` and `bar` have the type `Query a b` -- i.e. they both
+If instead `foo` and `bar` have the type `QueryArr a b` -- i.e. they both
 take an argument -- then using our Haskell list analogy we want the
 resultant query to behave like `\a -> foo a ++ bar a` i.e.
 

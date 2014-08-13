@@ -132,18 +132,19 @@ boolAnd = aggregatorMaker (AggrOther "bool_and")
 -- how, currently.  Once there's another function like this
 -- and binrel it will perhaps be easy to see where the real duplication is.
 aggregate' :: Aggregator a b -> (a, PrimQuery, Tag) -> (b, PrimQuery, Tag)
-aggregate' agg (out, primQ, j) = (runPackMap mapper tag' out, jobber, next j)
+aggregate' agg (w0, primQ, j) = (w1, primQ', next j)
   where tag' :: String -> String
         tag' = tagWith j
         (Aggregator aggrs writer' mapper) = agg
         old_names :: [String]
-        old_names = runWriter writer' out
+        old_names = runWriter writer' w0
         new_names :: [String]
         new_names = map tag' old_names
         zipped :: [(String, Maybe AggrOp, String)]
-        zipped = zip3 new_names (runWriter aggrs out) old_names
-        jobber :: PrimQuery
-        jobber = Project (map assoc zipped) primQ
+        zipped = zip3 new_names (runWriter aggrs w0) old_names
+        primQ' :: PrimQuery
+        primQ' = Project (map assoc zipped) primQ
+        w1 = runPackMap mapper tag' w0
 
 assoc :: (String, Maybe AggrOp, String) -> (Attribute, PrimExpr)
 assoc (snew, mop, sold) = (snew, makeAggr mop (AttrExpr sold))

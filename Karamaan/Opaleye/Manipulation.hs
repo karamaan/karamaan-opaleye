@@ -2,6 +2,7 @@
 
 module Karamaan.Opaleye.Manipulation
     ( Assocer
+    , AssocerE
     , TableMaybeWrapper
     , TableExprRunner
     , arrangeDeleteSqlDef

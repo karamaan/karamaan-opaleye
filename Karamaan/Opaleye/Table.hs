@@ -56,15 +56,15 @@ makeTable colspec = makeTable' colspec (zip x x)
   where x = runWriterOfColspec colspec
 
 makeTable' :: TableColspec wires -> [(String, String)] -> String -> Query wires
-makeTable' colspec cols table_name = simpleQueryArr f
+makeTable' colspec cols tableName = simpleQueryArr f
   where f ((), t0) = (retwires, primQuery, next t0)
-          where (retwires, primQuery) = makeTable'' colspec cols table_name (tagWith t0)
+          where (retwires, primQuery) = makeTable'' colspec cols tableName (tagWith t0)
 
 -- TODO: this needs tidying
 makeTable'' :: TableColspec wires
                -> [(String, String)] -> String -> (String -> String)
                -> (wires, PrimQuery)
-makeTable'' colspec cols table_name tag' =
+makeTable'' colspec cols tableName tag' =
   let basetablecols :: [String]
       basetablecols = map snd cols
       makeAssoc :: (String, String) -> (Attribute, PrimExpr)
@@ -72,5 +72,5 @@ makeTable'' colspec cols table_name tag' =
       projcols :: Assoc
       projcols = map makeAssoc cols
       q :: PrimQuery
-      q = Project projcols (BaseTable table_name basetablecols)
+      q = Project projcols (BaseTable tableName basetablecols)
   in (runPackMapOfColspec colspec tag', q)

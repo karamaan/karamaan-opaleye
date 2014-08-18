@@ -58,15 +58,13 @@ makeTable' colspec tableName = simpleQueryArr f
   where f ((), t0) = (retwires, primQuery, next t0)
           where (retwires, primQuery) = makeTable'' colspec tableName (tagWith t0)
 
--- TODO: this needs tidying
 makeTable'' :: TableColspec wires
                -> String -> (String -> String)
                -> (wires, PrimQuery)
-makeTable'' colspec tableName tag' =
-  let cols = runWriterOfColspec colspec
-      projcols :: Assoc
-      projcols = map (tag' &&& AttrExpr) cols
-      primQ :: PrimQuery
-      primQ = Project projcols (BaseTable tableName cols)
-      wires = runPackMapOfColspec colspec tag'
-  in (wires, primQ)
+makeTable'' colspec tableName tag' = (wires, primQ)
+  where cols = runWriterOfColspec colspec
+        projcols :: Assoc
+        projcols = map (tag' &&& AttrExpr) cols
+        primQ :: PrimQuery
+        primQ = Project projcols (BaseTable tableName cols)
+        wires = runPackMapOfColspec colspec tag'

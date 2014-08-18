@@ -75,6 +75,9 @@ fieldQueryRunnerUnclassed = QueryRunner (Unpackspec writerWire) . fieldWith
 instance Default QueryRunner (Wire Int) Int where
   def = fieldQueryRunner
 
+instance Default QueryRunner (Wire Integer) Integer where
+  def = fieldQueryRunner
+
 instance Default QueryRunner (Wire String) String where
   def = fieldQueryRunner
 
@@ -100,6 +103,9 @@ instance Default QueryRunner (Wire UUID) UUID where
   def = fieldQueryRunner
 
 instance Default QueryRunner (Wire (Maybe Int)) (Maybe Int) where
+  def = fieldQueryRunner
+
+instance Default QueryRunner (Wire (Maybe Integer)) (Maybe Integer) where
   def = fieldQueryRunner
 
 instance Default QueryRunner (Wire (Maybe String)) (Maybe String) where

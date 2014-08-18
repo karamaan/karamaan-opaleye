@@ -4,14 +4,13 @@ module Karamaan.Opaleye.Table where
 
 import Karamaan.Opaleye.QueryArr (Query, next, tagWith, simpleQueryArr)
 import Database.HaskellDB.PrimQuery (PrimQuery(Project, BaseTable),
-                                     PrimExpr(AttrExpr),
-                                     Attribute, Assoc)
+                                     PrimExpr(AttrExpr), Assoc)
 import Karamaan.Opaleye.TableColspec (TableColspec, TableColspecP,
                                       runWriterOfColspec, runPackMapOfColspec,
                                       tableColspecOfTableColspecP,
                                       WireMaker, runWireMaker)
 import Data.Profunctor.Product.Default (Default, def)
-import Control.Arrow ((***))
+import Control.Arrow ((&&&))
 import Karamaan.Plankton ((.:))
 
 -- For specifying the columns as Strings
@@ -52,25 +51,20 @@ makeTableQueryColspec = makeTable .: tableColspecOfTableColspecP
 -- so I don't want to deprecate it with a pragma yet.
 --{-# DEPRECATED makeTable "Use 'makeTableT' or 'queryTable' instead" #-}
 makeTable :: TableColspec wires -> String -> Query wires
-makeTable colspec = makeTable' colspec (zip x x)
-  where x = runWriterOfColspec colspec
+makeTable colspec = makeTable' colspec (runWriterOfColspec colspec)
 
-makeTable' :: TableColspec wires -> [(String, String)] -> String -> Query wires
+makeTable' :: TableColspec wires -> [String] -> String -> Query wires
 makeTable' colspec cols tableName = simpleQueryArr f
   where f ((), t0) = (retwires, primQuery, next t0)
           where (retwires, primQuery) = makeTable'' colspec cols tableName (tagWith t0)
 
 -- TODO: this needs tidying
 makeTable'' :: TableColspec wires
-               -> [(String, String)] -> String -> (String -> String)
+               -> [String] -> String -> (String -> String)
                -> (wires, PrimQuery)
 makeTable'' colspec cols tableName tag' =
-  let basetablecols :: [String]
-      basetablecols = map snd cols
-      makeAssoc :: (String, String) -> (Attribute, PrimExpr)
-      makeAssoc = tag' *** AttrExpr
-      projcols :: Assoc
-      projcols = map makeAssoc cols
+  let projcols :: Assoc
+      projcols = map (tag' &&& AttrExpr) cols
       q :: PrimQuery
-      q = Project projcols (BaseTable tableName basetablecols)
+      q = Project projcols (BaseTable tableName cols)
   in (runPackMapOfColspec colspec tag', q)

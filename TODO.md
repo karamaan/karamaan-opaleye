@@ -18,13 +18,14 @@ time to get their hands dirty with the internals.
 
 ## `OFFSET`
 
-This is not supported by HaskellDB but probably will be simple to add.
-A new constructor to `SpecialOp` needs to be added, say `Offset Int`.
-Then we do exactly the same as for LIMIT.
+Erik Hesselink has [a branch for
+OFFSET](https://github.com/hesselink/karamaan-opaleye/tree/implement-offset)
+but it requires a patch to HaskellDB, so I am holding off merging for
+a short while.
 
-There's one potential obstacle: `limit m . offset n` may end up
-generating invalid SQL because they're the "wrong way round".  I don't
-think you can say
+There's one uncertainty I have about the SQL that is
+generated: `limit m . offset n` may end up generating invalid SQL
+because they're the "wrong way round".  I don't think you can say
 
     SELECT ... FROM ... OFFSET n LIMIT m
 

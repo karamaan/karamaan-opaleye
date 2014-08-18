@@ -35,7 +35,7 @@ distinct' unpack q = simpleQueryArr (distinctU' unpack . runSimpleQueryArr q)
 distinctU' :: U.Unpackspec wires -> (wires, PrimQuery, Tag)
               -> (wires, PrimQuery, Tag)
 distinctU' unpack (wires, primQ, t) = (wires, primQ', t)
-  where cols = U.runUnpackspec unpack a
+  where cols = U.runUnpackspec unpack wires
         primQ' = Group (map (\col -> (col, AttrExpr col)) cols) primQ
 
 -- I realised you can implement distinct x = x `union` x!

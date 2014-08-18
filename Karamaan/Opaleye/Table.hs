@@ -51,20 +51,22 @@ makeTableQueryColspec = makeTable .: tableColspecOfTableColspecP
 -- so I don't want to deprecate it with a pragma yet.
 --{-# DEPRECATED makeTable "Use 'makeTableT' or 'queryTable' instead" #-}
 makeTable :: TableColspec wires -> String -> Query wires
-makeTable colspec = makeTable' colspec (runWriterOfColspec colspec)
+makeTable = makeTable'
 
-makeTable' :: TableColspec wires -> [String] -> String -> Query wires
-makeTable' colspec cols tableName = simpleQueryArr f
+makeTable' :: TableColspec wires -> String -> Query wires
+makeTable' colspec tableName = simpleQueryArr f
   where f ((), t0) = (retwires, primQuery, next t0)
-          where (retwires, primQuery) = makeTable'' colspec cols tableName (tagWith t0)
+          where (retwires, primQuery) = makeTable'' colspec tableName (tagWith t0)
 
 -- TODO: this needs tidying
 makeTable'' :: TableColspec wires
-               -> [String] -> String -> (String -> String)
+               -> String -> (String -> String)
                -> (wires, PrimQuery)
-makeTable'' colspec cols tableName tag' =
-  let projcols :: Assoc
+makeTable'' colspec tableName tag' =
+  let cols = runWriterOfColspec colspec
+      projcols :: Assoc
       projcols = map (tag' &&& AttrExpr) cols
-      q :: PrimQuery
-      q = Project projcols (BaseTable tableName cols)
-  in (runPackMapOfColspec colspec tag', q)
+      primQ :: PrimQuery
+      primQ = Project projcols (BaseTable tableName cols)
+      wires = runPackMapOfColspec colspec tag'
+  in (wires, primQ)

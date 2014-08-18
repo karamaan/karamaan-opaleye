@@ -55,8 +55,8 @@ makeTable = makeTable'
 
 makeTable' :: TableColspec wires -> String -> Query wires
 makeTable' colspec tableName = simpleQueryArr f
-  where f ((), t0) = (retwires, primQuery, next t0)
-          where (retwires, primQuery) = makeTable'' colspec tableName (tagWith t0)
+  where f ((), t0) = (retwires, primQ, next t0)
+          where (retwires, primQ) = makeTable'' colspec tableName (tagWith t0)
 
 makeTable'' :: TableColspec wires
                -> String -> (String -> String)

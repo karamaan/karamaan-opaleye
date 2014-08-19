@@ -46,6 +46,7 @@ import qualified Data.Profunctor.Product as PP
 --
 --  @
 --  q1 LEFT OUTER JOIN q2 ON expr
+--  @
 --
 
 -- Eventually this one will be renamed leftJoin, I suppose, but that's

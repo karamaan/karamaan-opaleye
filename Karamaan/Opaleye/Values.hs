@@ -37,6 +37,8 @@ showSQLType :: SQLType -> String
 --    consider this function as a "hack for now".
 showSQLType = show
 
+-- TODO: Why is there no Default instance for ValuesMaker?
+
 -- TODO: don't know why these are in a tuple!
 -- We would like to enforce the condition that ValuesMaker (f, c) ts
 -- has the image of f with constant length, which equals the length of

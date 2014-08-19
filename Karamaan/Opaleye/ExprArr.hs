@@ -44,6 +44,7 @@ module Karamaan.Opaleye.ExprArr
     , case_
     , runCase
     , ifThenElse
+    , caseMassage
     ) where
 
 import Control.Applicative (Applicative (..))
@@ -294,8 +295,10 @@ caseWire = makeExprArr wireName primExpr
 
 ifThenElse :: D.Default CaseRunner a b
               => ExprArr (Wire Bool, a, a) b
-ifThenElse = case_
-             <<< arr (\(cond, ifTrue, ifFalse) -> ([(cond, ifTrue)], ifFalse))
+ifThenElse = case_ <<< arr caseMassage
+
+caseMassage :: (Wire Bool, a, a) -> ([(Wire Bool, a)], a)
+caseMassage (cond, ifTrue, ifFalse) = ([(cond, ifTrue)], ifFalse)
 
 -- Converting ExprArrs to QueryArrs
 

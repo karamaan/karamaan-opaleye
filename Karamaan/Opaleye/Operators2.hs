@@ -9,7 +9,7 @@ import Karamaan.Opaleye.QueryArr (Query, QueryArr)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Database.HaskellDB.PrimQuery (RelOp(Union, Intersect, Difference, UnionAll),
                                      Literal(OtherLit))
-import Control.Arrow ((&&&), (<<<))
+import Control.Arrow ((&&&), (<<<), arr)
 import Data.Time.Calendar (Day)
 import qualified Karamaan.Opaleye.Values as Values
 import Karamaan.Opaleye.QueryColspec (QueryColspec)
@@ -124,8 +124,7 @@ ifThenElse :: (Default E.CaseRunner a b,
                Default (PP.PPOfContravariant U.Unpackspec) b b,
                Default (PP.PPOfContravariant U.Unpackspec) a a)
               => QueryArr (Wire Bool, a, a) b
-ifThenElse = proc (cond, ifTrue, ifFalse) ->
-  caseDef -< ([(cond, ifTrue)], ifFalse)
+ifThenElse = caseDef <<< arr E.caseMassage
 
 case_ :: QueryArr ([(Wire Bool, Wire a)], Wire a) (Wire a)
 case_ = E.toQueryArr (unpackspecCaseArg D.cdef) D.cdef E.case_

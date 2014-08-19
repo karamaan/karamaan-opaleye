@@ -3,12 +3,11 @@
 module Karamaan.Opaleye.Operators2 where
 
 import Prelude hiding (and, or, not)
-import Karamaan.Opaleye.Wire (Wire, unWire)
+import Karamaan.Opaleye.Wire (Wire)
 import Karamaan.Opaleye.OperatorsPrimatives (binrel)
 import Karamaan.Opaleye.QueryArr (Query, QueryArr)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Database.HaskellDB.PrimQuery (RelOp(Union, Intersect, Difference, UnionAll),
-                                     PrimExpr(AttrExpr),
                                      Literal(OtherLit))
 import Control.Arrow ((***), (&&&), (<<<), second)
 import Control.Applicative (Applicative, pure, (<*>))
@@ -154,6 +153,9 @@ case_ = E.toQueryArr u D.cdef E.case_
   where u = PP.unPPOfContravariant
             (PP.p2 (PP.PPOfContravariant unpackspecList, D.def))
 
+-- Arguably this could be derived, but I'm not really sure what the
+-- consequences of that would be for the other functionality that uses
+-- Unpackspec.
 unpackspecList :: U.Unpackspec [(Wire a, Wire b)]
 unpackspecList = U.Unpackspec (QC.Writer (concatMap (U.runUnpackspec D.cdef)))
 
@@ -163,9 +165,6 @@ ifThenElse :: Default CaseRunner a b
               => QueryArr (Wire Bool, a, a) b
 ifThenElse = proc (cond, ifTrue, ifFalse) ->
   caseDef -< ([(cond, ifTrue)], ifFalse)
-
-wireToPrimExpr :: Wire a -> PrimExpr
-wireToPrimExpr = AttrExpr . unWire
 
 -- ReaderCurried versions
 

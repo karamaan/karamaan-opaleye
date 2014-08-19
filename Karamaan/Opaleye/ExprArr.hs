@@ -4,6 +4,8 @@ module Karamaan.Opaleye.ExprArr
     ( Scope
     , ExprArr
     , Expr
+    , CaseArg
+    , CaseRunner
     , runExprArr''
     , scopeOfWire
     , scopeOfCols

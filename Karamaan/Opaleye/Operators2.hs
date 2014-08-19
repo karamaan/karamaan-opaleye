@@ -9,8 +9,7 @@ import Karamaan.Opaleye.QueryArr (Query, QueryArr)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Database.HaskellDB.PrimQuery (RelOp(Union, Intersect, Difference, UnionAll),
                                      Literal(OtherLit))
-import Control.Arrow ((***), (&&&), (<<<), second)
-import Control.Applicative (Applicative, pure, (<*>))
+import Control.Arrow ((&&&), (<<<))
 import Data.Time.Calendar (Day)
 import qualified Karamaan.Opaleye.Values as Values
 import Karamaan.Opaleye.QueryColspec (QueryColspec)
@@ -22,9 +21,6 @@ import qualified Karamaan.Opaleye.Unpackspec as U
 import Karamaan.Plankton.Arrow (replaceWith)
 import qualified Karamaan.Plankton.Arrow as A
 import Karamaan.Plankton.Arrow.ReaderCurry (readerCurry2)
-import Data.Profunctor (Profunctor, dimap)
-import Data.Profunctor.Product (ProductProfunctor, (***!), empty, defaultEmpty,
-                                defaultProfunctorProduct)
 import qualified Data.Profunctor.Product as PP
 
 -- NB: All of the logical, constant and conditional operators here
@@ -118,57 +114,43 @@ difference' = binrel Difference
 
 -- Case stuff
 
-type CaseArg a = ([(Wire Bool, a)], a)
+caseDef :: (Default E.CaseRunner a b,
+            Default (PP.PPOfContravariant U.Unpackspec) b b,
+            Default (PP.PPOfContravariant U.Unpackspec) a a)
+           => QueryArr (E.CaseArg a) b
+caseDef = E.toQueryArr (unpackspecCaseArg D.cdef) D.cdef E.case_
 
-fmapCaseArg :: (a -> b) -> CaseArg a -> CaseArg b
-fmapCaseArg f = map (second f) *** f
-
-newtype CaseRunner a b = CaseRunner (QueryArr (CaseArg a) b)
-
-instance Profunctor CaseRunner where
-  dimap f g (CaseRunner q) = CaseRunner (dimap (fmapCaseArg f) g q)
-
-instance Functor (CaseRunner a) where
-  fmap f (CaseRunner c) = CaseRunner (fmap f c)
-
-instance Applicative (CaseRunner a) where
-  pure = CaseRunner . pure
-  CaseRunner f <*> CaseRunner x = CaseRunner (f <*> x)
-
-instance ProductProfunctor CaseRunner where
-  empty = defaultEmpty
-  (***!) = defaultProfunctorProduct
-
-instance Default CaseRunner (Wire a) (Wire a) where
-  def = CaseRunner case_
-
-runCase :: CaseRunner a b -> QueryArr (CaseArg a) b
-runCase (CaseRunner q) = q
-
-caseDef :: Default CaseRunner a b => QueryArr (CaseArg a) b
-caseDef = runCase def
-
-case_ :: QueryArr ([(Wire Bool, Wire a)], Wire a) (Wire a)
-case_ = E.toQueryArr u D.cdef E.case_
-  where u = PP.unPPOfContravariant
-            (PP.p2 (PP.PPOfContravariant unpackspecList, D.def))
-
--- Arguably this could be derived, but I'm not really sure what the
--- consequences of that would be for the other functionality that uses
--- Unpackspec.
-unpackspecList :: U.Unpackspec [(Wire a, Wire b)]
-unpackspecList = unpackspecListApply D.cdef
-
-unpackspecListApply :: U.Unpackspec a -> U.Unpackspec [a]
-unpackspecListApply = U.Unpackspec . QC.Writer
-                      . concatMap . U.runUnpackspec
-
--- End of case stuff
-
-ifThenElse :: Default CaseRunner a b
+ifThenElse :: (Default E.CaseRunner a b,
+               Default (PP.PPOfContravariant U.Unpackspec) b b,
+               Default (PP.PPOfContravariant U.Unpackspec) a a)
               => QueryArr (Wire Bool, a, a) b
 ifThenElse = proc (cond, ifTrue, ifFalse) ->
   caseDef -< ([(cond, ifTrue)], ifFalse)
+
+case_ :: QueryArr ([(Wire Bool, Wire a)], Wire a) (Wire a)
+case_ = E.toQueryArr (unpackspecCaseArg D.cdef) D.cdef E.case_
+
+-- Product profunctor helpers for case
+
+-- Potentially the mapping 'U.Unpackspec a -> U.Unpackspec [a]' could
+-- be done with a typeclass but I'm not sure of the knock-on
+-- consequences for other users of Unpackspec, so I won't do that.
+
+-- I'm sure some of this could be simplified.
+
+unpackspecCaseArg :: U.Unpackspec a -> U.Unpackspec (E.CaseArg a)
+unpackspecCaseArg u = PP.unPPOfContravariant (PP.p2 (a, PP.PPOfContravariant u))
+  where a = PP.PPOfContravariant (unpackspecList (unpackspecTuple u))
+
+unpackspecTuple :: Default (PP.PPOfContravariant U.Unpackspec) a a =>
+                   U.Unpackspec b -> U.Unpackspec (a, b)
+unpackspecTuple unpack = PP.unPPOfContravariant
+                         (PP.p2 (D.def, PP.PPOfContravariant unpack))
+
+unpackspecList :: U.Unpackspec a -> U.Unpackspec [a]
+unpackspecList = U.Unpackspec . QC.Writer . concatMap . U.runUnpackspec
+
+-- End of case stuff
 
 -- ReaderCurried versions
 

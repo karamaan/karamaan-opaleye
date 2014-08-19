@@ -157,7 +157,11 @@ case_ = E.toQueryArr u D.cdef E.case_
 -- consequences of that would be for the other functionality that uses
 -- Unpackspec.
 unpackspecList :: U.Unpackspec [(Wire a, Wire b)]
-unpackspecList = U.Unpackspec (QC.Writer (concatMap (U.runUnpackspec D.cdef)))
+unpackspecList = unpackspecListApply D.cdef
+
+unpackspecListApply :: U.Unpackspec a -> U.Unpackspec [a]
+unpackspecListApply = U.Unpackspec . QC.Writer
+                      . concatMap . U.runUnpackspec
 
 -- End of case stuff
 

@@ -246,6 +246,8 @@ equalsOneOf :: ShowConstant a => [a] -> ExprArr (Wire a) (Wire Bool)
 equalsOneOf = foldrArr or false . map (opC eq . constant)
   where false = replaceWith (constant False)
 
+-- Converting ExprArrs to QueryArrs
+
 toQueryArr :: U.Unpackspec a -> U.Unpackspec b -> ExprArr a b -> QueryArr a b
 toQueryArr writera writerb exprArr = QueryArr f
   where f (w0, primQ0, t0) = (w1, primQ1, t1)

@@ -3,28 +3,30 @@
 module Karamaan.Opaleye.Operators2 where
 
 import Prelude hiding (and, or, not)
-import Karamaan.Opaleye.Wire (Wire(Wire), unWire)
+import Karamaan.Opaleye.Wire (Wire, unWire)
 import Karamaan.Opaleye.OperatorsPrimatives (binrel)
-import Karamaan.Opaleye.QueryArr (Query, QueryArr(QueryArr), next, tagWith)
+import Karamaan.Opaleye.QueryArr (Query, QueryArr)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Database.HaskellDB.PrimQuery (RelOp(Union, Intersect, Difference, UnionAll),
-                                     extend,
                                      PrimExpr(AttrExpr),
                                      Literal(OtherLit))
-import qualified Database.HaskellDB.PrimQuery as PrimQuery
 import Control.Arrow ((***), (&&&), (<<<), second)
 import Control.Applicative (Applicative, pure, (<*>))
 import Data.Time.Calendar (Day)
 import qualified Karamaan.Opaleye.Values as Values
 import Karamaan.Opaleye.QueryColspec (QueryColspec)
+import qualified Karamaan.Opaleye.QueryColspec as QC
 import Data.Profunctor.Product.Default (Default, def)
+import qualified Data.Profunctor.Product.Default as D
 import qualified Karamaan.Opaleye.ExprArr as E
+import qualified Karamaan.Opaleye.Unpackspec as U
 import Karamaan.Plankton.Arrow (replaceWith)
 import qualified Karamaan.Plankton.Arrow as A
 import Karamaan.Plankton.Arrow.ReaderCurry (readerCurry2)
 import Data.Profunctor (Profunctor, dimap)
 import Data.Profunctor.Product (ProductProfunctor, (***!), empty, defaultEmpty,
                                 defaultProfunctorProduct)
+import qualified Data.Profunctor.Product as PP
 
 -- NB: All of the logical, constant and conditional operators here
 -- will one day be deprecated.  You should use the ExprArr versions
@@ -148,15 +150,12 @@ caseDef :: Default CaseRunner a b => QueryArr (CaseArg a) b
 caseDef = runCase def
 
 case_ :: QueryArr ([(Wire Bool, Wire a)], Wire a) (Wire a)
-case_ = QueryArr f where
-  f ((cases, otherwise_), primQ, t0) = (w_out, primQ', t1)
-    where t1 = next t0
-          attrname_out = tagWith t0 "case_result"
-          w_out = Wire attrname_out
-          cases' = map (wireToPrimExpr *** wireToPrimExpr) cases
-          otherwise' = wireToPrimExpr otherwise_
-          caseExpr = PrimQuery.CaseExpr cases' otherwise'
-          primQ' = extend [(attrname_out, caseExpr)] primQ
+case_ = E.toQueryArr u D.cdef E.case_
+  where u = PP.unPPOfContravariant
+            (PP.p2 (PP.PPOfContravariant unpackspecList, D.def))
+
+unpackspecList :: U.Unpackspec [(Wire a, Wire b)]
+unpackspecList = U.Unpackspec (QC.Writer (concatMap (U.runUnpackspec D.cdef)))
 
 -- End of case stuff
 

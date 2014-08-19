@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, DeriveFunctor #-}
+{-# LANGUAGE FlexibleContexts, DeriveFunctor, MultiParamTypeClasses #-}
 
 module Karamaan.Opaleye.ExprArr
     ( Scope
@@ -39,6 +39,9 @@ module Karamaan.Opaleye.ExprArr
     , times
     , minus
     , signum
+    , case_
+    , runCase
+    , ifThenElse
     ) where
 
 import Control.Applicative (Applicative (..))
@@ -46,7 +49,7 @@ import Prelude hiding (or, and, not, mod, abs, signum)
 import qualified Data.Map as Map
 import Data.Map (Map)
 import Database.HaskellDB.PrimQuery (PrimExpr, extend, Literal)
-import Control.Arrow (Arrow, arr, first, (***), (&&&))
+import Control.Arrow (Arrow, arr, first, second, (***), (&&&))
 import Control.Category (Category, (<<<))
 import qualified Control.Category
 import Karamaan.Opaleye.QueryArr (Tag, first3, next, tagWith, start,
@@ -245,6 +248,52 @@ equalsOneOf :: ShowConstant a => [a] -> ExprArr (Wire a) (Wire Bool)
 -- TODO: Should this be foldl', since laziness gets us nothing here?
 equalsOneOf = foldrArr or false . map (opC eq . constant)
   where false = replaceWith (constant False)
+
+-- Case
+
+type CaseArg a = ([(Wire Bool, a)], a)
+
+fmapCaseArg :: (a -> b) -> CaseArg a -> CaseArg b
+fmapCaseArg f = map (second f) *** f
+
+newtype CaseRunner a b = CaseRunner (ExprArr (CaseArg a) b)
+
+instance Profunctor CaseRunner where
+  dimap f g (CaseRunner q) = CaseRunner (dimap (fmapCaseArg f) g q)
+
+instance Functor (CaseRunner a) where
+  fmap f (CaseRunner c) = CaseRunner (fmap f c)
+
+instance Applicative (CaseRunner a) where
+  pure = CaseRunner . pure
+  CaseRunner f <*> CaseRunner x = CaseRunner (f <*> x)
+
+instance ProductProfunctor CaseRunner where
+  empty = P.defaultEmpty
+  (***!) = P.defaultProfunctorProduct
+
+instance D.Default CaseRunner (Wire a) (Wire a) where
+  def = CaseRunner caseWire
+
+runCase :: CaseRunner a b -> ExprArr (CaseArg a) b
+runCase (CaseRunner q) = q
+
+case_ :: D.Default CaseRunner a b => ExprArr (CaseArg a) b
+case_ = runCase D.def
+
+caseWire :: ExprArr (CaseArg (Wire a)) (Wire a)
+caseWire = makeExprArr wireName primExpr
+  where wireName _ = "case_result"
+        primExpr lookupS (cases, Wire else_) = PQ.CaseExpr casesP elseP
+          where elseP = lookupS else_
+                casesP = map condWires cases
+                condWires (Wire cond, Wire result)
+                  = (lookupS cond, lookupS result)
+
+ifThenElse :: D.Default CaseRunner a b
+              => ExprArr (Wire Bool, a, a) b
+ifThenElse = case_
+             <<< arr (\(cond, ifTrue, ifFalse) -> ([(cond, ifTrue)], ifFalse))
 
 -- Converting ExprArrs to QueryArrs
 

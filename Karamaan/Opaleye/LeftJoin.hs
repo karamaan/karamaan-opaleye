@@ -36,18 +36,26 @@ import qualified Karamaan.Opaleye.SQL as SQL
 import qualified Karamaan.Opaleye.ExprArr as E
 import qualified Data.Profunctor.Product as PP
 
--- | To perform a left join use
---
---  @
---  leftJoin' q1 q2 expr
---  @
---
--- This does the equivalent of
---
---  @
---  q1 LEFT OUTER JOIN q2 ON expr
---  @
---
+{- | Without the class constraints the type is
+
+  @
+  leftJoin' ::  Query wiresA -> Query wiresB
+              -> E.ExprArr (wiresA, wiresB) (Wire Bool)
+              -> Query (wiresA, wireNullablesB)
+  @
+
+  To perform a left join use
+
+  @
+  leftJoin' q1 q2 expr
+  @
+
+ This does the equivalent of
+
+  @
+  q1 LEFT OUTER JOIN q2 ON expr
+  @
+-}
 
 -- Eventually this one will be renamed leftJoin, I suppose, but that's
 -- a breaking change.

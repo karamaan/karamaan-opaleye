@@ -35,9 +35,6 @@ equalsDay day = restrict
                 <<< first (constantDay day)
                 <<< arr (\d -> ((), d))
 
-null' :: Wire a -> PrimExpr
-null' = UnExpr OpIsNull . AttrExpr . unWire
-
 wireIsOneOf :: Wire a -> [Literal] -> PrimExpr
 wireIsOneOf w = foldr or' false . map (wireIs w)
   where false :: PrimExpr

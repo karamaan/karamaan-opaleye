@@ -38,7 +38,6 @@ library
                    Karamaan.Opaleye.Bend,
                    Karamaan.Opaleye.Difference,
                    Karamaan.Opaleye.Distinct,
-                   Karamaan.Opaleye.Explore,
                    Karamaan.Opaleye.ExprArr,
                    Karamaan.Opaleye.HaskellDB,
                    Karamaan.Opaleye.Join,

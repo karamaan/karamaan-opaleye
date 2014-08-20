@@ -4,22 +4,23 @@ import Karamaan.Opaleye.Wire (Wire, unWire)
 import Karamaan.Opaleye.QueryArr (QueryArr, restrictWith)
 import Karamaan.Opaleye.Operators2 (eq, constantDay)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
-import Database.HaskellDB.PrimQuery (PrimExpr(AttrExpr, UnExpr, ConstExpr,
+import Database.HaskellDB.PrimQuery (PrimExpr(AttrExpr, ConstExpr,
                                               BinExpr),
-                                     Literal(BoolLit),
-                                     BinOp(OpOr, OpEq, OpNotEq),
-                                     UnOp(OpIsNull), Literal)
+                                     Literal,
+                                     BinOp(OpEq, OpNotEq),
+                                     Literal)
 import Data.Time.Calendar (Day)
 import Control.Arrow (arr, first, (<<<))
 
--- The combinators are to be in Operators2 are to be preferred to the ones here.
--- Predicates contains code from an earlier time when I didn't understand the
--- more convenient ways to work with Arrows.
+-- The only useful function here is 'restrict'.  All the others should
+-- be considered deprecated.  Use 'Karamaan.Opaleye.ExprArr' instead.
 
--- We now have a complete implementation of 'ExprArr' which essentially
--- does all the PrimExpr plumbing with a safer API.  In the future
--- it's preferable to use 'ExprArr' to any of the combinators here
--- (except restrict which is still needed).
+restrict :: QueryArr (Wire Bool) ()
+restrict = restrictWith wireTrue
+
+-- WARNING!
+--
+-- ALL THE FOLLOWING ARE TO BE CONSIDERED DEPRECATED
 
 notEqualC :: ShowConstant a => a -> QueryArr (Wire a) ()
 notEqualC = restrictWith . flip wireIsNot . showConstant
@@ -46,6 +47,3 @@ wireIsNot = wireOp OpNotEq
 
 wireTrue :: Wire a -> PrimExpr
 wireTrue = AttrExpr . unWire
-
-restrict :: QueryArr (Wire Bool) ()
-restrict = restrictWith wireTrue

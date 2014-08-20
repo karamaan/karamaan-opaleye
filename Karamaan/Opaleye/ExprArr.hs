@@ -281,7 +281,7 @@ instance D.Default CaseRunner (Wire a) (Wire a) where
 runCase :: CaseRunner a b -> ExprArr (CaseArg a) b
 runCase (CaseRunner q) = q
 
-case_ :: D.Default CaseRunner a b => ExprArr (CaseArg a) b
+case_ :: D.Default CaseRunner a a => ExprArr (CaseArg a) a
 case_ = runCase D.def
 
 caseWire :: ExprArr (CaseArg (Wire a)) (Wire a)
@@ -293,8 +293,8 @@ caseWire = makeExprArr wireName primExpr
                 condWires (Wire cond, Wire result)
                   = (lookupS cond, lookupS result)
 
-ifThenElse :: D.Default CaseRunner a b
-              => ExprArr (Wire Bool, a, a) b
+ifThenElse :: D.Default CaseRunner a a
+              => ExprArr (Wire Bool, a, a) a
 ifThenElse = case_ <<< arr caseMassage
 
 caseMassage :: (Wire Bool, a, a) -> ([(Wire Bool, a)], a)

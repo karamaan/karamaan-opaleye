@@ -114,16 +114,14 @@ difference' = binrel Difference
 
 -- Case stuff
 
-caseDef :: (Default E.CaseRunner a b,
-            Default (PP.PPOfContravariant U.Unpackspec) b b,
+caseDef :: (Default E.CaseRunner a a,
             Default (PP.PPOfContravariant U.Unpackspec) a a)
-           => QueryArr (E.CaseArg a) b
+           => QueryArr (E.CaseArg a) a
 caseDef = E.toQueryArr (unpackspecCaseArg D.cdef) D.cdef E.case_
 
-ifThenElse :: (Default E.CaseRunner a b,
-               Default (PP.PPOfContravariant U.Unpackspec) b b,
+ifThenElse :: (Default E.CaseRunner a a,
                Default (PP.PPOfContravariant U.Unpackspec) a a)
-              => QueryArr (Wire Bool, a, a) b
+              => QueryArr (Wire Bool, a, a) a
 ifThenElse = caseDef <<< arr E.caseMassage
 
 case_ :: QueryArr ([(Wire Bool, Wire a)], Wire a) (Wire a)

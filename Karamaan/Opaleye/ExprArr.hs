@@ -165,19 +165,20 @@ binOp op name = makeExprArr wireName primExpr
           where uExpr = lookupS u
                 u'Expr = lookupS u'
 
-unOp :: PQ.UnOp -> String -> ExprArr (Wire a) (Wire b)
-unOp op name = makeExprArr wireName primExpr
+-- Generically make an operation of one argument
+unG :: (op -> arg -> PrimExpr) -> (PrimExpr -> arg) -> op -> [Char]
+       -> ExprArr (Wire a) (Wire b)
+unG expr wrap op name = makeExprArr wireName primExpr
   where wireName u = name ++ "_" ++ take 5 v
           where Wire v = u
-        primExpr lookupS (Wire u) = PQ.UnExpr op uExpr
+        primExpr lookupS (Wire u) = expr op (wrap uExpr)
           where uExpr = lookupS u
 
+unOp :: PQ.UnOp -> String -> ExprArr (Wire a) (Wire b)
+unOp = unG PQ.UnExpr id
+
 unFun :: String -> String -> ExprArr (Wire a) (Wire b)
-unFun op name = makeExprArr wireName primExpr
-  where wireName u = name ++ "_" ++ take 5 v
-          where Wire v = u
-        primExpr lookupS (Wire u) = PQ.FunExpr op [uExpr]
-          where uExpr = lookupS u
+unFun = unG PQ.FunExpr (\x -> [x])
 
 makeExprArr :: (wires -> String) -> ((String -> PrimExpr) -> wires -> PrimExpr)
                -> ExprArr wires (Wire a)

@@ -2,14 +2,13 @@ module Karamaan.Opaleye.Predicates where
 
 import Karamaan.Opaleye.Wire (Wire, unWire)
 import Karamaan.Opaleye.QueryArr (QueryArr, restrictWith)
-import Karamaan.Opaleye.Values (sqlStringOfDay)
 import Karamaan.Opaleye.Operators2 (eq, constantDay)
 import Database.HaskellDB.Query (ShowConstant, showConstant)
 import Database.HaskellDB.PrimQuery (PrimExpr(AttrExpr, UnExpr, ConstExpr,
                                               BinExpr),
                                      Literal(BoolLit),
                                      BinOp(OpOr, OpEq, OpNotEq),
-                                     UnOp(OpIsNull), Literal(OtherLit))
+                                     UnOp(OpIsNull), Literal)
 import Data.Time.Calendar (Day)
 import Control.Arrow (arr, first, (<<<))
 
@@ -28,11 +27,6 @@ notEqualC = restrictWith . flip wireIsNot . showConstant
 -- TODO: replace this with something like equalsDay?
 equalsC :: ShowConstant a => a -> QueryArr (Wire a) ()
 equalsC = restrictWith . flip wireIs . showConstant
-
-literalDay :: Day -> Literal
-literalDay = OtherLit . sqlStringOfDay
-                  -- I guess this should really be a DateLit, but I can't
-                  -- work out how to use HaskellDB's CalendarTime
 
 -- TODO: should we get rid of this as it is somewhat redundant?
 equalsDay :: Day -> QueryArr (Wire Day) ()

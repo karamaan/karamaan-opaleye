@@ -79,3 +79,14 @@ test-suite examples
     profunctors,
     time,
     karamaan-opaleye
+
+test-suite test
+  type: exitcode-stdio-1.0
+  main-is: Test.hs
+  hs-source-dirs: Test
+  build-depends:
+    base >= 4 && < 5,
+    postgresql-simple,
+    product-profunctors,
+    profunctors,
+    karamaan-opaleye

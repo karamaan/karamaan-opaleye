@@ -1,7 +1,7 @@
 {-# LANGUAGE Arrows #-}
 {-# LANGUAGE FlexibleContexts #-}
 
-module Test where
+module Main where
 
 import Karamaan.Opaleye.Wire (Wire)
 import qualified Karamaan.Opaleye.Table as T
@@ -26,10 +26,12 @@ import qualified Data.Ord as Ord
 import qualified Data.String as St
 import Control.Arrow ((<<<))
 import qualified Control.Arrow as Arr
+import qualified System.Exit as Exit
 
--- { Set your test database info here.  Then invoke the 'run' function
---   to run the tests.  The test database must already exist and the
---   test user must have permissions to modify it.
+-- { Set your test database info here.  Then invoke the 'main'
+--   function to run the tests, or just use 'cabal test'.  The test
+--   database must already exist and the test user must have
+--   permissions to modify it.
 
 connectInfo :: SQL.ConnectInfo
 connectInfo =  SQL.ConnectInfo { SQL.connectHost = "Name of Postgres server"
@@ -246,8 +248,8 @@ allTests = [testSelect, testDistinct, testRestrict, testAggregate, testOrderBy,
             testLeftJoin, testLeftJoinNullable, testLeftJoinNullableClass,
             testCase, testCaseQuery]
 
-run :: IO ()
-run = do
+main :: IO ()
+main = do
   conn <- SQL.connect connectInfo
 
   let insert (table, tabledata) =
@@ -263,4 +265,8 @@ run = do
 
   print results
 
-  putStrLn (if and results then "All passed" else "Failure")
+  let passed = and results
+
+  putStrLn (if passed then "All passed" else "Failure")
+  Exit.exitWith (if passed then Exit.ExitSuccess
+                           else Exit.ExitFailure 1)

@@ -83,7 +83,7 @@ as you almost always will, you can use type synonyms.  For example:
 
 > data Birthday' a b = Birthday { bdName :: a, bdDay :: b }
 > type Birthday = Birthday' String Day
-> type WireBirthday = Birthday' (Wire String) (Wire Day)
+> type WireBirthday = Birthday (Wire String) (Wire Day)
 
 To get user defined types to work with the typeclass magic they must
 have instances defined for them.  The instances are derivable with

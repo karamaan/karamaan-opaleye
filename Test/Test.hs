@@ -42,6 +42,74 @@ connectInfo =  SQL.ConnectInfo { SQL.connectHost = "Name of Postgres server"
 
 -- }
 
+{-
+
+Status
+======
+
+The tests here are very superficial and pretty much the bare mininmum
+that needs to be tested.
+
+
+Future
+======
+
+The overall approach to testing should probably go as follows.
+
+1. Test all individual units of functionality by running them on a
+   table and checking that they produce the expected result.  This type
+   of testing is amenable to the QuickCheck approach if we reimplement
+   the individual units of functionality in Haskell.
+
+2. Test that "the denotation is an arrow morphism" is correct.  I
+   think in combination with 1. this is all that will be required to
+   demonstrate that the library is correct.
+
+   "The denotation is an arrow morphism" means that for each arrow
+   operation, the denotation preserves the operation.  If we have
+
+       f :: QueryArr wiresa wiresb
+
+   then [f] should be something like
+
+       [f] :: a -> IO [b]
+       f as = runQuery (toValues as >>> f)
+
+   For example, take the operation >>>.  We need to check that
+
+       [f >>> g] = [f] >>> [g]
+
+   for all f and g, where [] means the denotation.  We would also want
+   to check that
+
+       [id] = id
+
+   and
+
+       [first f] = first [f]
+
+   I think checking these operations is sufficient because all the
+   other QueryArr operations are implemented in terms of them.
+
+   (Here I'm taking a slight liberty as `a -> IO [b]` is not directly
+   an arrow, but it could be made one straightforwardly.  (For the laws
+   to be satisfied, perhaps we have to assume that the IO actions
+   commute.))
+
+   I don't think this type of testing is amenable to QuickCheck.  It
+   seems we have to check the properties for arbitrary arrows indexed by
+   arbitrary types.  I don't think QuickCheck supports this sort of
+   randomised testing.
+
+Note
+----
+
+This seems to be equivalent to just reimplementing Opaleye in
+Haskell-side terms and comparing the results of queries run in both
+ways.
+
+-}
+
 twoIntTable :: String -> T.Table (Wire Int, Wire Int)
 twoIntTable n = T.tableOfTableSpecDef (T.TableSpec ("column1", "column2") n)
 

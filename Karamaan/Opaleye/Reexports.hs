@@ -23,5 +23,5 @@ import Karamaan.Opaleye.Operators.Numeric (plus, divide, times, minus, gt, gte,
                                            lt, lte)
 import Karamaan.Opaleye.Predicates (restrict)
 import Karamaan.Opaleye.Aggregate (sum, avg, max, groupBy, count, aggregate)
-import Karamaan.Opaleye.RunQuery (runQuery, runQueryDefaultConnectInfo)
+import Karamaan.Opaleye.RunQuery (QueryRunner, runQuery, runQueryDefaultConnectInfo)
 import Karamaan.Opaleye.SQL (showSqlForPostgres)

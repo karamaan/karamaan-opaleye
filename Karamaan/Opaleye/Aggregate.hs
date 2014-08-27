@@ -39,6 +39,7 @@ import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
 import Data.Functor.Contravariant (contramap)
 import Control.Applicative (Applicative, (<*>), pure)
 import Data.Monoid (mempty, (<>))
+import Data.Int (Int64)
 
 -- Maybe it would be safer if we combined the two writers into
 -- "LWriter (Maybe AggrOp, String) a"?  That way we'd know they output
@@ -116,7 +117,7 @@ groupBy = aggregatorMaker' Nothing
 
 -- | Count the amount of rows inside each @GROUP BY@ clause (or the entire table
 -- if no grouping was specified).
-count :: Aggregator (Wire a) (Wire Int)
+count :: Aggregator (Wire a) (Wire Int64)
 count = aggregatorMaker AggrCount
 
 stddev :: Aggregator (Wire a) (Wire a)

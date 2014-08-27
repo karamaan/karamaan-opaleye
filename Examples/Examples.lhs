@@ -21,6 +21,7 @@
 > import Karamaan.Opaleye.SQL (showSqlForPostgresDefault)
 > import Control.Category ((<<<))
 > import Control.Arrow (arr, (&&&), returnA)
+> import Data.Int (Int64)
 > import Data.Time.Calendar (Day)
 >
 > import Data.Profunctor.Product.TH (makeAdaptorAndInstance)
@@ -427,13 +428,13 @@ Here we see the first explict use of our Template Haskell derived
 code.  We use the 'pWidget' "adaptor" to specify how columns are
 aggregated.  Note that this is yet another example of avoiding a
 headache by keeping your datatype fully polymorphic, because the
-'count' aggregator changes a 'Wire String' into a 'Wire Int'.
+'count' aggregator changes a 'Wire String' into a 'Wire Int64'.
 
 'aggregateWidgets' groups by the style and color of widgets,
 calculating how many (possibly duplicated) locations there are, the
 total number of such widgets and their average radius.
 
-> aggregateWidgets :: Query (Widget (Wire String) (Wire String) (Wire Int)
+> aggregateWidgets :: Query (Widget (Wire String) (Wire String) (Wire Int64)
 >                              (Wire Int) (Wire Double))
 > aggregateWidgets = aggregate (pWidget (Widget' { style    = groupBy
 >                                                , color    = groupBy

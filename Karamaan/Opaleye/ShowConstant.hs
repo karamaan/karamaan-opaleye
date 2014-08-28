@@ -17,7 +17,7 @@ import Data.Time.Calendar (Day)
 import Data.Time (UTCTime, formatTime)
 import System.Locale (defaultTimeLocale)
 
-{- The ShowConstant class is intended to eventualy replace HaskellDB's
+{- The ShowConstant class is intended to eventually replace HaskellDB's
    ShowConstant.
 
    It needs to be a MPTC because the type Haskell-side might not be

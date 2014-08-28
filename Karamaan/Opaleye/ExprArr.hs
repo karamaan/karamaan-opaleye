@@ -137,8 +137,9 @@ constantLit l = ExprArr g
                 w = Wire ws
                 scope = Map.singleton ws (PQ.ConstExpr l)
 
--- Probably best just to use Karamaan.Opaleye.ShowConstant.showConstant
--- these days.  constant may well be deprecated at some future point.
+{-| 'constant' should be considered deprecated.
+    Use Karamaan.Opaleye.ShowConstant.showConstant instead
+-}
 constant :: ShowConstant a => a -> Expr (Wire a)
 constant = constantLit . showConstant
 

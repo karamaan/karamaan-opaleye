@@ -64,6 +64,10 @@ constantLit = E.toQueryArrDef . E.constantLit
 -- TODO: is this type signature right?
 -- Doesn't seem to work for string with postgresql-simple
 -- because postgresql-simple seems to need a type sig on its strings
+--
+{-| 'constant' should be considered deprecated.
+    Use Karamaan.Opaleye.ShowConstant.showConstant instead
+-}
 constant :: ShowConstant a => a -> Query (Wire a)
 constant = constantLit . showConstant
 

@@ -40,8 +40,7 @@ instance ShowConstant haskell opaleye
 instance ShowConstant String String where
   showConstant = E.constantLit . PQ.StringLit
 
--- FIXME: Why is this 'Text Text'?  There is no 'Wire Text'.  It seems
--- that this should be 'Text String'.
+-- FIXME: I don't think this should exist.  There is no 'Wire Text'.
 instance ShowConstant Text Text where
   showConstant = showThrough unpack
 

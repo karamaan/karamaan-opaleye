@@ -45,6 +45,9 @@ instance ShowConstant String String where
 instance ShowConstant Text Text where
   showConstant = showThrough unpack
 
+instance ShowConstant Text String where
+  showConstant = showConstant . unpack
+
 instance ShowConstant Int Int where
   showConstant = E.constantLit . PQ.IntegerLit . fromIntegral
 

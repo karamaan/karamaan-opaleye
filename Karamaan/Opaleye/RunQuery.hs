@@ -22,6 +22,7 @@ import Karamaan.Opaleye.QueryArr (Query)
 import Data.String (fromString)
 import Data.Text (Text)
 import Data.UUID (UUID)
+import Data.Int (Int64)
 
 import Data.Reflection (Reifies, reflect, reify)
 import Data.Proxy (Proxy(Proxy))
@@ -72,6 +73,9 @@ fieldQueryRunnerUnclassed :: FieldParser a -> QueryRunner (Wire a) a
 fieldQueryRunnerUnclassed = QueryRunner U.unpackspecWire . fieldWith
 
 instance Default QueryRunner (Wire Int) Int where
+  def = fieldQueryRunner
+
+instance Default QueryRunner (Wire Int64) Int64 where
   def = fieldQueryRunner
 
 instance Default QueryRunner (Wire Integer) Integer where

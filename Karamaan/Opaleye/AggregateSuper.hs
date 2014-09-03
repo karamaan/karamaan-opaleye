@@ -9,8 +9,11 @@ import qualified Karamaan.Opaleye.Unpackspec as U
 import qualified Karamaan.Opaleye.QueryArr as Q
 import qualified Data.Profunctor.Product as PP
 import qualified Data.Profunctor.Product.Default as D
+import Karamaan.Opaleye.Wire (Wire)
 
 import Control.Arrow ((>>>), (<<<))
+import qualified Control.Category as C
+import Data.Int (Int64)
 
 data Aggregator a b = forall a' b'.
                       Aggregator (E.ExprArr a a')
@@ -36,3 +39,11 @@ aggregate :: (D.Default (PP.PPOfContravariant U.Unpackspec) a a,
               D.Default (PP.PPOfContravariant U.Unpackspec) b b)
               => Aggregator a b -> Q.Query a -> Q.Query b
 aggregate = aggregateExplicit D.cdef D.cdef
+
+old :: (D.Default (PP.PPOfContravariant U.Unpackspec) a a,
+        D.Default (PP.PPOfContravariant U.Unpackspec) b b) =>
+       A.Aggregator a b -> Aggregator a b
+old a = Aggregator C.id D.cdef a D.cdef C.id
+
+countAll :: Aggregator () (Wire Int64)
+countAll = lmapExpr (E.constant (0 :: Int)) (old A.count)

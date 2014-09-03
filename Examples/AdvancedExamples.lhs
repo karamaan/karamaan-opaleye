@@ -1,8 +1,4 @@
-> {-# LANGUAGE Arrows, FlexibleContexts #-}
-> -- TODO: Get rid of FlexibleContexts if we ever move the definition of s
-> --    elsewhere.
-> {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
-> {-# LANGUAGE TemplateHaskell #-}
+> {-# LANGUAGE Arrows #-}
 >
 > module AdvancedExamples where
 >

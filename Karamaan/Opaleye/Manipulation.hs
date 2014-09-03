@@ -306,9 +306,10 @@ arrangeDeleteSqlDef :: Default TableExprRunner wires wires' =>
                     Table wires -> ExprArr wires' (Wire Bool) -> String
 arrangeDeleteSqlDef  = show . ppDelete .: arrangeDeleteDef
 
-arrangeInsertSqlDef :: (Default (PPOfContravariant Assocer) wires' wires',
-                     Default TableMaybeWrapper wires wires')
-                    => Table wires -> Expr wires' -> String
+arrangeInsertSqlDef :: (Default (PPOfContravariant Assocer)
+                          maybeWires maybeWires,
+                     Default TableMaybeWrapper wires maybeWires)
+                    => Table wires -> Expr maybeWires -> String
 arrangeInsertSqlDef = show . ppInsert .: arrangeInsertDef
 
 arrangeInsertReturningSql

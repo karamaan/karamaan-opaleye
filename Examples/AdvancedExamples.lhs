@@ -35,12 +35,11 @@
 >   N.divide -< (range, cStdDev)
 
 > spreadAgg :: A.Aggregator (Wire Double) (Wire Double)
-> spreadAgg = a
->   where a = (A.rmapExpr numericalExpr
+> spreadAgg = (A.rmapExpr numericalExpr
 >              . A.lmapExpr triple) (A.old (p3 (min, max, stddev)))
->         numericalExpr = proc (cMin, cMax, cStdDev) -> do
->                           range <- E.minus -< (cMax, cMin)
->                           E.divide -< (range, cStdDev)
+>   where numericalExpr = proc (cMin, cMax, cStdDev) -> do
+>                         range <- E.minus -< (cMax, cMin)
+>                         E.divide -< (range, cStdDev)
 
 ghci> sh spread
 -- FIXME: this one has a bug because of the repeated column names!

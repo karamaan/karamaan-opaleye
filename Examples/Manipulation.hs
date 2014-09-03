@@ -70,8 +70,10 @@ testTableInsertReturning = M.arrangeInsertReturningSqlDef testTable insertExpr
           five <- constant 5 -< ()
           six <- constant 6 -< ()
           returnA -< (Nothing, Just five, Just six)
-        returnExpr :: ExprArr (Wire Int, Wire Int,  Wire Int)
-                              (Wire Bool, Wire Int)
+        -- We don't need this type signature because instance resolution is
+        -- enough. 
+        --returnExpr :: ExprArr (Wire Int, Wire Int,  Wire Int)
+        --                      (Wire Bool, Wire Int)
         returnExpr = proc (a, b, c) -> do
           eq'  <- eq   -< (a, b)
           sum' <- plus -< (b, c)

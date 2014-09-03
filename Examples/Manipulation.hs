@@ -45,7 +45,9 @@ testUpdate = arrangeUpdateSqlDef table updateExpr condExpr
         updateExpr = proc (x, y, _) -> do
           x_plus_y <- plus -< (x, y)
           returnA -< (Nothing, Just x_plus_y, Nothing)
-        condExpr :: ExprArr (Wire Int, Wire Int, Wire Int) (Wire Bool)
+        -- We don't need this type signature because instance resolution is
+        -- enough. 
+        --condExpr :: ExprArr (Wire Int, Wire Int, Wire Int) (Wire Bool)
         condExpr = proc (x, _, z) -> do
           eq -< (x, z)
 
@@ -93,7 +95,9 @@ testTableUpdate = arrangeUpdateSqlDef testTable updateExpr condExpr
         updateExpr = proc (x, y, _) -> do
           x_plus_y <- plus -< (x, y)
           returnA -< (Nothing, Nothing, Just x_plus_y)
-        condExpr :: ExprArr (Wire Int, Wire Int, Wire Int) (Wire Bool)
+        -- We don't need this type signature because instance resolution is
+        -- enough. 
+        --condExpr :: ExprArr (Wire Int, Wire Int, Wire Int) (Wire Bool)
         condExpr = proc (x, _, _) -> do
           five <- constant 5 -< ()
           eq -< (x, five)

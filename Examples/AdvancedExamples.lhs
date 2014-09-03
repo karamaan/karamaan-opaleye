@@ -11,7 +11,6 @@
 > import qualified Karamaan.Opaleye.ExprArr as E
 > import Karamaan.Opaleye.Wire (Wire)
 > import Control.Arrow (returnA, (<<<), arr)
-> import qualified Data.Profunctor as P
 >
 > import Data.Profunctor.Product (p3)
 > import Examples (sh)

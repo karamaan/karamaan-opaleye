@@ -5,12 +5,12 @@
 > import Prelude hiding (sum, min, max)
 > import Karamaan.Opaleye.Table (makeTableDef)
 > import Karamaan.Opaleye.QueryArr (Query)
-> import Karamaan.Opaleye.Aggregate (Aggregator, aggregate, stddev, min, max)
+> import Karamaan.Opaleye.Aggregate (aggregate, stddev, min, max)
 > import qualified Karamaan.Opaleye.AggregateSuper as A
 > import qualified Karamaan.Opaleye.Operators.Numeric as N
 > import qualified Karamaan.Opaleye.ExprArr as E
 > import Karamaan.Opaleye.Wire (Wire)
-> import Control.Arrow (returnA, (<<<), arr)
+> import Control.Arrow ((<<<), arr, Arrow)
 >
 > import Data.Profunctor.Product (p3)
 > import Examples (sh)
@@ -19,10 +19,11 @@
 > table :: Query (Wire Double)
 > table = makeTableDef "myColumn" "myTable"
 
+> triple :: Arrow arr => arr a (a, a, a)
+> triple = arr (\a -> (a, a, a))
+
 > cols3 :: Query (Wire Double, Wire Double, Wire Double)
-> cols3 = proc () -> do
->   col <- table -< ()
->   returnA -< (col, col, col)
+> cols3 = triple <<< table
 
 > statistics :: Query (Wire Double, Wire Double, Wire Double)
 > statistics = aggregate (p3 (min, max, stddev)) cols3
@@ -34,13 +35,12 @@
 >   N.divide -< (range, cStdDev)
 
 > spreadAgg :: A.Aggregator (Wire Double) (Wire Double)
-> spreadAgg = b
->   where cols3' = proc x -> returnA -< (x, x, x)
->         a = A.lmapExpr cols3' (A.old (p3 (min, max, stddev)))
->         b = A.rmapExpr e a
->         e = proc (cMin, cMax, cStdDev) -> do
->           range <- E.minus -< (cMax, cMin)
->           E.divide -< (range, cStdDev)
+> spreadAgg = a
+>   where a = (A.rmapExpr numericalExpr
+>              . A.lmapExpr triple) (A.old (p3 (min, max, stddev)))
+>         numericalExpr = proc (cMin, cMax, cStdDev) -> do
+>                           range <- E.minus -< (cMax, cMin)
+>                           E.divide -< (range, cStdDev)
 
 ghci> sh spread
 -- FIXME: this one has a bug because of the repeated column names!

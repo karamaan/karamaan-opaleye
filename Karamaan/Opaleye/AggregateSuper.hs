@@ -8,10 +8,14 @@ import qualified Karamaan.Opaleye.ExprArr as E
 import qualified Karamaan.Opaleye.Unpackspec as U
 import qualified Karamaan.Opaleye.QueryArr as Q
 import qualified Data.Profunctor.Product as PP
+import Data.Profunctor.Product ((***!), (***<))
+import qualified Data.Monoid as M
 import qualified Data.Profunctor.Product.Default as D
 import Karamaan.Opaleye.Wire (Wire)
 
-import Control.Arrow ((>>>), (<<<))
+import Control.Applicative (Applicative, (<*>), pure)
+import Control.Arrow ((>>>), (<<<), arr, (***))
+import qualified Control.Arrow as Arr
 import qualified Control.Category as C
 import Data.Int (Int64)
 
@@ -21,6 +25,18 @@ data Aggregator a b = forall a' b'.
                                  (A.Aggregator a' b')
                                  (U.Unpackspec b')
                                  (E.ExprArr b' b)
+
+instance Functor (Aggregator a) where
+  fmap f (Aggregator l ul a ur r) = Aggregator l ul a ur (fmap f r)
+
+instance Applicative (Aggregator a) where
+  pure x = Aggregator (Arr.arr (const ())) M.mempty PP.empty M.mempty
+                      (Arr.arr (pure x))
+  Aggregator fl ful fa fur fr <*> Aggregator xl xul xa xur xr = p
+    where p = Aggregator ((fl *** xl) <<< arr (\x -> (x,x)))
+                         (ful ***< xul) (fa ***! xa)
+                         (fur ***< xur)
+                         (arr (uncurry ($)) <<< (fr *** xr))
 
 lmapExpr :: E.ExprArr a' a -> Aggregator a b -> Aggregator a' b
 lmapExpr f (Aggregator l ul a ur r) = Aggregator (f >>> l) ul a ur r

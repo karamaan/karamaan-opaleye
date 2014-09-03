@@ -35,10 +35,12 @@ instance Applicative (Aggregator a) where
   pure x = Aggregator (Arr.arr (const ())) M.mempty PP.empty M.mempty
                       (Arr.arr (pure x))
   Aggregator fl ful fa fur fr <*> Aggregator xl xul xa xur xr = p
-    where p = Aggregator ((fl *** xl) <<< arr (\x -> (x,x)))
+    where p = Aggregator rl
                          (ful ***< xul) (fa ***! xa)
                          (fur ***< xur)
-                         (arr (uncurry ($)) <<< (fr *** xr))
+                         rr
+          rr = arr (uncurry ($)) <<< (fr *** xr)
+          rl = (fl *** xl) <<< arr (\x -> (x,x))
 
 instance Profunctor Aggregator where
   dimap f g = lmapExpr (arr f) . rmapExpr (arr g)

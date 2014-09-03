@@ -246,8 +246,8 @@ arrangeUpdate tableExprRunner
 
 -- arrange*Def pass the default typeclass instances in automatically,
 -- to reduce boilerplate
-arrangeDeleteDef :: Default TableExprRunner wires wires' =>
-                    Table wires -> ExprArr wires' (Wire Bool) -> SqlDelete
+arrangeDeleteDef :: Default TableExprRunner wires wires =>
+                    Table wires -> ExprArr wires (Wire Bool) -> SqlDelete
 arrangeDeleteDef = arrangeDelete def
 
 arrangeInsertDef :: (Default (PPOfContravariant Assocer) maybewires maybewires,
@@ -302,8 +302,8 @@ assocerWire (Wire s) w scope = (s, unsafeScopeLookup w scope)
 assocerEWire :: Wire a -> Scope -> [PrimExpr]
 assocerEWire = return .: unsafeScopeLookup
 
-arrangeDeleteSqlDef :: Default TableExprRunner wires wires' =>
-                    Table wires -> ExprArr wires' (Wire Bool) -> String
+arrangeDeleteSqlDef :: Default TableExprRunner wires wires =>
+                    Table wires -> ExprArr wires (Wire Bool) -> String
 arrangeDeleteSqlDef  = show . ppDelete .: arrangeDeleteDef
 
 arrangeInsertSqlDef :: (Default (PPOfContravariant Assocer)
@@ -347,15 +347,15 @@ arrangeUpdateSqlDef :: (Default TableExprRunner wires wires',
 arrangeUpdateSqlDef = (show . ppUpdate) .:. arrangeUpdateDef
 
 {-# DEPRECATED executeDeleteConnDef "Use 'run...' instead of 'execute...' " #-}
-executeDeleteConnDef :: Default TableExprRunner wires wires' =>
+executeDeleteConnDef :: Default TableExprRunner wires wires =>
                     SQL.Connection ->
-                    Table wires -> ExprArr wires' (Wire Bool) -> IO Int64
+                    Table wires -> ExprArr wires (Wire Bool) -> IO Int64
 executeDeleteConnDef conn =
   SQL.execute_ conn . fromString .: arrangeDeleteSqlDef
 
-runDeleteConnDef :: Default TableExprRunner wires wires' =>
+runDeleteConnDef :: Default TableExprRunner wires wires =>
                     SQL.Connection ->
-                    Table wires -> ExprArr wires' (Wire Bool) -> IO Int64
+                    Table wires -> ExprArr wires (Wire Bool) -> IO Int64
 runDeleteConnDef = executeDeleteConnDef
 
 {-# DEPRECATED executeInsertConnDef "Use 'run...' instead of 'execute...' " #-}
@@ -453,16 +453,16 @@ runUpdateConnDef :: (Default TableExprRunner wires wires',
 runUpdateConnDef = executeUpdateConnDef
 
 {-# DEPRECATED executeDeleteDef "Use 'run...' instead of 'execute...' " #-}
-executeDeleteDef :: Default TableExprRunner wires wires' =>
+executeDeleteDef :: Default TableExprRunner wires wires =>
                     SQL.ConnectInfo ->
-                    Table wires -> ExprArr wires' (Wire Bool) -> IO Int64
+                    Table wires -> ExprArr wires (Wire Bool) -> IO Int64
 executeDeleteDef connectInfo t e = do
   conn <- SQL.connect connectInfo
   executeDeleteConnDef conn t e
 
-runDeleteDef :: Default TableExprRunner wires wires' =>
+runDeleteDef :: Default TableExprRunner wires wires =>
                 SQL.ConnectInfo ->
-                Table wires -> ExprArr wires' (Wire Bool) -> IO Int64
+                Table wires -> ExprArr wires (Wire Bool) -> IO Int64
 runDeleteDef = executeDeleteDef
 
 {-# DEPRECATED executeInsertDef "Use 'run...' instead of 'execute...' " #-}

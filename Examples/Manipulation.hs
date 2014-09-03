@@ -15,7 +15,7 @@ table = Table "tablename" ((Wire "col1", Wire "col2"), Wire "col3")
 
 testDelete :: String
 testDelete = arrangeDeleteSqlDef table condExpr
-  where condExpr :: ExprArr ((Wire Int, Wire Int), Wire Int) (Wire Bool)
+  where --condExpr :: ExprArr ((Wire Int, Wire Int), Wire Int) (Wire Bool)
         condExpr = proc ((x, y), z) -> do
           x_plus_y <- plus -< (x, y)
           cond1 <- eq -< (x_plus_y, z)

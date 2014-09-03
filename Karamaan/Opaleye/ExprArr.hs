@@ -1,9 +1,11 @@
-{-# LANGUAGE FlexibleContexts, DeriveFunctor #-}
+{-# LANGUAGE FlexibleContexts, DeriveFunctor, MultiParamTypeClasses #-}
 
 module Karamaan.Opaleye.ExprArr
     ( Scope
     , ExprArr
     , Expr
+    , CaseArg
+    , CaseRunner
     , runExprArr''
     , scopeOfWire
     , scopeOfCols
@@ -39,6 +41,10 @@ module Karamaan.Opaleye.ExprArr
     , times
     , minus
     , signum
+    , case_
+    , runCase
+    , ifThenElse
+    , caseMassage
     ) where
 
 import Control.Applicative (Applicative (..))
@@ -46,7 +52,7 @@ import Prelude hiding (or, and, not, mod, abs, signum)
 import qualified Data.Map as Map
 import Data.Map (Map)
 import Database.HaskellDB.PrimQuery (PrimExpr, extend, Literal)
-import Control.Arrow (Arrow, arr, first, (***), (&&&))
+import Control.Arrow (Arrow, arr, first, second, (***), (&&&))
 import Control.Category (Category, (<<<))
 import qualified Control.Category
 import Karamaan.Opaleye.QueryArr (Tag, first3, next, tagWith, start,
@@ -75,6 +81,13 @@ type Scope = Map String PrimExpr
 emptyScope :: Scope
 emptyScope = Map.empty
 
+-- An ExprArr takes some wires, a scope to look up the meaning of the
+-- wires in (returning a PrimExpr) and a fresh tag.
+--
+-- It returns the new wires, a scope for looking up the new wires in
+-- and a new fresh tag.  The returned scope only has to be so big as
+-- to contain the new wires so we are at liberty to throw the old
+-- scope away if we like.
 newtype ExprArr a b = ExprArr ((a, Scope, Tag) -> (b, Scope, Tag))
   deriving (Functor)
 
@@ -114,8 +127,9 @@ runExprArr'' :: ExprArr a (Wire b) -> (a, Scope) -> PrimExpr
 runExprArr'' expr (a, scope) = unsafeScopeLookup b scope1
   where (b, scope1, _) = runExprArrStart expr (a, scope)
 
--- Note that the returned Scope value is what is *added* to the
--- overall scope, so ignoring the incoming Scope here is not a bug!
+-- Note that we only need to be able to look up the returned Wire in
+-- the returned Scope, so it's not a mistake to ignore the argument
+-- Scope.
 constantLit :: Literal -> Expr (Wire a)
 constantLit l = ExprArr g
   where g ((), _, t0) = (w, scope, next t0)
@@ -123,8 +137,9 @@ constantLit l = ExprArr g
                 w = Wire ws
                 scope = Map.singleton ws (PQ.ConstExpr l)
 
--- Probably best just to use Karamaan.Opaleye.ShowConstant.showConstant
--- these days.  constant may well be deprecated at some future point.
+{-| 'constant' should be considered deprecated.
+    Use Karamaan.Opaleye.ShowConstant.showConstant instead
+-}
 constant :: ShowConstant a => a -> Expr (Wire a)
 constant = constantLit . showConstant
 
@@ -151,19 +166,20 @@ binOp op name = makeExprArr wireName primExpr
           where uExpr = lookupS u
                 u'Expr = lookupS u'
 
-unOp :: PQ.UnOp -> String -> ExprArr (Wire a) (Wire b)
-unOp op name = makeExprArr wireName primExpr
+-- Generically make an operation of one argument
+unG :: (op -> arg -> PrimExpr) -> (PrimExpr -> arg) -> op -> [Char]
+       -> ExprArr (Wire a) (Wire b)
+unG expr wrap op name = makeExprArr wireName primExpr
   where wireName u = name ++ "_" ++ take 5 v
           where Wire v = u
-        primExpr lookupS (Wire u) = PQ.UnExpr op uExpr
+        primExpr lookupS (Wire u) = expr op (wrap uExpr)
           where uExpr = lookupS u
 
+unOp :: PQ.UnOp -> String -> ExprArr (Wire a) (Wire b)
+unOp = unG PQ.UnExpr id
+
 unFun :: String -> String -> ExprArr (Wire a) (Wire b)
-unFun op name = makeExprArr wireName primExpr
-  where wireName u = name ++ "_" ++ take 5 v
-          where Wire v = u
-        primExpr lookupS (Wire u) = PQ.FunExpr op [uExpr]
-          where uExpr = lookupS u
+unFun = unG PQ.FunExpr (\x -> [x])
 
 makeExprArr :: (wires -> String) -> ((String -> PrimExpr) -> wires -> PrimExpr)
                -> ExprArr wires (Wire a)
@@ -237,6 +253,56 @@ equalsOneOf :: ShowConstant a => [a] -> ExprArr (Wire a) (Wire Bool)
 -- TODO: Should this be foldl', since laziness gets us nothing here?
 equalsOneOf = foldrArr or false . map (opC eq . constant)
   where false = replaceWith (constant False)
+
+-- Case
+
+type CaseArg a = ([(Wire Bool, a)], a)
+
+fmapCaseArg :: (a -> b) -> CaseArg a -> CaseArg b
+fmapCaseArg f = map (second f) *** f
+
+newtype CaseRunner a b = CaseRunner (ExprArr (CaseArg a) b)
+
+instance Profunctor CaseRunner where
+  dimap f g (CaseRunner q) = CaseRunner (dimap (fmapCaseArg f) g q)
+
+instance Functor (CaseRunner a) where
+  fmap f (CaseRunner c) = CaseRunner (fmap f c)
+
+instance Applicative (CaseRunner a) where
+  pure = CaseRunner . pure
+  CaseRunner f <*> CaseRunner x = CaseRunner (f <*> x)
+
+instance ProductProfunctor CaseRunner where
+  empty = P.defaultEmpty
+  (***!) = P.defaultProfunctorProduct
+
+instance D.Default CaseRunner (Wire a) (Wire a) where
+  def = CaseRunner caseWire
+
+runCase :: CaseRunner a b -> ExprArr (CaseArg a) b
+runCase (CaseRunner q) = q
+
+case_ :: D.Default CaseRunner a a => ExprArr (CaseArg a) a
+case_ = runCase D.def
+
+caseWire :: ExprArr (CaseArg (Wire a)) (Wire a)
+caseWire = makeExprArr wireName primExpr
+  where wireName _ = "case_result"
+        primExpr lookupS (cases, Wire else_) = PQ.CaseExpr casesP elseP
+          where elseP = lookupS else_
+                casesP = map condWires cases
+                condWires (Wire cond, Wire result)
+                  = (lookupS cond, lookupS result)
+
+ifThenElse :: D.Default CaseRunner a a
+              => ExprArr (Wire Bool, a, a) a
+ifThenElse = case_ <<< arr caseMassage
+
+caseMassage :: (Wire Bool, a, a) -> ([(Wire Bool, a)], a)
+caseMassage (cond, ifTrue, ifFalse) = ([(cond, ifTrue)], ifFalse)
+
+-- Converting ExprArrs to QueryArrs
 
 toQueryArr :: U.Unpackspec a -> U.Unpackspec b -> ExprArr a b -> QueryArr a b
 toQueryArr writera writerb exprArr = QueryArr f

@@ -17,7 +17,7 @@ import Data.Time.Calendar (Day)
 import Data.Time (UTCTime, formatTime)
 import System.Locale (defaultTimeLocale)
 
-{- The ShowConstant class is intended to eventualy replace HaskellDB's
+{- The ShowConstant class is intended to eventually replace HaskellDB's
    ShowConstant.
 
    It needs to be a MPTC because the type Haskell-side might not be
@@ -40,11 +40,15 @@ instance ShowConstant haskell opaleye
 instance ShowConstant String String where
   showConstant = E.constantLit . PQ.StringLit
 
+-- FIXME: I don't think this should exist.  There is no 'Wire Text'.
 instance ShowConstant Text Text where
   showConstant = showThrough unpack
 
+instance ShowConstant Text String where
+  showConstant = showConstant . unpack
+
 instance ShowConstant Int Int where
-  showConstant = E.constantLit . PQ.IntegerLit . fromIntegral
+  showConstant = showThrough (fromIntegral :: Int -> Integer)
 
 instance ShowConstant Integer Integer where
   showConstant = E.constantLit . PQ.IntegerLit

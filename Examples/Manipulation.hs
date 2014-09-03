@@ -10,13 +10,15 @@ import Karamaan.Opaleye.Manipulation (arrangeDeleteSqlDef,
 import qualified Karamaan.Opaleye.Manipulation as M
 import Karamaan.Opaleye.Table (Table(Table))
 
-table :: Table ((Wire Int, Wire Int), Wire Int)
-table = Table "tablename" ((Wire "col1", Wire "col2"), Wire "col3")
+table :: Table (Wire Int, Wire Int, Wire Int)
+table = Table "tablename" (Wire "col1", Wire "col2", Wire "col3")
 
 testDelete :: String
 testDelete = arrangeDeleteSqlDef table condExpr
-  where condExpr :: ExprArr ((Wire Int, Wire Int), Wire Int) (Wire Bool)
-        condExpr = proc ((x, y), z) -> do
+  where -- We don't need this type signature because instance resolution is
+        -- enough. 
+        --condExpr :: ExprArr ((Wire Int, Wire Int), Wire Int) (Wire Bool)
+        condExpr = proc (x, y, z) -> do
           x_plus_y <- plus -< (x, y)
           cond1 <- eq -< (x_plus_y, z)
           cond2 <- eq -< (x, z)
@@ -24,7 +26,7 @@ testDelete = arrangeDeleteSqlDef table condExpr
 
 testInsert :: String
 testInsert = arrangeInsertSqlDef table insertExpr
-  where insertExpr :: Expr ((Maybe (Wire Int), Maybe (Wire Int)),
+  where insertExpr :: Expr (Maybe (Wire Int), Maybe (Wire Int),
                             Maybe (Wire Int))
         insertExpr = proc () -> do
           one <- constant 1 -< ()
@@ -33,19 +35,20 @@ testInsert = arrangeInsertSqlDef table insertExpr
 
           five_plus_six <- plus -< (five, six)
 
-          returnA -< ((Just one, Nothing), Just five_plus_six)
+          returnA -< (Just one, Nothing, Just five_plus_six)
 
 testUpdate :: String
 testUpdate = arrangeUpdateSqlDef table updateExpr condExpr
-  where updateExpr :: ExprArr ((Wire Int, Wire Int),
-                               Wire Int)
-                              ((Maybe (Wire Int), Maybe (Wire Int)),
+  where updateExpr :: ExprArr (Wire Int, Wire Int, Wire Int)
+                              (Maybe (Wire Int), Maybe (Wire Int),
                                Maybe (Wire Int))
-        updateExpr = proc ((x, y), _) -> do
+        updateExpr = proc (x, y, _) -> do
           x_plus_y <- plus -< (x, y)
-          returnA -< ((Nothing, Just x_plus_y), Nothing)
-        condExpr :: ExprArr ((Wire Int, Wire Int), Wire Int) (Wire Bool)
-        condExpr = proc ((x, _), z) -> do
+          returnA -< (Nothing, Just x_plus_y, Nothing)
+        -- We don't need this type signature because instance resolution is
+        -- enough. 
+        --condExpr :: ExprArr (Wire Int, Wire Int, Wire Int) (Wire Bool)
+        condExpr = proc (x, _, z) -> do
           eq -< (x, z)
 
 testTable :: Table (Wire Int, Wire Int, Wire Int)
@@ -67,8 +70,10 @@ testTableInsertReturning = M.arrangeInsertReturningSqlDef testTable insertExpr
           five <- constant 5 -< ()
           six <- constant 6 -< ()
           returnA -< (Nothing, Just five, Just six)
-        returnExpr :: ExprArr (Wire Int, Wire Int,  Wire Int)
-                              (Wire Bool, Wire Int)
+        -- We don't need this type signature because instance resolution is
+        -- enough. 
+        --returnExpr :: ExprArr (Wire Int, Wire Int,  Wire Int)
+        --                      (Wire Bool, Wire Int)
         returnExpr = proc (a, b, c) -> do
           eq'  <- eq   -< (a, b)
           sum' <- plus -< (b, c)
@@ -76,7 +81,9 @@ testTableInsertReturning = M.arrangeInsertReturningSqlDef testTable insertExpr
 
 testTableDelete :: String
 testTableDelete = arrangeDeleteSqlDef testTable condExpr
-  where condExpr :: ExprArr (Wire Int, Wire Int, Wire Int) (Wire Bool)
+  where -- We don't need this type signature because instance resolution is
+        -- enough. 
+        --condExpr :: ExprArr (Wire Int, Wire Int, Wire Int) (Wire Bool)
         condExpr = proc (x, _, z) -> do
           two <- (constant 2 :: Expr (Wire Int)) -< ()
           x_mul_2 <- mul -< (x, two)
@@ -90,7 +97,9 @@ testTableUpdate = arrangeUpdateSqlDef testTable updateExpr condExpr
         updateExpr = proc (x, y, _) -> do
           x_plus_y <- plus -< (x, y)
           returnA -< (Nothing, Nothing, Just x_plus_y)
-        condExpr :: ExprArr (Wire Int, Wire Int, Wire Int) (Wire Bool)
+        -- We don't need this type signature because instance resolution is
+        -- enough. 
+        --condExpr :: ExprArr (Wire Int, Wire Int, Wire Int) (Wire Bool)
         condExpr = proc (x, _, _) -> do
           five <- constant 5 -< ()
           eq -< (x, five)

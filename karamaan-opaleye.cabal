@@ -12,7 +12,7 @@ library
   build-depends:
       base               >= 4   && < 5
     , containers         >= 0.4 && < 0.6
-    , contravariant      >= 0.4 && < 1.2
+    , contravariant      >= 0.4 && < 1.3
     , karamaan-plankton  >= 0.1 && < 0.4
     , haskelldb          == 2.2.2.0.0.0.3
       -- vv mtl just for the State monad in Values.
@@ -34,11 +34,11 @@ library
     , uuid       == 1.3.*
 
   exposed-modules: Karamaan.Opaleye.Aggregate,
+                   Karamaan.Opaleye.AggregateSuper,
                    Karamaan.Opaleye.ArrowLambda,
                    Karamaan.Opaleye.Bend,
                    Karamaan.Opaleye.Difference,
                    Karamaan.Opaleye.Distinct,
-                   Karamaan.Opaleye.Explore,
                    Karamaan.Opaleye.ExprArr,
                    Karamaan.Opaleye.HaskellDB,
                    Karamaan.Opaleye.Join,
@@ -50,6 +50,7 @@ library
                    Karamaan.Opaleye.Operators2,
                    Karamaan.Opaleye.OperatorsPrimatives,
                    Karamaan.Opaleye.Operators.Numeric,
+                   Karamaan.Opaleye.Order
                    Karamaan.Opaleye.Predicates,
                    Karamaan.Opaleye.QueryArr,
                    Karamaan.Opaleye.QueryColspec,
@@ -78,4 +79,15 @@ test-suite examples
     product-profunctors,
     profunctors,
     time,
+    karamaan-opaleye
+
+test-suite test
+  type: exitcode-stdio-1.0
+  main-is: Test.hs
+  hs-source-dirs: Test
+  build-depends:
+    base >= 4 && < 5,
+    postgresql-simple,
+    product-profunctors,
+    profunctors,
     karamaan-opaleye

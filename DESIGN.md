@@ -33,13 +33,13 @@ For intuition compare this with `() -> [b]`.
 
 ## Unions of query arrows
 
-Opaleye allows you to take unions of values of type `Query () b`.
+Opaleye allows you to take unions of values of type `QueryArr () b`.
 This corresponds directly to SQL's `UNION`, and the Haskell list
 analogue is `a ++ b`.  (There is a caveat here.  `++` is closer to
 `UNION ALL` since it does not remove duplicates, but the difference
 between the two is irrelevant for the purposes of this document.)
 
-If we have two queries `foo` and `bar` of type `Query () b` then the
+If we have two queries `foo` and `bar` of type `QueryArr () b` then the
 lambda-style code for their union can be written
 
     SELECT ... columns of type b ...
@@ -50,7 +50,7 @@ lambda-style code for their union can be written
     FROM ... the tables of bar ...
     WHERE ... some conditions involving bar ...
 
-If instead `foo` and `bar` have the type `Query a b` -- i.e. they both
+If instead `foo` and `bar` have the type `QueryArr a b` -- i.e. they both
 take an argument -- then using our Haskell list analogy we want the
 resultant query to behave like `\a -> foo a ++ bar a` i.e.
 
@@ -125,8 +125,8 @@ leading to SQL of
               FROM .. the tables of bar and a ...
               WHERE ... conditions involving bar and a ...
           WHERE ... conditions involving baz and a ...
-	  UNION
-	  SELECT ... columns of type (b, c) ...
+          UNION
+          SELECT ... columns of type (b, c) ...
           FROM
           ... tables of quux ...,
               SELECT ... columns of type b and a ...
@@ -158,3 +158,48 @@ However, SQL does not make it easy to support this kind of
 functionality and it is unclear what the performance implications will
 be.  This functionality will be left as something to explore in the
 much longer term.
+
+## Expression arrows
+
+Currently the only way to create expressions is via "expression
+arrows".  This is somewhat cumbersome.  Fortunately expression arrows
+are "pure", meaning that amongst other nice properties,
+
+    a  <- aArr -< aIn
+    a' <- aArr -< aIn
+    f -< (a, a')
+
+is the same as
+
+    a <- aArr -< aIn
+    f -< (a, a)
+
+and
+
+    a <- aArr -< aIn
+    b <- bArr -< bIn
+    returnA -< (a, b)
+
+is the same as
+
+    b <- bArr -< bIn
+    a <- aArr -< aIn
+    returnA -< (a, b)
+
+Having got a good sense of how expression arrows work I think they
+could be made genuinely pure.  That is to say, instead of having
+
+    plus :: ExprArr (Wire Int, Wire Int) (Wire Int)
+
+we could have simply
+
+    plus :: Wire Int -> Wire Int -> Wire Int
+
+I am not aware of any way this could lead to invalid queries, but at
+the same time I am not certain that it cannot.  I will hold of on
+making this change for now, as it would be very hard to reverse, but
+it is worth keeping in mind.
+
+The change that would be made is simple.  `Wire a` would no longer
+contain a string referring to a column.  Instead it would contain an
+entire `PrimExpr`.  This is what HaskellDB did with it's `Expr` type.

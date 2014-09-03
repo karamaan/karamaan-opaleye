@@ -30,7 +30,10 @@ instance ProductContravariant Unpackspec where
   (***<) = defaultContravariantProduct
 
 instance Default (PPOfContravariant Unpackspec) (Wire a) (Wire a) where
-  def = PPOfContravariant (Unpackspec writerWire)
+  def = PPOfContravariant unpackspecWire
+
+unpackspecWire :: Unpackspec (Wire a)
+unpackspecWire = Unpackspec writerWire
 
 runUnpackspec :: Unpackspec a -> a -> [String]
 runUnpackspec (Unpackspec writer) = Q.runWriter writer

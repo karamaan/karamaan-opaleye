@@ -54,3 +54,6 @@ toNullableExpr = E.unsafeCoerce
 
 null :: E.Expr (Wire (Nullable a))
 null = E.unsafeCoerce <<< E.constantLit PQ.NullLit
+
+joinNullable :: E.ExprArr (Wire (Nullable (Nullable a))) (Wire (Nullable a))
+joinNullable = arr Wire.unsafeCoerce

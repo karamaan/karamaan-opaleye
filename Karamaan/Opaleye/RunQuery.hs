@@ -15,12 +15,14 @@ import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
 import Control.Applicative (Applicative, (<*>), pure)
 import Data.Monoid ((<>), mempty)
 import Data.Profunctor.Product.Default (Default, def)
-import Karamaan.Opaleye.QueryColspec (writerWire)
-import Karamaan.Opaleye.Unpackspec (Unpackspec(Unpackspec))
+import Karamaan.Opaleye.Unpackspec (Unpackspec)
+import qualified Karamaan.Opaleye.Unpackspec as U
 import Karamaan.Opaleye.SQL (showSqlForPostgres)
 import Karamaan.Opaleye.QueryArr (Query)
 import Data.String (fromString)
 import Data.Text (Text)
+import Data.UUID (UUID)
+import Data.Int (Int64)
 
 import Data.Reflection (Reifies, reflect, reify)
 import Data.Proxy (Proxy(Proxy))
@@ -67,11 +69,16 @@ fmapFieldParser :: (a -> b) -> FieldParser a -> FieldParser b
 fmapFieldParser = fmap . fmap . fmap
 
 -- TODO: May want to make this "(Wire b) a" in the future
--- TODO: put 'Unpackspec writerWire' in Unpackspec.hs
 fieldQueryRunnerUnclassed :: FieldParser a -> QueryRunner (Wire a) a
-fieldQueryRunnerUnclassed = QueryRunner (Unpackspec writerWire) . fieldWith
+fieldQueryRunnerUnclassed = QueryRunner U.unpackspecWire . fieldWith
 
 instance Default QueryRunner (Wire Int) Int where
+  def = fieldQueryRunner
+
+instance Default QueryRunner (Wire Int64) Int64 where
+  def = fieldQueryRunner
+
+instance Default QueryRunner (Wire Integer) Integer where
   def = fieldQueryRunner
 
 instance Default QueryRunner (Wire String) String where
@@ -95,7 +102,13 @@ instance Default QueryRunner (Wire LocalTime) LocalTime where
 instance Default QueryRunner (Wire Bool) Bool where
   def = fieldQueryRunner
 
+instance Default QueryRunner (Wire UUID) UUID where
+  def = fieldQueryRunner
+
 instance Default QueryRunner (Wire (Maybe Int)) (Maybe Int) where
+  def = fieldQueryRunner
+
+instance Default QueryRunner (Wire (Maybe Integer)) (Maybe Integer) where
   def = fieldQueryRunner
 
 instance Default QueryRunner (Wire (Maybe String)) (Maybe String) where
@@ -117,6 +130,9 @@ instance Default QueryRunner (Wire (Maybe LocalTime)) (Maybe LocalTime) where
   def = fieldQueryRunner
 
 instance Default QueryRunner (Wire (Maybe Bool)) (Maybe Bool) where
+  def = fieldQueryRunner
+
+instance Default QueryRunner (Wire (Maybe UUID)) (Maybe UUID) where
   def = fieldQueryRunner
 
 -- Reflection stuff, see
@@ -156,7 +172,7 @@ runQueryDefaultConnectInfo connectInfo q = do
 --
 -- Wanted to use a "manual dictionary" or "free instance" along the
 -- lines of "But what about manual dictionaries?" in
--- https://www.fpcomplete.com/user/thoughtpolice/using-reflection but
+-- https://www.fpcomplete.com/user/thoughtpolice/using-reflectio but
 -- I couldn't see how to get it to work.  It seems we need to come up
 -- with a value of type 'RowParser (RowParser c -> c)'.
 query_ :: RowParser haskells -> SQL.Connection -> SQL.Query -> IO [haskells]

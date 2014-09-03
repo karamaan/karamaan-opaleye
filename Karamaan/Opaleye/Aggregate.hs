@@ -13,6 +13,8 @@ module Karamaan.Opaleye.Aggregate
     , nullableMax
     , sum
     , stddev
+    , boolOr
+    , boolAnd
     )
     where
 
@@ -23,7 +25,7 @@ import Karamaan.Opaleye.QueryArr (Query, runSimpleQueryArr,
                                   simpleQueryArr)
 import Database.HaskellDB.PrimQuery (PrimQuery(Project),
                                      AggrOp(AggrSum, AggrAvg, AggrMax, AggrMin,
-                                            AggrCount),
+                                            AggrCount, AggrOther),
                                      PrimExpr(AttrExpr,
                                               AggrExpr),
                                      Attribute)
@@ -37,7 +39,7 @@ import Data.Profunctor.Product (ProductProfunctor, empty, (***!),
 import Data.Functor.Contravariant (contramap)
 import Control.Applicative (Applicative, (<*>), pure)
 import Data.Monoid (mempty, (<>))
-import qualified Control.Monad.State as S
+import Data.Int (Int64)
 
 -- Maybe it would be safer if we combined the two writers into
 -- "LWriter (Maybe AggrOp, String) a"?  That way we'd know they output
@@ -115,35 +117,35 @@ groupBy = aggregatorMaker' Nothing
 
 -- | Count the amount of rows inside each @GROUP BY@ clause (or the entire table
 -- if no grouping was specified).
-count :: Aggregator (Wire a) (Wire Int)
+count :: Aggregator (Wire a) (Wire Int64)
 count = aggregatorMaker AggrCount
 
 stddev :: Aggregator (Wire a) (Wire a)
 stddev = aggregatorMaker PQ.AggrStdDev
 
+boolOr :: Aggregator (Wire Bool) (Wire Bool)
+boolOr = aggregatorMaker (AggrOther "bool_or")
+
+boolAnd :: Aggregator (Wire Bool) (Wire Bool)
+boolAnd = aggregatorMaker (AggrOther "bool_and")
+
 -- This is messy and there should be a lot more structure to it, but I can't see
 -- how, currently.  Once there's another function like this
 -- and binrel it will perhaps be easy to see where the real duplication is.
 aggregate' :: Aggregator a b -> (a, PrimQuery, Tag) -> (b, PrimQuery, Tag)
-aggregate' agg (out, primQ', j) =
-    let tag' :: String -> String
-        tag' = tagWith j
+aggregate' agg (w0, primQ, t0) = (w1, primQ', next t0)
+  where tag' :: String -> String
+        tag' = tagWith t0
         (Aggregator aggrs writer' mapper) = agg
         old_names :: [String]
-        old_names = runWriter writer' out
+        old_names = runWriter writer' w0
         new_names :: [String]
         new_names = map tag' old_names
         zipped :: [(String, Maybe AggrOp, String)]
-        zipped = zip3 new_names (runWriter aggrs out) old_names
-        jobber :: PrimQuery
-        jobber = Project (map assoc zipped) primQ'
-    in (runPackMap mapper tag' out, jobber, next j)
-
-tagS :: String -> S.State Tag String
-tagS s = do
-  t <- S.get
-  S.put (next t)
-  return (tagWith t s)
+        zipped = zip3 new_names (runWriter aggrs w0) old_names
+        primQ' :: PrimQuery
+        primQ' = Project (map assoc zipped) primQ
+        w1 = runPackMap mapper tag' w0
 
 assoc :: (String, Maybe AggrOp, String) -> (Attribute, PrimExpr)
 assoc (snew, mop, sold) = (snew, makeAggr mop (AttrExpr sold))

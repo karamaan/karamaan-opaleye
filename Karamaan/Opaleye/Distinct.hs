@@ -2,7 +2,7 @@
 
 module Karamaan.Opaleye.Distinct where
 
-import Karamaan.Opaleye.QueryArr (Query, runSimpleQueryArr, simpleQueryArr)
+import Karamaan.Opaleye.QueryArr (Query, runSimpleQueryArr, simpleQueryArr, Tag)
 import Karamaan.Opaleye.Wire (Wire(Wire))
 import Database.HaskellDB.PrimQuery (PrimQuery(Group),PrimExpr(AttrExpr))
 import Karamaan.Opaleye.Operators2 (union)
@@ -25,15 +25,18 @@ AST, at which point we could just introduce our own DISTINCT operation
 anyway.
 -}
 
-distinct' :: U.Unpackspec wires -> Query wires -> Query wires
-distinct' u q = simpleQueryArr $ \((), t0) ->
-  let (a, primQ, t1) = runSimpleQueryArr q ((), t0)
-      cols = U.runUnpackspec u a
-  in (a, Group (map (\oldCol -> (oldCol, AttrExpr oldCol)) cols) primQ, t1)
-
 distinctBetter :: D.Default (PP.PPOfContravariant U.Unpackspec) wires wires =>
                   Query wires -> Query wires
 distinctBetter = distinct' D.cdef
+
+distinct' :: U.Unpackspec wires -> Query wires -> Query wires
+distinct' unpack q = simpleQueryArr (distinctU' unpack . runSimpleQueryArr q)
+
+distinctU' :: U.Unpackspec wires -> (wires, PrimQuery, Tag)
+              -> (wires, PrimQuery, Tag)
+distinctU' unpack (wires, primQ, t) = (wires, primQ', t)
+  where cols = U.runUnpackspec unpack wires
+        primQ' = Group (map (\col -> (col, AttrExpr col)) cols) primQ
 
 -- I realised you can implement distinct x = x `union` x!
 -- This may fail massively with large queries unless the optimiser realises

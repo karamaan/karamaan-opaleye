@@ -41,15 +41,12 @@ binrel op colspec q1 q2 = simpleQueryArr f where
           -- one wire is duplicated, say via 'id &&& id')
           new = map tag' (runWriter w1)
 
-          assoc = zip new . map AttrExpr . runWriter
-
-          old1_assoc = assoc w1
-          old2_assoc = assoc w2
+          oldAssoc = Project . zip new . map AttrExpr . runWriter
 
           r1 :: PrimQuery
-          r1 = Project old1_assoc primQ1
+          r1 = oldAssoc w1 primQ1
           r2 :: PrimQuery
-          r2 = Project old2_assoc primQ2
+          r2 = oldAssoc w2 primQ2
 
           primQ = Binary op r1 r2
 

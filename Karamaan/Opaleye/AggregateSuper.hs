@@ -11,6 +11,8 @@ import qualified Data.Profunctor.Product as PP
 import Data.Profunctor.Product ((***!), (***<))
 import qualified Data.Monoid as M
 import qualified Data.Profunctor.Product.Default as D
+import Data.Profunctor.Product (ProductProfunctor)
+import Data.Profunctor (Profunctor, dimap)
 import Karamaan.Opaleye.Wire (Wire)
 
 import Control.Applicative (Applicative, (<*>), pure)
@@ -37,6 +39,13 @@ instance Applicative (Aggregator a) where
                          (ful ***< xul) (fa ***! xa)
                          (fur ***< xur)
                          (arr (uncurry ($)) <<< (fr *** xr))
+
+instance Profunctor Aggregator where
+  dimap f g = lmapExpr (arr f) . rmapExpr (arr g)
+
+instance ProductProfunctor Aggregator where
+  empty = PP.defaultEmpty
+  (***!) = PP.defaultProfunctorProduct
 
 lmapExpr :: E.ExprArr a' a -> Aggregator a b -> Aggregator a' b
 lmapExpr f (Aggregator l ul a ur r) = Aggregator (f >>> l) ul a ur r

@@ -27,10 +27,6 @@
 > statistics :: Query (Wire Double, Wire Double, Wire Double)
 > statistics = aggregate (p3 (min, max, stddev)) cols3
 
-> foo = proc () -> do
->   (cMin, cMax, cStdDev) <- statistics -< ()
->   returnA -< (cMin, cMax, cStdDev)
-
 > spread :: Query (Wire Double)
 > spread = proc () -> do
 >   (cMin, cMax, cStdDev) <- statistics -< ()

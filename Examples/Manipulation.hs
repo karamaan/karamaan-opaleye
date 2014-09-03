@@ -15,7 +15,9 @@ table = Table "tablename" ((Wire "col1", Wire "col2"), Wire "col3")
 
 testDelete :: String
 testDelete = arrangeDeleteSqlDef table condExpr
-  where --condExpr :: ExprArr ((Wire Int, Wire Int), Wire Int) (Wire Bool)
+  where -- We don't need this type signature because instance resolution is
+        -- enough. 
+        --condExpr :: ExprArr ((Wire Int, Wire Int), Wire Int) (Wire Bool)
         condExpr = proc ((x, y), z) -> do
           x_plus_y <- plus -< (x, y)
           cond1 <- eq -< (x_plus_y, z)
@@ -76,7 +78,9 @@ testTableInsertReturning = M.arrangeInsertReturningSqlDef testTable insertExpr
 
 testTableDelete :: String
 testTableDelete = arrangeDeleteSqlDef testTable condExpr
-  where condExpr :: ExprArr (Wire Int, Wire Int, Wire Int) (Wire Bool)
+  where -- We don't need this type signature because instance resolution is
+        -- enough. 
+        --condExpr :: ExprArr (Wire Int, Wire Int, Wire Int) (Wire Bool)
         condExpr = proc (x, _, z) -> do
           two <- (constant 2 :: Expr (Wire Int)) -< ()
           x_mul_2 <- mul -< (x, two)

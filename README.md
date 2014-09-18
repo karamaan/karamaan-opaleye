@@ -15,9 +15,6 @@ Some brief release notes:
 
 * The software is not polished at all, but we are using in in production.
 
-* Please don't post public links to the Github repos.  I want to keep it
-  low-key for now.
-
 * There's little documentation, but [I am happy to answer
   questions](http://web.jaguarpaw.co.uk/~tom/contact/) by email on a
   very prompt basis.  Don't be shy and don't

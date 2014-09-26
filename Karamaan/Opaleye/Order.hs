@@ -6,6 +6,9 @@ module Karamaan.Opaleye.Order
 
     -- * Limiting
   , limit
+
+    -- * Offset
+  , offset
   ) where
 
 import Database.HaskellDB.PrimQuery ( PrimQuery (..), SpecialOp (..)
@@ -108,3 +111,20 @@ limit n a = simpleQueryArr (limit' n . runSimpleQueryArr a)
 
 limit' :: Int -> (a, PrimQuery, Tag) -> (a, PrimQuery, Tag)
 limit' n (x, q, t) = (x, Special (Top n) q, t)
+
+
+-- * Offset
+
+
+{- |
+
+Offset the results of the given query by the given amount, skipping
+that many result rows.
+
+-}
+
+offset :: Int -> Query a -> Query a
+offset n a = simpleQueryArr (offset' n . runSimpleQueryArr a)
+
+offset' :: Int -> (a, PrimQuery, Tag) -> (a, PrimQuery, Tag)
+offset' n (x, q, t) = (x, Special (Offset n) q, t)

@@ -14,7 +14,7 @@ library
     , containers         >= 0.4 && < 0.6
     , contravariant      >= 0.4 && < 1.3
     , karamaan-plankton  >= 0.1 && < 0.4
-    , haskelldb          == 2.2.2.0.0.0.3
+    , haskelldb          == 2.2.3.0.0.0.1
       -- vv mtl just for the State monad in Values.
       -- Remove this dependency when we write our own monad.
     , mtl >= 2.1 && < 2.3

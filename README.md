@@ -5,7 +5,8 @@ You will need the following libraries
 
 You should also use the Github version of HaskellDB available here
 
-* [https://github.com/tomjaguarpaw/haskelldb](https://github.com/tomjaguarpaw/haskelldb)
+* [https://github.com/tomjaguarpaw/haskelldb/tree/opaleye](https://github.com/tomjaguarpaw/haskelldb/tree/opaleye)
+  (Make sure you use the opaleye branch)
 
 which will be kept up-to-date with any patches needed to support new
 functionality in Opaleye.  (You should update karamaan-opaleye.cabal

@@ -231,7 +231,7 @@ fact there is a functional dependency in both directions between the
 type of the table and the type of the expression.
 
 We can use a type family to make this instance resolution easier.
-Consider the following
+This is based on an idea by Adam Bergmark.  Consider the following
 
     {-# LANGUAGE TypeFamilies #-}
 

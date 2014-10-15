@@ -15,3 +15,18 @@ side doesn't pose much of a problem.
 
 It can be done by someone dedicated enough who's willing to spend the
 time to get their hands dirty with the internals.
+
+## Type families for better resolution
+
+As discussed in [`DESIGN.md`](DESIGN.md), there is a nice way of
+getting instance resolution to work better.  There are two stages to
+this work.   Both of them should be easy although the Template Haskell
+part requires knowledge of TH incantations.
+
+The first stage of the project is to write the generic type family
+code and tuple type instances.  They should be added to
+`product-profunctors`, along with Template Haskell to generate type
+family instances.
+
+The second stage of the project is to use the type families in the
+type signatures of various Opaleye functions which use `Default`.

@@ -41,9 +41,8 @@ use them to generate selects, joins and filters; use the API of
 Opaleye to make your queries more composable; and finally run the
 queries on Postgres.
 
-Opaleye uses HaskellDB's SQL generator.  You should really use the
-latest version from https://github.com/m4dc4p/haskelldb because it
-patches some important bugs present in 2.2.2.
+Opaleye uses HaskellDB's SQL generator.  You should make sure you use
+the version suggested in [`README.md`](../README.md).
 
 Schema
 ======

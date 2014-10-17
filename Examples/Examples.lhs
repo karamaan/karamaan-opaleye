@@ -67,14 +67,14 @@ just go ahead and define your table specification.
 
 If we generate the SQL for this we see the following:
 
-ghci> sh personTable
+ghci> printSQL personTable
 SELECT name as name_1,
        age as age_1,
        address as address_1
 FROM personTable as T1
 
-('sh' is just a conveniently named utility function for the purposes
-of this example file)
+('printSQL' is just a convenient utility function for the purposes of
+this example file.  See below for its definition.)
 
 Opaleye can use user defined types in queries.  It will save you a lot
 of headaches if you define your data types to be polymorphic in all
@@ -103,7 +103,7 @@ worry about this, just make all your fields polymorphic!
 >                                        , bdDay = "birthday" })
 >                     "birthdayTable"
 
-ghci> sh birthdayTable
+ghci> printSQL birthdayTable
 SELECT name as name_1,
        birthday as birthday_1
 FROM birthdayTable as T1
@@ -128,7 +128,7 @@ and second columns of 'personTable'
 > nameAge :: Query (Wire String, Wire Int)
 > nameAge = arr (\(x, y, _) -> (x, y)) <<< personTable
 
-ghci> sh nameAge
+ghci> printSQL nameAge
 SELECT name as name_1,
        age as age_1
 FROM personTable as T1
@@ -148,7 +148,7 @@ For example, to take the product of the 'personTable' and the
 >                                 WireBirthday)
 > personBirthdayProduct = personTable &&& birthdayTable
 
-ghci> sh personBirthdayProduct
+ghci> printSQL personBirthdayProduct
 SELECT name_1,
        age_1,
        address_1,
@@ -237,7 +237,7 @@ which is essentially a product followed by a restriction.
 >
 >   returnA -< (name, age, address, bdDay birthday)
 
-ghci> sh personAndBirthday
+ghci> printSQL personAndBirthday
 SELECT name_1,
        age_1,
        address_1,
@@ -284,7 +284,7 @@ reimplement 'personAndBirthday'' in a more neatly-factored way.
 >
 >   returnA -< (name, age, address, birthday)
 
-ghci> sh personAndBirthday'
+ghci> printSQL personAndBirthday'
 SELECT name_1,
        age_1,
        address_1,
@@ -319,7 +319,7 @@ query finds everyone whose age is less than 18.
 >
 >   returnA -< row
 
-ghci> sh children
+ghci> printSQL children
 SELECT name as name_1,
        age as age_1,
        address as address_1
@@ -346,7 +346,7 @@ not in their twenties, and lives at a specific address.
 >
 >   returnA -< row
 
-ghci> sh notTwentiesAtAddress
+ghci> printSQL notTwentiesAtAddress
 SELECT name as name_1,
        age as age_1,
        address as address_1
@@ -384,9 +384,9 @@ check 'addressIs1MyStreet'.
 
 The generated SQL is again exactly the same as before.
 
-> sh :: Default (PPOfContravariant Unpackspec) a a
+> printSQL :: Default (PPOfContravariant Unpackspec) a a
 >       => Query a -> IO ()
-> sh = putStrLn . showSqlForPostgresDefault
+> printSQL = putStrLn . showSqlForPostgresDefault
 
 Aggregation
 ===========
@@ -444,7 +444,7 @@ total number of such widgets and their average radius.
 
 The Opaleye corresponds closely to the generated SQL.
 
-ghci> sh widgetTable
+ghci> printSQL widgetTable
 SELECT style as style_1_2,
        color as color_1_2,
        COUNT(location) as location_1_2,
@@ -471,7 +471,7 @@ get round to it!  File an issue[1] if you need them).
 >           eqName = proc ((name, _, _), birthdayRow) -> do
 >             E.eq -< (name, bdName birthdayRow)
 
-ghci> sh personBirthdayLeftJoin
+ghci> printSQL personBirthdayLeftJoin
 SELECT name_1,
        age_1,
        address_1,

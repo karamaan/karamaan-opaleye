@@ -42,7 +42,7 @@ Opaleye to make your queries more composable; and finally run the
 queries on Postgres.
 
 Opaleye uses HaskellDB's SQL generator.  You should make sure you use
-the version suggested in [`README.md`](../README.md).
+the version suggested in README.md.
 
 Schema
 ======

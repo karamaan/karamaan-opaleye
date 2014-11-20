@@ -8,7 +8,7 @@ import qualified Karamaan.Opaleye.Wire as Wire
 import qualified Karamaan.Opaleye.ExprArr as E
 import qualified Karamaan.Opaleye.Operators2 as Op2
 import Control.Arrow (arr, (<<<))
-import Database.HaskellDB.PrimQuery (UnOp(OpIsNull))
+import Database.HaskellDB.PrimQuery (UnOp(OpIsNull,OpIsNotNull))
 import qualified Database.HaskellDB.PrimQuery as PQ
 
 -- TODO: At the appropriate time we will replace the Nullable type
@@ -35,6 +35,12 @@ isNullExpr = E.unOp OpIsNull "is_null"
 
 isNull :: QueryArr (Wire (Nullable a)) (Wire Bool)
 isNull = E.toQueryArrDef isNullExpr
+
+isNotNullExpr :: E.ExprArr (Wire (Nullable a)) (Wire Bool)
+isNotNullExpr = E.unOp OpIsNotNull "is_not_null"
+
+isNotNull :: QueryArr (Wire (Nullable a)) (Wire Bool)
+isNotNull = E.toQueryArrDef isNotNullExpr
 
 fromNullable :: QueryArr (Wire a, Wire (Maybe a)) (Wire a)
 fromNullable = proc (d, m) -> do
